@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "amorphie-user",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dapr-debug-amorphie-user",
+            "program": "${workspaceFolder}/amorphie.user/bin/Debug/net7.0/amorphie.user.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/amorphie.user",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:4501",
+                "DAPR_HTTP_PORT": "45010",
+                "DAPR_GRPC_PORT": "45011"
+            },
+            "postDebugTask": "daprd-down-amorphie-user"
+        },
+        
+    ]
+}
