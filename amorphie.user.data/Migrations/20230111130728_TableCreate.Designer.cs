@@ -12,7 +12,7 @@ using amorphie.user.data;
 namespace amorphie.user.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    [Migration("20230109131150_TableCreate")]
+    [Migration("20230111130728_TableCreate")]
     partial class TableCreate
     {
         /// <inheritdoc />
@@ -50,7 +50,9 @@ namespace amorphie.user.data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TcNo")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)");
 
                     b.HasKey("Id");
 
@@ -59,7 +61,7 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d6359d7a-ac9a-47c9-ac6d-80c057743448"),
+                            Id = new Guid("750b7a20-839c-4d9b-bc7d-247c09d4d784"),
                             Name = "Damla",
                             Password = "12345",
                             Surname = "Erhan",
@@ -88,9 +90,9 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("0b02f9e1-20ad-47b3-bf11-ff51d86b50cb"),
+                            Id = new Guid("633d9b29-81b8-4c11-a611-ef61d862ed51"),
                             SecurityQuestion = "en sevdiğiniz araba",
-                            UserId = new Guid("d6359d7a-ac9a-47c9-ac6d-80c057743448")
+                            UserId = new Guid("750b7a20-839c-4d9b-bc7d-247c09d4d784")
                         });
                 });
 
@@ -115,9 +117,9 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f9f88ec4-fd3f-4042-bf40-0c672d972a3a"),
+                            Id = new Guid("03832c57-53c1-4b72-b21f-bc2122b5b46c"),
                             Name = "user-list-get",
-                            UserId = new Guid("d6359d7a-ac9a-47c9-ac6d-80c057743448")
+                            UserId = new Guid("750b7a20-839c-4d9b-bc7d-247c09d4d784")
                         });
                 });
 

@@ -9,6 +9,8 @@ public class User
     public string? Name { get; set; }
     public string? Surname { get; set; }
     public string?  Password { get; set; }
+   [Required]
+   [StringLength(11, MinimumLength = 11 , ErrorMessage = "TcNo cannot be longer than 11 characters")]
     public string?  TcNo { get; set; }
     public int? State{get;set;}
     public DateTime? LastLoginDate{get;set;}

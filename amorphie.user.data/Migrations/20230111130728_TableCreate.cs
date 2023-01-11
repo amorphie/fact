@@ -19,7 +19,7 @@ namespace amorphie.user.data.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     Surname = table.Column<string>(type: "text", nullable: true),
                     Password = table.Column<string>(type: "text", nullable: true),
-                    TcNo = table.Column<string>(type: "text", nullable: true),
+                    TcNo = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
                     State = table.Column<int>(type: "integer", nullable: true),
                     LastLoginDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -70,17 +70,17 @@ namespace amorphie.user.data.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "LastLoginDate", "ModifiedDate", "Name", "Password", "State", "Surname", "TcNo" },
-                values: new object[] { new Guid("d6359d7a-ac9a-47c9-ac6d-80c057743448"), null, null, "Damla", "12345", null, "Erhan", "12345" });
+                values: new object[] { new Guid("750b7a20-839c-4d9b-bc7d-247c09d4d784"), null, null, "Damla", "12345", null, "Erhan", "12345" });
 
             migrationBuilder.InsertData(
                 table: "UserSecurityQuestions",
                 columns: new[] { "Id", "SecurityQuestion", "UserId" },
-                values: new object[] { new Guid("0b02f9e1-20ad-47b3-bf11-ff51d86b50cb"), "en sevdiğiniz araba", new Guid("d6359d7a-ac9a-47c9-ac6d-80c057743448") });
+                values: new object[] { new Guid("633d9b29-81b8-4c11-a611-ef61d862ed51"), "en sevdiğiniz araba", new Guid("750b7a20-839c-4d9b-bc7d-247c09d4d784") });
 
             migrationBuilder.InsertData(
                 table: "UserTags",
                 columns: new[] { "Id", "Name", "UserId" },
-                values: new object[] { new Guid("f9f88ec4-fd3f-4042-bf40-0c672d972a3a"), "user-list-get", new Guid("d6359d7a-ac9a-47c9-ac6d-80c057743448") });
+                values: new object[] { new Guid("03832c57-53c1-4b72-b21f-bc2122b5b46c"), "user-list-get", new Guid("750b7a20-839c-4d9b-bc7d-247c09d4d784") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSecurityQuestions_UserId",

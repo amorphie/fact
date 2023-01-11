@@ -47,15 +47,15 @@ public class UserDBContext : DbContext
             Id = UserId,
              Name= "Damla",
            Surname="Erhan",
-           Password="12345",
-           TcNo="12345",
+           Password="123",
+           TcNo="12345678912",
          
         });
  
         modelBuilder.Entity<UserSecurityQuestion>().HasData(new
         {
             Id =  Guid.NewGuid(),
-           SecurityQuestion="en sevdiğiniz araba",
+           SecurityQuestion="en sevdiğiniz araba modeli",
            UserId=UserId,
          
         });
