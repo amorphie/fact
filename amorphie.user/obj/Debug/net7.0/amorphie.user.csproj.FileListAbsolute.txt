@@ -1,0 +1,94 @@
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.csproj.AssemblyReference.cache
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.AssemblyInfoInputs.cache
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.AssemblyInfo.cs
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.csproj.CoreCompileInputs.cache
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\appsettings.Development.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\appsettings.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.exe
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.deps.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.runtimeconfig.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.pdb
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Dapr.AspNetCore.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Dapr.Client.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Google.Api.CommonProtos.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Google.Protobuf.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Grpc.Core.Api.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Grpc.Net.Client.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Grpc.Net.Common.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Microsoft.OpenApi.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Npgsql.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.data.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\bin\Debug\net7.0\amorphie.user.data.pdb
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.amorphie.user.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.build.amorphie.user.props
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.amorphie.user.props
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.buildTransitive.amorphie.user.props
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets.pack.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets.build.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\staticwebassets.development.json
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\scopedcss\bundle\amorphie.user.styles.css
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.csproj.CopyComplete
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\refint\amorphie.user.dll
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.pdb
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\amorphie.user.genruntimeconfig.cache
+C:\Users\Damla Erhan\Desktop\Facts\amorphie.user\obj\Debug\net7.0\ref\amorphie.user.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\appsettings.Development.json
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\appsettings.json
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.exe
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.deps.json
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.runtimeconfig.json
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.pdb
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Dapr.AspNetCore.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Dapr.Client.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Google.Api.CommonProtos.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Google.Protobuf.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Grpc.Core.Api.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Grpc.Net.Client.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Grpc.Net.Common.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Microsoft.OpenApi.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Npgsql.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.data.dll
+C:\Projects\fact\amorphie.user\bin\Debug\net7.0\amorphie.user.data.pdb
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.csproj.AssemblyReference.cache
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.AssemblyInfoInputs.cache
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.AssemblyInfo.cs
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.csproj.CoreCompileInputs.cache
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.MvcApplicationPartsAssemblyInfo.cs
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.MvcApplicationPartsAssemblyInfo.cache
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.amorphie.user.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.build.amorphie.user.props
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.buildMultiTargeting.amorphie.user.props
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets\msbuild.buildTransitive.amorphie.user.props
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets.pack.json
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets.build.json
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\staticwebassets.development.json
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\scopedcss\bundle\amorphie.user.styles.css
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.csproj.CopyComplete
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.dll
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\refint\amorphie.user.dll
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.pdb
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\amorphie.user.genruntimeconfig.cache
+C:\Projects\fact\amorphie.user\obj\Debug\net7.0\ref\amorphie.user.dll
