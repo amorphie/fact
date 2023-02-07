@@ -1,6 +1,24 @@
 version: "3.9"
 services:
-
+  amorphie.user:
+    image: ${DOCKER_REGISTRY-}amorphie.user
+    build:
+      context: .
+      dockerfile: Dockerfile-User
+    ports:
+      - '5000:5000'
+    depends_on:
+      - redis
+      - placement
+    networks:
+      - bbt-development
+  placement:
+    image: "daprio/dapr"
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+    networks:
+      - bbt-development
   redis:
     container_name: bbt-redis
     image: redis:latest
@@ -70,6 +88,17 @@ services:
       - ./prometheus/:/etc
     ports:
       - "9090:9090"
+    networks:
+      - bbt-development
+  user-scretstore:
+    container_name: bbt-scretstore
+    image: "vault:latest"
+    command:
+      - "--config.file=/etc/user-secretstore.yml"
+    volumes:
+      - ./amorphie.user/:/etc
+    ports:
+      - "8200:8200"
     networks:
       - bbt-development
 networks:
