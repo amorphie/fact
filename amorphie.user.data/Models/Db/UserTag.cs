@@ -14,9 +14,7 @@ public class UserTag
     public DateTime? CreatedAt { get; set; }
     public Guid ModifiedBy { get; set; }
     public DateTime? ModifiedAt { get; set; }
-
     public Guid CretedByBehalfOf { get; set; }
-
     public Guid ModifiedByBehalof { get; set; }
     public User? User { get; set; }
 }
