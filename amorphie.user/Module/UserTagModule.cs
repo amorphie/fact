@@ -1,5 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using amorphie.user.data;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 public static class UserTagModule
@@ -33,6 +38,8 @@ public static class UserTagModule
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
 
+        
+
        _app.MapDelete("/usertag/{id}", deleteUserTag)
        .WithOpenApi()
        .WithSummary("Deletes usertag")
@@ -56,7 +63,7 @@ public static class UserTagModule
 
         if (!string.IsNullOrEmpty(Name))
         {
-            query.Where(t => t.Tag==Name);
+           query= query.Where(x => x.Tag.Contains(Name));
         }
 
         var userTags = query.ToList();
@@ -116,7 +123,7 @@ public static class UserTagModule
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok(userTag);
+                return Results.Ok(data);
             }
             else
             {
@@ -124,7 +131,7 @@ public static class UserTagModule
             }
         
         }
-        return Results.Conflict("Request or Order template is already used for another record.");
+        return Results.Conflict("Request  is already used for another record.");
     }
      static IResult deleteUserTag(
         [FromRoute(Name = "id")] Guid id,

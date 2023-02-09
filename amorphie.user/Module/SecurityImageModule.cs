@@ -1,5 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using amorphie.user.data;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 public static class SecurityImageModule
@@ -107,7 +112,7 @@ public static class SecurityImageModule
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok(securityImage);
+                return Results.Ok(data);
             }
             else
             {
@@ -115,7 +120,7 @@ public static class SecurityImageModule
             }
 
         }
-        return Results.Conflict("Request or Order template is already used for another record.");
+        return Results.Conflict("Request is already used for another record.");
     }
     static IResult deleteSecurityImage(
        [FromRoute(Name = "id")] Guid id,

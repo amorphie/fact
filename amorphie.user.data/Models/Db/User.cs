@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace amorphie.user.data;
 
-public class User
+public class User:BaseEntity
 {
-    [Key]
-    public Guid Id { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
@@ -15,14 +13,6 @@ public class User
     public string Reference { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
 
-    public Guid CreatedBy { get; set; }
-    public DateTime? CreatedAt { get; set; }
-    public Guid ModifiedBy { get; set; }
-    public DateTime? ModifiedAt { get; set; }
-
-    public Guid CretedByBehalfOf { get; set; }
-
-    public Guid ModifiedByBehalof { get; set; }
     public string Salt{get;set;}= string.Empty;
    
     public ICollection<UserTag>? UserTags { get; set; }

@@ -1,5 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 using amorphie.user.data;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 public static class UserDeviceModule
@@ -54,7 +59,7 @@ public static class UserDeviceModule
 
         if (ClientId!=null)
         {
-            query.Where(t => t.ClientId==ClientId);
+           query=query.Where(t => t.ClientId==ClientId);
         }
 
         var userDevices = query.ToList();
@@ -121,7 +126,7 @@ public static class UserDeviceModule
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok(userDevice);
+                return Results.Ok(data);
             }
             else
             {
@@ -129,7 +134,7 @@ public static class UserDeviceModule
             }
         
         }
-        return Results.Conflict("Request or Order template is already used for another record.");
+        return Results.Conflict("Request  is already used for another record.");
     }
      static IResult deleteUserDevice(
         [FromRoute(Name = "id")] Guid id,

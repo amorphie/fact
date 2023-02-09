@@ -1,7 +1,11 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using amorphie.user.data;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static amorphie.user.data.User;
 
@@ -39,13 +43,21 @@ public static class UserModule
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapPost("/user/checkUserPassword", checkUserPassword)
-      .WithOpenApi()
-      .WithSummary("User password check")
-      .WithDescription("User password check.")
-      .WithTags("User")
-      .Produces(StatusCodes.Status200OK)
-      .Produces(StatusCodes.Status404NotFound); 
+        //     _app.MapPost("/user/checkUserPassword", checkUserPassword)
+        //   .WithOpenApi()
+        //   .WithSummary("User password check")
+        //   .WithDescription("User password check.")
+        //   .WithTags("User")
+        //   .Produces(StatusCodes.Status200OK)
+        //   .Produces(StatusCodes.Status404NotFound); 
+        _app.MapGet("/user/user/{userId}/password/{password}", checkUserPassword)
+           .WithOpenApi()
+          .WithSummary("Check user password.")
+          .WithDescription("Check user password")
+          .WithTags("User")
+          .Produces<GetUserResponse>(StatusCodes.Status200OK)
+          .Produces(StatusCodes.Status404NotFound);
+
 
 
     }
@@ -62,7 +74,7 @@ public static class UserModule
 
         if (!string.IsNullOrEmpty(Reference))
         {
-            query.Where(t => t.Reference == Reference);
+            query=query.Where(t => t.Reference == Reference);
         }
 
         var users = query.ToList();
@@ -154,11 +166,11 @@ public static class UserModule
             if (data.Phone != null && data.Phone != user.Phone) { user.Phone = data.Phone; hasChanges = true; }
             if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != user.ModifiedByBehalof) { user.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
             if (data.ModifiedBy != null && data.ModifiedBy != user.ModifiedBy) { user.ModifiedBy = data.ModifiedBy; hasChanges = true; }
-               user.ModifiedAt=DateTime.Now;
+            user.ModifiedAt = DateTime.Now;
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok(user);
+                return Results.Ok(data);
             }
             else
             {
@@ -187,21 +199,21 @@ public static class UserModule
             return Results.Ok();
         }
     }
-
     static async Task<IResult> checkUserPassword(
-           [FromBody] UserCheckPasswordRequest data,
-            [FromServices] UserDBContext context
-           )
+        [FromRoute(Name = "userId")] Guid userId,
+        [FromRoute(Name = "password")] string password,
+           [FromServices] UserDBContext context
+          )
     {
-        var user = context!.Users!.FirstOrDefault(x => x.Id == data.UserId);
+        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
             var btyePassword = Convert.FromBase64String(user.Password);
             var salt = Convert.FromBase64String(user.Salt);
-            var checkPassword = PasswordHelper.VerifyHash(data.Password, salt, btyePassword);
+            var checkPassword = PasswordHelper.VerifyHash(password, salt, btyePassword);
             if (checkPassword)
             {
-                return Results.Created($"/user/{data.UserId}", checkPassword);
+                return Results.Created($"/user/{userId}", checkPassword);
             }
             else
             {
@@ -210,9 +222,36 @@ public static class UserModule
         }
         else
         {
-            return Results.NotFound();
+            return Results.NotFound("User is not found");
         }
 
     }
+    // static async Task<IResult> checkUserPassword(
+    //        [FromBody] UserCheckPasswordRequest data,
+    //         [FromServices] UserDBContext context
+    //        )
+    // {
+    //     var user = context!.Users!.FirstOrDefault(x => x.Id == data.UserId);
+    //     if (user != null)
+    //     {
+    //         var btyePassword = Convert.FromBase64String(user.Password);
+    //         var salt = Convert.FromBase64String(user.Salt);
+    //         var checkPassword = PasswordHelper.VerifyHash(data.Password, salt, btyePassword);
+    //         if (checkPassword)
+    //         {
+    //             return Results.Created($"/user/{data.UserId}", checkPassword);
+    //         }
+    //         else
+    //         {
+    //             return Results.Problem("Passwords do not match", null);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return Results.NotFound();
+    //     }
+
+    //  }
+
 }
 

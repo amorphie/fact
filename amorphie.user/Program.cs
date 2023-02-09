@@ -1,5 +1,10 @@
+using System;
 using amorphie.user.data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 namespace amorphie.user;
 internal class Program
 {

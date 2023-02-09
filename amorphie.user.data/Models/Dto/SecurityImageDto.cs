@@ -14,7 +14,6 @@ Guid CretedByBehalfOf,
 Guid ModifiedByBehalof);
 public record PostSecurityImageRequest(
 string Image,
-Guid UserId,
 Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
