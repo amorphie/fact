@@ -137,13 +137,14 @@ public static class UserSecurityImageModule
             {
                 if (user.Salt != null)
                 {
+
                     var bytePassword = Convert.FromBase64String(userSecurityImage.SecurityImage);
                     var salt = Convert.FromBase64String(user.Salt);
                     var checkPassword = PasswordHelper.VerifyHash(data.SecurityImage, salt, bytePassword);
                     if (!checkPassword)
                     {
                         var password = PasswordHelper.HashPassword(data.SecurityImage, salt);
-                        user.Password = Convert.ToBase64String(password);
+                        userSecurityImage.SecurityImage = Convert.ToBase64String(password);
                         hasChanges = true;
                     }
                     if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userSecurityImage.ModifiedByBehalof) { userSecurityImage.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
@@ -191,9 +192,7 @@ public static class UserSecurityImageModule
     static async Task<IResult> userCheckImage(
         [FromRoute(Name = "userId")] Guid userId,
         [FromRoute(Name = "image")] string image,
-           //    [FromQuery] Guid UserId,
-           //     [FromQuery] string Image,
-           [FromServices] UserDBContext context
+         [FromServices] UserDBContext context
           )
     {
         var user = context!.Users!.FirstOrDefault(x => x.Id == userId);

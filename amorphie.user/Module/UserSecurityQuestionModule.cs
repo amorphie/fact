@@ -64,7 +64,7 @@ public static class UserSecurityQuestionModule
 
         if (UserId != null)
         {
-           query=query.Where(t => t.UserId == UserId);
+            query = query.Where(t => t.UserId == UserId);
         }
 
         var userSecurityQuestions = query.ToList();
@@ -103,24 +103,30 @@ public static class UserSecurityQuestionModule
 
         if (userSecurityQuestion == null)
         {
-
-            var salt = Convert.FromBase64String(user.Salt);
-            var password = PasswordHelper.HashPassword(data.SecurityAnswer, salt);
-            var result = Convert.ToBase64String(password);
-
-            var newRecord = new UserSecurityQuestion
+            if (user.Salt != null)
             {
-                Id = Guid.NewGuid(),
-                SecurityAnswer = result,
-                SecurityQuestionId = data.SecurityQuestionId,
-                UserId = data.UserId,
-                CreatedAt = DateTime.Now,
-                CreatedBy = data.CreatedBy,
-                CretedByBehalfOf = data.CretedByBehalfOf
-            };
-            context!.UserSecurityQuestions!.Add(newRecord);
-            context.SaveChanges();
-            return Results.Created($"/userSecurityQuestion/{data.UserId}", newRecord);
+                var salt = Convert.FromBase64String(user.Salt);
+                var password = PasswordHelper.HashPassword(data.SecurityAnswer, salt);
+                var result = Convert.ToBase64String(password);
+
+                var newRecord = new UserSecurityQuestion
+                {
+                    Id = Guid.NewGuid(),
+                    SecurityAnswer = result,
+                    SecurityQuestionId = data.SecurityQuestionId,
+                    UserId = data.UserId,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = data.CreatedBy,
+                    CretedByBehalfOf = data.CretedByBehalfOf
+                };
+                context!.UserSecurityQuestions!.Add(newRecord);
+                context.SaveChanges();
+                return Results.Created($"/userSecurityQuestion/{data.UserId}", newRecord);
+            }
+            else
+            {
+                return Results.NotFound("User salt is null");
+            }
         }
         else
         {
@@ -128,21 +134,28 @@ public static class UserSecurityQuestionModule
             // Apply update to only changed fields.
             if (data.SecurityAnswer != null)
             {
-                var bytePassword = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
-                var salt = Convert.FromBase64String(user.Salt);
-                var checkPassword = PasswordHelper.VerifyHash(data.SecurityAnswer, salt, bytePassword);
-                if (!checkPassword)
+                if (user.Salt != null)
                 {
-                    var password = PasswordHelper.HashPassword(data.SecurityAnswer, salt);
-                    user.Password = Convert.ToBase64String(password);
-                    hasChanges = true;
+                    var bytePassword = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
+                    var salt = Convert.FromBase64String(user.Salt);
+                    var checkPassword = PasswordHelper.VerifyHash(data.SecurityAnswer, salt, bytePassword);
+                    if (!checkPassword)
+                    {
+                        var password = PasswordHelper.HashPassword(data.SecurityAnswer, salt);
+                        userSecurityQuestion.SecurityAnswer = Convert.ToBase64String(password);
+                        hasChanges = true;
+                    }
+                }
+                else
+                {
+                    return Results.NotFound("User salt is null");
                 }
                 if (data.SecurityQuestionId != null && data.SecurityQuestionId != userSecurityQuestion.SecurityQuestionId) { userSecurityQuestion.SecurityQuestionId = data.SecurityQuestionId; hasChanges = true; }
                 if (data.UserId != null && data.UserId != userSecurityQuestion.UserId) { userSecurityQuestion.UserId = data.UserId; hasChanges = true; }
                 if (data.ModifiedBy != null && data.ModifiedBy != userSecurityQuestion.ModifiedBy) { userSecurityQuestion.ModifiedBy = data.ModifiedBy; hasChanges = true; }
                 if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userSecurityQuestion.ModifiedByBehalof) { userSecurityQuestion.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
                 userSecurityQuestion.ModifiedAt = DateTime.Now;
-            }
+            
             if (hasChanges)
             {
                 context!.SaveChanges();
@@ -152,42 +165,45 @@ public static class UserSecurityQuestionModule
             {
                 return Results.Problem("Not Modified.", null, 304);
             }
-
         }
+
+    }
         return Results.Conflict("Request is already used for another record.");
     }
-    static IResult deleteUserSecurityQuestion(
-       [FromRoute(Name = "id")] Guid id,
-       [FromServices] UserDBContext context)
+static IResult deleteUserSecurityQuestion(
+   [FromRoute(Name = "id")] Guid id,
+   [FromServices] UserDBContext context)
+{
+
+    var recordToDelete = context?.UserSecurityQuestions?.FirstOrDefault(t => t.Id == id);
+
+    if (recordToDelete == null)
     {
-
-        var recordToDelete = context?.UserSecurityQuestions?.FirstOrDefault(t => t.Id == id);
-
-        if (recordToDelete == null)
-        {
-            return Results.NotFound();
-        }
-        else
-        {
-            context!.Remove(recordToDelete);
-            context.SaveChanges();
-            return Results.Ok();
-        }
+        return Results.NotFound();
     }
-    static async Task<IResult> userCheckSecurityAnswer(
-       [FromRoute(Name = "userId")] Guid userId,
-       [FromRoute(Name = "securityQuestionId")] Guid securityQuestionId,
-       [FromQuery] string securityAnswer,
-       [FromServices] UserDBContext context
-         )
+    else
     {
-        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
-        if (user != null)
+        context!.Remove(recordToDelete);
+        context.SaveChanges();
+        return Results.Ok();
+    }
+}
+static async Task<IResult> userCheckSecurityAnswer(
+   [FromRoute(Name = "userId")] Guid userId,
+   [FromRoute(Name = "securityQuestionId")] Guid securityQuestionId,
+   [FromQuery] string securityAnswer,
+   [FromServices] UserDBContext context
+     )
+{
+    var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+    if (user != null)
+    {
+        var userSecurityQuestion = context!.UserSecurityQuestions!.FirstOrDefault(x => x.UserId == userId && x.SecurityQuestionId == securityQuestionId);
+        if (userSecurityQuestion != null)
         {
-            var userSecurityQuestion = context!.UserSecurityQuestions!.FirstOrDefault(x => x.UserId == userId && x.SecurityQuestionId == securityQuestionId);
-            if (userSecurityQuestion != null)
+            if (securityAnswer != null)
             {
-                if (securityAnswer != null)
+                if (user.Salt != null)
                 {
                     var byteQuestion = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
                     var salt = Convert.FromBase64String(user.Salt);
@@ -205,19 +221,24 @@ public static class UserSecurityQuestionModule
                 {
                     return Results.NotFound("Security answer is null");
                 }
-
-
             }
             else
             {
-                return Results.NotFound("SecurityAnswer definition is not found.");
+
+                return Results.NotFound("User salt is null");
             }
+
         }
         else
         {
-            return Results.NotFound("User is not found.");
+            return Results.NotFound("SecurityAnswer definition is not found.");
         }
-
     }
+    else
+    {
+        return Results.NotFound("User is not found.");
+    }
+
+}
 }
 
