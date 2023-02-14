@@ -4,60 +4,42 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SecretExtensions;
 
-namespace amorphie.user;
-internal class Program
+var builder = WebApplication.CreateBuilder(args);
+await builder.Configuration.AddVaultSecrets("user-secretstore", "user-secretstore");
+var postgresql = builder.Configuration["postgresql"];
+builder.Logging.ClearProviders();
+builder.Logging.AddJsonConsole();
+
+builder.Services.AddDaprClient();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<UserDBContext>
+(options => options.UseNpgsql(postgresql));
+var app = builder.Build();
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+app.UseCloudEvents();
+app.UseRouting();
+app.MapSubscribeHandler();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.MapUserEndpoints();
+app.MapUserTagEndpoints();
+app.MapSecurityQuestionEndpoints();
+app.MapUserSecurityQuestionEndpoints();
+app.MapSecurityImageEndpoints();
+app.MapUserSecurityImageEndpoints();
+app.MapUserDeviceEndpoints();
+
+try
 {
-    private static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-
-        builder.Logging.ClearProviders();
-        builder.Logging.AddJsonConsole();
-
-        builder.Services.AddDaprClient();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-        builder.Services.AddDbContext<UserDBContext>
-        (options => options.UseNpgsql("Host=localhost:5432;Database=users;Username=postgres;Password=postgres"));
-        var app = builder.Build();
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        app.UseCloudEvents();
-        app.UseRouting();
-        app.MapSubscribeHandler();
-
-        app.UseSwagger();
-        app.UseSwaggerUI();
-
-         app.MapUserEndpoints();
-         app.MapUserTagEndpoints();
-         app.MapSecurityQuestionEndpoints();
-         app.MapUserSecurityQuestionEndpoints();
-         app.MapSecurityImageEndpoints();
-         app.MapUserSecurityImageEndpoints();
-         app.MapUserDeviceEndpoints();
-         
-
-        // app.MapGet("/", () => "Hello World!");
-        // app.MapGet("/user", ([FromQuery] string? TcNo) => { })
-        //     .WithOpenApi(operation =>
-        //         {
-        //             operation.Summary = "Returns queried users.";
-        //             operation.Parameters[0].Description = "Full or partial name of TcNo to be queried.";
-        //             return operation;
-        //         })
-        //      .Produces<GetUserResponse[]>(StatusCodes.Status200OK)
-        //     .Produces(StatusCodes.Status204NoContent)
-        // ;
-        try
-        {
-            app.Logger.LogInformation("Starting application...");
-            app.Run();
-        }
-        catch (Exception ex)
-        {
-            app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
-        }
-        //
-    }
+    app.Logger.LogInformation("Starting application...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
 }

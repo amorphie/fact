@@ -26,6 +26,14 @@ public static class UserModule
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
+    //    _app.MapGet("/user/{countrycode}/{prefix}{number}", getPhoneUser)
+    //    .WithOpenApi()
+    //    .WithSummary("Gets registered users.")
+    //    .WithDescription("Returns phone users records")
+    //    .WithTags("User")
+    //    .Produces<GetUserResponse>(StatusCodes.Status200OK)
+    //    .Produces(StatusCodes.Status404NotFound);
+
         _app.MapPost("/user", postUser)
          .WithOpenApi()
          .WithSummary("Save user")
@@ -104,6 +112,53 @@ public static class UserModule
         else
             return Results.NoContent();
     }
+
+    //   static IResult getPhoneUser(
+    //   [FromRoute(Name = "countrycode")] Guid id,
+    //    [FromRoute(Name = "id")] Guid id,
+    //     [FromRoute(Name = "id")] Guid id,
+    //   [FromServices] UserDBContext context,
+     
+    //   [FromQuery][Range(0, 100)] int page = 0,
+    //   [FromQuery][Range(5, 100)] int pageSize = 100
+    //   )
+    // {
+    //     var query = context!.Users!
+    //         .Skip(page * pageSize)
+    //         .Take(pageSize);
+
+    //     if (!string.IsNullOrEmpty(Reference))
+    //     {
+    //         query=query.Where(t => t.Reference == Reference);
+    //     }
+
+    //     var users = query.ToList();
+
+    //     if (users.Count() > 0)
+    //     {
+    //         return Results.Ok(users.Select(user =>
+    //           new GetUserResponse(
+    //            user.Id,
+    //            user.FirstName,
+    //            user.LastName,
+    //            user.Reference,
+    //            user.Password,
+    //            user.EMail,
+    //            user.Phone,
+    //            user.State,
+    //            user.CreatedBy,
+    //            user.CreatedAt,
+    //            user.ModifiedBy,
+    //            user.ModifiedAt,
+    //            user.CretedByBehalfOf,
+    //            user.ModifiedByBehalof
+
+    //            )
+    //         ).ToArray());
+    //     }
+    //     else
+    //         return Results.NoContent();
+    // }
     static async Task<IResult> postUser(
            [FromBody] PostUserRequest data,
             [FromServices] UserDBContext context
