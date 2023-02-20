@@ -52,7 +52,7 @@ public static class UserTagModule
     }
       static IResult getAllUserTag(
         [FromServices] UserDBContext context,
-        [FromQuery] string? Name,
+        [FromQuery] string? Tag,
         [FromQuery][Range(0, 100)] int page = 0,
         [FromQuery][Range(5, 100)] int pageSize = 100
         )
@@ -61,9 +61,9 @@ public static class UserTagModule
             .Skip(page * pageSize)
             .Take(pageSize);
 
-        if (!string.IsNullOrEmpty(Name))
+        if (!string.IsNullOrEmpty(Tag))
         {
-           query= query.Where(x => x.Tag.Contains(Name));
+           query= query.Where(x => x.Tag.Contains(Tag));
         }
 
         var userTags = query.ToList();
@@ -95,14 +95,14 @@ public static class UserTagModule
     {
        
         var userTag = context!.UserTags!
-          .FirstOrDefault(x => x.Tag==data.Name && x.UserId==data.UserId );
+          .FirstOrDefault(x => x.Tag==data.Tag && x.UserId==data.UserId );
 
 
         if (userTag== null)
         {
             var newRecord = new UserTag { 
              Id = Guid.NewGuid(),
-             Tag = data.Name,
+             Tag = data.Tag,
              UserId=data.UserId,
              CreatedAt = DateTime.Now,
              CreatedBy = data.CreatedBy,
@@ -110,12 +110,12 @@ public static class UserTagModule
              };
             context!.UserTags!.Add(newRecord);
             context.SaveChanges();
-            return Results.Created($"/usertag/{data.Name}", newRecord);
+            return Results.Created($"/usertag/{data.Tag}", newRecord);
         }
         else{
               var hasChanges = false;
             // Apply update to only changed fields.
-            if (data.Name != null && data.Name != userTag.Tag) {  userTag.Tag=data.Name ; hasChanges = true; }
+            if (data.Tag != null && data.Tag != userTag.Tag) {  userTag.Tag=data.Tag ; hasChanges = true; }
             if (data.UserId != null && data.UserId != userTag.UserId) { userTag.UserId = data.UserId; hasChanges = true; }
             if (data.ModifiedBy != null && data.ModifiedBy != userTag.ModifiedBy) { userTag.ModifiedBy = data.ModifiedBy; hasChanges = true; }
             if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userTag.ModifiedByBehalof) { userTag.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }

@@ -16,7 +16,7 @@ public static class UserSecurityImageModule
     {
         _app = app;
 
-        _app.MapGet("/userSecurityImage", getAllUserSecurityImage)
+        _app.MapGet("/usersecurityimage", getAllUserSecurityImage)
         .WithOpenApi()
        .WithSummary("Returns saved usersecurityimage records.")
        .WithDescription("Returns existing usersecurityimage with metadata.Query parameter usersecurityimage is can contain request or order SecurityQuestion of usersecurityimages.")
@@ -25,7 +25,7 @@ public static class UserSecurityImageModule
        .Produces(StatusCodes.Status404NotFound);
 
 
-        _app.MapPost("/userSecurityImage", postUserSecurityImage)
+        _app.MapPost("/usersecurityimage", postUserSecurityImage)
          .WithOpenApi()
          .WithSummary("Save usersecurityimage.")
          .WithDescription("Save usersecurityimage.")
@@ -34,7 +34,7 @@ public static class UserSecurityImageModule
          .Produces(StatusCodes.Status201Created)
          .Produces(StatusCodes.Status409Conflict);
 
-        _app.MapDelete("/userSecurityImage/{id}", deleteUserSecurityImage)
+        _app.MapDelete("/usersecurityimage/{id}", deleteUserSecurityImage)
         .WithOpenApi()
         .WithSummary("Deletes usersecurityimage")
         .WithDescription("Delete usersecurityimage.")
@@ -42,7 +42,7 @@ public static class UserSecurityImageModule
         .Produces<GetUserSecurityImageResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/userSecurityImage/user/{userId}/image/{image}", userCheckImage)
+        _app.MapGet("/usersecurityimage/user/{userId}/image/{image}", userCheckImage)
         .WithOpenApi()
        .WithSummary("Check image.")
        .WithDescription("Check image")

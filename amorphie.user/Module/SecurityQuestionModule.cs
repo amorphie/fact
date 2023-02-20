@@ -16,7 +16,7 @@ public static class SecurityQuestionModule
     {
         _app = app;
 
-        _app.MapGet("/securityQuestion", getAllSecurityQuestion)
+        _app.MapGet("/securityquestion", getAllSecurityQuestion)
        .WithTags("SecurityQuestion")
        .WithOpenApi(operation =>
        {
@@ -28,7 +28,7 @@ public static class SecurityQuestionModule
        .Produces<GetUserResponse[]>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status204NoContent);
 
-        _app.MapPost("/securityQuestion", postSecurityQuestion)
+        _app.MapPost("/securityquestion", postSecurityQuestion)
          .WithOpenApi()
          .WithSummary("Save securityquestion")
          .WithTags("SecurityQuestion")
@@ -36,7 +36,7 @@ public static class SecurityQuestionModule
          .Produces(StatusCodes.Status201Created)
          .Produces(StatusCodes.Status409Conflict);
 
-        _app.MapDelete("/securityQuestion/{id}", deleteSecurityQuestion)
+        _app.MapDelete("/securityquestion/{id}", deleteSecurityQuestion)
         .WithOpenApi()
         .WithSummary("Deletes securityquestion")
         .WithDescription("Delete securityquestion.")

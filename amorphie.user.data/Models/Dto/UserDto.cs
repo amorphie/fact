@@ -30,3 +30,4 @@ Guid ModifiedByBehalof,
 string Salt);
 
 public record UserCheckPasswordRequest(string Password,Guid UserId);
+public record UserPasswordUpdateRequest(string oldPassword,string newPassord);

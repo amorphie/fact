@@ -15,7 +15,7 @@ public static class UserSecurityQuestionModule
     {
         _app = app;
 
-        _app.MapGet("/userSecurityQuestion", getAllUserSecurityQuestion)
+        _app.MapGet("/usersecurityquestion", getAllUserSecurityQuestion)
         .WithOpenApi()
        .WithSummary("Returns saved usersecurityquestion records.")
        .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")
@@ -24,7 +24,7 @@ public static class UserSecurityQuestionModule
        .Produces(StatusCodes.Status404NotFound);
 
 
-        _app.MapPost("/userSecurityQuestion", postUserSecurityQuestion)
+        _app.MapPost("/usersecurityquestion", postUserSecurityQuestion)
          .WithOpenApi()
          .WithSummary("Save UserSecurityQuestion")
          .WithDescription("Save UserSecurityQuestion")
@@ -33,7 +33,7 @@ public static class UserSecurityQuestionModule
          .Produces(StatusCodes.Status201Created)
          .Produces(StatusCodes.Status409Conflict);
 
-        _app.MapDelete("/userSecurityQuestion/{id}", deleteUserSecurityQuestion)
+        _app.MapDelete("/usersecurityquestion/{id}", deleteUserSecurityQuestion)
         .WithOpenApi()
         .WithSummary("Deletes UserSecurityQuestion")
         .WithDescription("Delete usertag.")
@@ -41,7 +41,7 @@ public static class UserSecurityQuestionModule
         .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/userSecurityQuestion/user/{userId}/securityQuestion/{securityQuestionId}", userCheckSecurityAnswer)
+        _app.MapGet("/usersecurityquestion/user/{userId}/securityQuestion/{securityQuestionId}/securityAnswer/{securityAnswer}", userCheckSecurityAnswer)
          .WithOpenApi()
         .WithSummary("Check security answer.")
         .WithDescription("Check security answer")
@@ -155,90 +155,90 @@ public static class UserSecurityQuestionModule
                 if (data.ModifiedBy != null && data.ModifiedBy != userSecurityQuestion.ModifiedBy) { userSecurityQuestion.ModifiedBy = data.ModifiedBy; hasChanges = true; }
                 if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userSecurityQuestion.ModifiedByBehalof) { userSecurityQuestion.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
                 userSecurityQuestion.ModifiedAt = DateTime.Now;
-            
-            if (hasChanges)
-            {
-                context!.SaveChanges();
-                return Results.Ok(data);
-            }
-            else
-            {
-                return Results.Problem("Not Modified.", null, 304);
-            }
-        }
 
-    }
+                if (hasChanges)
+                {
+                    context!.SaveChanges();
+                    return Results.Ok(data);
+                }
+                else
+                {
+                    return Results.Problem("Not Modified.", null, 304);
+                }
+            }
+
+        }
         return Results.Conflict("Request is already used for another record.");
     }
-static IResult deleteUserSecurityQuestion(
-   [FromRoute(Name = "id")] Guid id,
-   [FromServices] UserDBContext context)
-{
+    static IResult deleteUserSecurityQuestion(
+       [FromRoute(Name = "id")] Guid id,
+       [FromServices] UserDBContext context)
+    {
 
-    var recordToDelete = context?.UserSecurityQuestions?.FirstOrDefault(t => t.Id == id);
+        var recordToDelete = context?.UserSecurityQuestions?.FirstOrDefault(t => t.Id == id);
 
-    if (recordToDelete == null)
-    {
-        return Results.NotFound();
-    }
-    else
-    {
-        context!.Remove(recordToDelete);
-        context.SaveChanges();
-        return Results.Ok();
-    }
-}
-static async Task<IResult> userCheckSecurityAnswer(
-   [FromRoute(Name = "userId")] Guid userId,
-   [FromRoute(Name = "securityQuestionId")] Guid securityQuestionId,
-   [FromQuery] string securityAnswer,
-   [FromServices] UserDBContext context
-     )
-{
-    var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
-    if (user != null)
-    {
-        var userSecurityQuestion = context!.UserSecurityQuestions!.FirstOrDefault(x => x.UserId == userId && x.SecurityQuestionId == securityQuestionId);
-        if (userSecurityQuestion != null)
+        if (recordToDelete == null)
         {
-            if (securityAnswer != null)
+            return Results.NotFound();
+        }
+        else
+        {
+            context!.Remove(recordToDelete);
+            context.SaveChanges();
+            return Results.Ok();
+        }
+    }
+    static async Task<IResult> userCheckSecurityAnswer(
+       [FromRoute(Name = "userId")] Guid userId,
+       [FromRoute(Name = "securityQuestionId")] Guid securityQuestionId,
+       [FromRoute(Name = "securityAnswer")] string securityAnswer,
+       [FromServices] UserDBContext context
+         )
+    {
+        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+        if (user != null)
+        {
+            var userSecurityQuestion = context!.UserSecurityQuestions!.FirstOrDefault(x => x.UserId == userId && x.SecurityQuestionId == securityQuestionId);
+            if (userSecurityQuestion != null)
             {
-                if (user.Salt != null)
+                if (securityAnswer != null)
                 {
-                    var byteQuestion = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
-                    var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = PasswordHelper.VerifyHash(securityAnswer, salt, byteQuestion);
-                    if (checkPassword)
+                    if (user.Salt != null)
                     {
-                        return Results.Created($"/user/{userId}", checkPassword);
+                        var byteQuestion = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
+                        var salt = Convert.FromBase64String(user.Salt);
+                        var checkPassword = PasswordHelper.VerifyHash(securityAnswer, salt, byteQuestion);
+                        if (checkPassword)
+                        {
+                            return Results.Created($"/user/{userId}", checkPassword);
+                        }
+                        else
+                        {
+                            return Results.Problem("Passwords do not match", null);
+                        }
                     }
                     else
                     {
-                        return Results.Problem("Passwords do not match", null);
+                        return Results.NotFound("Security answer is null");
                     }
                 }
                 else
                 {
-                    return Results.NotFound("Security answer is null");
+
+                    return Results.NotFound("User salt is null");
                 }
+
             }
             else
             {
-
-                return Results.NotFound("User salt is null");
+                return Results.NotFound("SecurityAnswer definition is not found.");
             }
-
         }
         else
         {
-            return Results.NotFound("SecurityAnswer definition is not found.");
+            return Results.NotFound("User is not found.");
         }
-    }
-    else
-    {
-        return Results.NotFound("User is not found.");
-    }
 
-}
+    }
 }
 

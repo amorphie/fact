@@ -7,41 +7,50 @@ using amorphie.user.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Dapr.Client;
 using static amorphie.user.data.User;
 
 public static class UserModule
 {
-
+    const string STATE_STORE = "amorphie-cache";
     static WebApplication _app = default!;
 
     public static void MapUserEndpoints(this WebApplication app)
     {
         _app = app;
 
-        _app.MapGet("/user", getAllUser)
+        _app.MapGet("/user", getAllUsers)
        .WithOpenApi()
        .WithSummary("Gets registered users.")
-       .WithDescription("Returns existing users with metadata.Query parameter TcNo is can contain request or order TcNo of user.")
+       .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
        .WithTags("User")
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-    //    _app.MapGet("/user/{countrycode}/{prefix}{number}", getPhoneUser)
-    //    .WithOpenApi()
-    //    .WithSummary("Gets registered users.")
-    //    .WithDescription("Returns phone users records")
-    //    .WithTags("User")
-    //    .Produces<GetUserResponse>(StatusCodes.Status200OK)
-    //    .Produces(StatusCodes.Status404NotFound);
+        _app.MapGet("/user/phone/countrycode/{countrycode}/prefix/{prefix}/number/{number}", getPhoneUser)
+        .WithOpenApi()
+        .WithSummary("Returns phone users records.")
+        .WithDescription("Returns phone users records")
+        .WithTags("User")
+        .Produces<GetUserResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
+
+        _app.MapGet("/user/email/{email}/", getEmailUser)
+      .WithOpenApi()
+      .WithSummary("Returns email users records.")
+      .WithDescription("Returns email users records")
+      .WithTags("User")
+      .Produces<GetUserResponse>(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status404NotFound);
 
         _app.MapPost("/user", postUser)
-         .WithOpenApi()
-         .WithSummary("Save user")
-         .WithDescription("It is update or creates new user.")
-         .WithTags("User")
-         .Produces(StatusCodes.Status200OK)
-         .Produces(StatusCodes.Status201Created)
-         .Produces(StatusCodes.Status409Conflict);
+        .WithOpenApi()
+        .WithSummary("Save user")
+        .WithDescription("It is update or creates new user.")
+        .WithTags("User")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict);
 
         _app.MapDelete("/user/{id}", deleteUser)
         .WithOpenApi()
@@ -51,41 +60,113 @@ public static class UserModule
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-        //     _app.MapPost("/user/checkUserPassword", checkUserPassword)
-        //   .WithOpenApi()
-        //   .WithSummary("User password check")
-        //   .WithDescription("User password check.")
-        //   .WithTags("User")
-        //   .Produces(StatusCodes.Status200OK)
-        //   .Produces(StatusCodes.Status404NotFound); 
-        _app.MapGet("/user/user/{userId}/password/{password}", checkUserPassword)
-           .WithOpenApi()
-          .WithSummary("Check user password.")
-          .WithDescription("Check user password")
-          .WithTags("User")
-          .Produces<GetUserResponse>(StatusCodes.Status200OK)
-          .Produces(StatusCodes.Status404NotFound);
+        _app.MapGet("/user/userId/{userId}/password/{password}", checkUserPassword)
+        .WithOpenApi()
+        .WithSummary("Check user password.")
+        .WithDescription("Check user password")
+        .WithTags("User")
+        .Produces<GetUserResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
 
+        _app.MapPost("/user/{userId}/updatePassword", updateUserPassword)
+        .WithOpenApi()
+        .WithSummary("Update user password.")
+        .WithDescription("Update user password.")
+        .WithTags("User")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict);
 
+        _app.MapPost("/user/{userId}/updateEmail", updateUserEmail)
+       .WithOpenApi()
+       .WithSummary("Update user mail.")
+       .WithDescription("Update user mail.")
+       .WithTags("User")
+       .Produces(StatusCodes.Status200OK)
+       .Produces(StatusCodes.Status201Created)
+       .Produces(StatusCodes.Status409Conflict);
+
+        _app.MapPost("/user/{userId}/updatePhone", updateUserPhone)
+      .WithOpenApi()
+      .WithSummary("Update user phone.")
+      .WithDescription("Update user phone.")
+      .WithTags("User")
+      .Produces(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status201Created)
+      .Produces(StatusCodes.Status409Conflict);
 
     }
-    static IResult getAllUser(
+    async static Task<IResult> getAllUsers(
       [FromServices] UserDBContext context,
       [FromQuery] string? Reference,
+      HttpContext httpContext,
+      [FromServices] DaprClient client,
       [FromQuery][Range(0, 100)] int page = 0,
       [FromQuery][Range(5, 100)] int pageSize = 100
       )
     {
+        var cacheData = await client.GetStateAsync<GetUserResponse[]>(STATE_STORE, "GetAllUsers");
+        if (cacheData != null)
+        {
+            httpContext.Response.Headers.Add("X-Cache", "Hit");
+            return Results.Ok(cacheData);
+        }
         var query = context!.Users!
             .Skip(page * pageSize)
             .Take(pageSize);
 
         if (!string.IsNullOrEmpty(Reference))
         {
-            query=query.Where(t => t.Reference == Reference);
+            query = query.Where(t => t.Reference == Reference);
         }
 
         var users = query.ToList();
+
+        if (users.Count() > 0)
+        {
+            var response = users.Select(user =>
+               new GetUserResponse(
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Reference,
+                user.Password,
+                user.EMail,
+                user.Phone,
+                user.State,
+                user.CreatedBy,
+                user.CreatedAt,
+                user.ModifiedBy,
+                user.ModifiedAt,
+                user.CretedByBehalfOf,
+                user.ModifiedByBehalof
+
+                )
+             ).ToArray();
+            var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
+            await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
+
+            httpContext.Response.Headers.Add("X-Cache", "Miss");
+            return Results.Ok(response);
+        }
+        else
+            return Results.NoContent();
+    }
+
+    static IResult getPhoneUser(
+    [FromRoute(Name = "countrycode")] int countryCode,
+    [FromRoute(Name = "prefix")] int prefix,
+    [FromRoute(Name = "number")] int number,
+    [FromServices] UserDBContext context,
+    [FromQuery][Range(0, 100)] int page = 0,
+    [FromQuery][Range(5, 100)] int pageSize = 100
+    )
+    {
+        var query = context!.Users!
+            .Skip(page * pageSize)
+            .Take(pageSize);
+
+        var users = query.Where(t => t.Phone.CountryCode == countryCode && t.Phone.Prefix == prefix && t.Phone.Number == number).ToList();
 
         if (users.Count() > 0)
         {
@@ -112,53 +193,52 @@ public static class UserModule
         else
             return Results.NoContent();
     }
+    static IResult getEmailUser(
+   [FromRoute(Name = "email")] string email,
+   [FromServices] UserDBContext context,
+   [FromQuery][Range(0, 100)] int page = 0,
+   [FromQuery][Range(5, 100)] int pageSize = 100
+   )
+    {
+        var query = context!.Users!
+            .Skip(page * pageSize)
+            .Take(pageSize);
+        if (!String.IsNullOrEmpty(email))
+        {
+            var users = query.Where(t => t.EMail == email).ToList();
 
-    //   static IResult getPhoneUser(
-    //   [FromRoute(Name = "countrycode")] Guid id,
-    //    [FromRoute(Name = "id")] Guid id,
-    //     [FromRoute(Name = "id")] Guid id,
-    //   [FromServices] UserDBContext context,
-     
-    //   [FromQuery][Range(0, 100)] int page = 0,
-    //   [FromQuery][Range(5, 100)] int pageSize = 100
-    //   )
-    // {
-    //     var query = context!.Users!
-    //         .Skip(page * pageSize)
-    //         .Take(pageSize);
+            if (users.Count() > 0)
+            {
+                return Results.Ok(users.Select(user =>
+                  new GetUserResponse(
+                   user.Id,
+                   user.FirstName,
+                   user.LastName,
+                   user.Reference,
+                   user.Password,
+                   user.EMail,
+                   user.Phone,
+                   user.State,
+                   user.CreatedBy,
+                   user.CreatedAt,
+                   user.ModifiedBy,
+                   user.ModifiedAt,
+                   user.CretedByBehalfOf,
+                   user.ModifiedByBehalof
 
-    //     if (!string.IsNullOrEmpty(Reference))
-    //     {
-    //         query=query.Where(t => t.Reference == Reference);
-    //     }
-
-    //     var users = query.ToList();
-
-    //     if (users.Count() > 0)
-    //     {
-    //         return Results.Ok(users.Select(user =>
-    //           new GetUserResponse(
-    //            user.Id,
-    //            user.FirstName,
-    //            user.LastName,
-    //            user.Reference,
-    //            user.Password,
-    //            user.EMail,
-    //            user.Phone,
-    //            user.State,
-    //            user.CreatedBy,
-    //            user.CreatedAt,
-    //            user.ModifiedBy,
-    //            user.ModifiedAt,
-    //            user.CretedByBehalfOf,
-    //            user.ModifiedByBehalof
-
-    //            )
-    //         ).ToArray());
-    //     }
-    //     else
-    //         return Results.NoContent();
-    // }
+                   )
+                ).ToArray());
+            }
+            else
+            {
+                return Results.NoContent();
+            }
+        }
+        else
+        {
+            return Results.NotFound("Email is null");
+        }
+    }
     static async Task<IResult> postUser(
            [FromBody] PostUserRequest data,
             [FromServices] UserDBContext context
@@ -254,18 +334,52 @@ public static class UserModule
             return Results.Ok();
         }
     }
-    static async Task<IResult> checkUserPassword(
+    static async Task<IResult> updateUserPassword(
         [FromRoute(Name = "userId")] Guid userId,
-        [FromRoute(Name = "password")] string password,
-           [FromServices] UserDBContext context
+        [FromBody] UserPasswordUpdateRequest request,
+        [FromServices] UserDBContext context
           )
     {
         var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-            var btyePassword = Convert.FromBase64String(user.Password);
+            
+                var bytePassword = Convert.FromBase64String(user.Password);
+                var salt = Convert.FromBase64String(user.Salt);
+                var checkPassword = PasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
+                if (checkPassword)
+                {
+        
+                    var password = PasswordHelper.HashPassword(request.newPassord, salt);
+                    user.Password = Convert.ToBase64String(password);
+
+                    context!.SaveChanges();
+                    return Results.Ok(user);
+                }
+                else
+                {
+                    return Results.Problem("Old Passwords do not match", null);
+
+                }
+            
+        }
+        else
+        {
+            return Results.NotFound("User is not found");
+        }
+    }
+    static async Task<IResult> checkUserPassword(
+    [FromRoute(Name = "userId")] Guid userId,
+    [FromRoute(Name = "password")] string password,
+    [FromServices] UserDBContext context
+    )
+    {
+        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+        if (user != null)
+        {
+            var bytePassword = Convert.FromBase64String(user.Password);
             var salt = Convert.FromBase64String(user.Salt);
-            var checkPassword = PasswordHelper.VerifyHash(password, salt, btyePassword);
+            var checkPassword = PasswordHelper.VerifyHash(password, salt, bytePassword);
             if (checkPassword)
             {
                 return Results.Created($"/user/{userId}", checkPassword);
@@ -279,34 +393,51 @@ public static class UserModule
         {
             return Results.NotFound("User is not found");
         }
-
     }
-    // static async Task<IResult> checkUserPassword(
-    //        [FromBody] UserCheckPasswordRequest data,
-    //         [FromServices] UserDBContext context
-    //        )
-    // {
-    //     var user = context!.Users!.FirstOrDefault(x => x.Id == data.UserId);
-    //     if (user != null)
-    //     {
-    //         var btyePassword = Convert.FromBase64String(user.Password);
-    //         var salt = Convert.FromBase64String(user.Salt);
-    //         var checkPassword = PasswordHelper.VerifyHash(data.Password, salt, btyePassword);
-    //         if (checkPassword)
-    //         {
-    //             return Results.Created($"/user/{data.UserId}", checkPassword);
-    //         }
-    //         else
-    //         {
-    //             return Results.Problem("Passwords do not match", null);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         return Results.NotFound();
-    //     }
+    static async Task<IResult> updateUserEmail(
+          [FromRoute(Name = "userId")] Guid userId,
+          [FromQuery] string newEmail,
+          [FromServices] UserDBContext context
+            )
+    {
 
-    //  }
+        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+        if (user != null)
+        {
+           
+                user.EMail = newEmail;
+                context!.SaveChanges();
+                return Results.Ok(user);
+
+        }
+        else
+        {
+            return Results.NotFound("User is not found");
+        }
+    }
+    static async Task<IResult> updateUserPhone(
+              [FromRoute(Name = "userId")] Guid userId,
+              [FromQuery] int countryCode,
+              [FromQuery] int prefix,
+              [FromQuery] int number,
+              [FromServices] UserDBContext context
+     )
+    {
+
+        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+        if (user != null)
+        {
+
+            user.Phone.CountryCode = countryCode;
+            user.Phone.Prefix = prefix;
+            user.Phone.Number = number;
+            context!.SaveChanges();
+            return Results.Ok(user);
+        }
+        else
+        {
+            return Results.NotFound("User is not found");
+        }
+    }
 
 }
-

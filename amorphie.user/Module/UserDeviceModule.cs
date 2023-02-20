@@ -28,6 +28,20 @@ public static class UserDeviceModule
         .Produces<GetUserDeviceResponse[]>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
+        
+         _app.MapGet("/userdevice/{userId}", getUserDevice)
+        .WithTags("UserDevice")
+        .WithOpenApi(operation =>
+        {
+            operation.Summary = "Returns saved userdevice records.";
+            operation.Parameters[0].Description = "Filtering parameter. Given **userdevice** is used to filter userdevice.";
+            operation.Parameters[1].Description = "UserId of the requested device.";
+            return operation;
+        })
+        .Produces<GetUserDeviceResponse[]>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status204NoContent);
+
+
        _app.MapPost("/userdevice", postUserDevice)
         .WithOpenApi()
         .WithSummary("Save userdevice")
@@ -68,6 +82,44 @@ public static class UserDeviceModule
         {
             return Results.Ok(userDevices.Select(userDevice =>
               new GetUserDeviceResponse(
+               userDevice.Id,
+               userDevice.DeviceId,
+               userDevice.TokenId,
+               userDevice.ClientId,
+               userDevice.UserId,   
+               userDevice.CreatedBy,
+               userDevice.CreatedAt,
+               userDevice.ModifiedBy,
+               userDevice.ModifiedAt,
+               userDevice.CretedByBehalfOf,
+               userDevice.ModifiedByBehalof
+               
+                )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
+    }
+     static IResult getUserDevice(
+        [FromServices] UserDBContext context,
+         [FromRoute(Name = "userId")] Guid userId,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.UserDevices!
+            .Skip(page * pageSize)
+            .Take(pageSize);
+
+        
+           var userDevices=query.Where(t => t.UserId==userId).ToList();
+        
+
+      
+        if (userDevices.Count() > 0)
+        {
+              return Results.Ok(userDevices.Select(userDevice =>
+               new GetUserDeviceResponse(
                userDevice.Id,
                userDevice.DeviceId,
                userDevice.TokenId,
