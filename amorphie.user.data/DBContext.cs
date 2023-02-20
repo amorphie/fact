@@ -9,7 +9,6 @@ public class UserDbContextFactory : IDesignTimeDbContextFactory<UserDBContext>
     public UserDBContext CreateDbContext(string[] args)
     {
         var builder = new DbContextOptionsBuilder<UserDBContext>();
-
         var connStr = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
         builder.UseNpgsql(connStr);
         return new UserDBContext(builder.Options);

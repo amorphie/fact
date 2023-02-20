@@ -1,24 +1,29 @@
-using System;
 using amorphie.user.data;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SecretExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore", "user-secretstore");
-var postgresql = builder.Configuration["postgresql"];
+var postgreSql = builder.Configuration["postgresql"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
+
+
+
 
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserDBContext>
-(options => options.UseNpgsql(postgresql));
+    (options => options.UseNpgsql(postgreSql,b => b.MigrationsAssembly("amorphie.user.data")));
+
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
+db.Database.Migrate();
+
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
