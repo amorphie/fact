@@ -137,7 +137,6 @@ public static class UserModule
                 user.Phone,
                 user.State,
                 user.UserTags.Select(x=>x.Tag).ToArray(),
-                //user.UserTags.ToList(),
                 user.CreatedBy,
                 user.CreatedAt,
                 user.ModifiedBy,
