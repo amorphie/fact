@@ -15,6 +15,7 @@ public class User:BaseEntity
 
     public string Salt{get;set;}= string.Empty;
    
+    
     public ICollection<UserTag>? UserTags { get; set; }
 
     public ICollection<UserSecurityQuestion>? UserSecurityQuestion { get; set; }

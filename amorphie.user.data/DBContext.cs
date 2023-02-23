@@ -31,6 +31,9 @@ public class UserDBContext : DbContext
         modelBuilder.Entity<User>()
             .HasKey(e => e.Id);
 
+               modelBuilder.Entity<User>()
+             .HasMany(b => b.UserTags);
+
         modelBuilder.Entity<User>()
          .HasIndex(e => e.Reference).IsUnique();
 

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Dapr.Client;
 using static amorphie.user.data.User;
+using Microsoft.EntityFrameworkCore;
 
 public static class UserModule
 {
@@ -96,7 +97,7 @@ public static class UserModule
       .Produces(StatusCodes.Status409Conflict);
 
     }
-    async static Task<IResult> getAllUsers(
+    async  static Task<IResult> getAllUsers(
       [FromServices] UserDBContext context,
       [FromQuery] string? Reference,
       HttpContext httpContext,
@@ -112,6 +113,7 @@ public static class UserModule
             return Results.Ok(cacheData);
         }
         var query = context!.Users!
+            .Include(d =>d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
 
@@ -134,6 +136,8 @@ public static class UserModule
                 user.EMail,
                 user.Phone,
                 user.State,
+                user.UserTags.Select(x=>x.Tag).ToArray(),
+                //user.UserTags.ToList(),
                 user.CreatedBy,
                 user.CreatedAt,
                 user.ModifiedBy,
@@ -144,8 +148,7 @@ public static class UserModule
                 )
              ).ToArray();
             var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
-            await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
-
+             await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
             httpContext.Response.Headers.Add("X-Cache", "Miss");
             return Results.Ok(response);
         }
@@ -163,6 +166,7 @@ public static class UserModule
     )
     {
         var query = context!.Users!
+            .Include(d =>d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
 
@@ -180,6 +184,7 @@ public static class UserModule
                user.EMail,
                user.Phone,
                user.State,
+               user.UserTags.Select(x=>x.Tag).ToArray(),
                user.CreatedBy,
                user.CreatedAt,
                user.ModifiedBy,
@@ -201,6 +206,7 @@ public static class UserModule
    )
     {
         var query = context!.Users!
+            .Include(d =>d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
         if (!String.IsNullOrEmpty(email))
@@ -219,12 +225,14 @@ public static class UserModule
                    user.EMail,
                    user.Phone,
                    user.State,
+                  user.UserTags.Select(x=>x.Tag).ToArray(),
                    user.CreatedBy,
                    user.CreatedAt,
                    user.ModifiedBy,
                    user.ModifiedAt,
                    user.CretedByBehalfOf,
                    user.ModifiedByBehalof
+
 
                    )
                 ).ToArray());
@@ -343,13 +351,13 @@ public static class UserModule
         var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-            
+
                 var bytePassword = Convert.FromBase64String(user.Password);
                 var salt = Convert.FromBase64String(user.Salt);
                 var checkPassword = PasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
                 if (checkPassword)
                 {
-        
+
                     var password = PasswordHelper.HashPassword(request.newPassord, salt);
                     user.Password = Convert.ToBase64String(password);
 
@@ -361,7 +369,7 @@ public static class UserModule
                     return Results.Problem("Old Passwords do not match", null);
 
                 }
-            
+
         }
         else
         {
@@ -404,7 +412,7 @@ public static class UserModule
         var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-           
+
                 user.EMail = newEmail;
                 context!.SaveChanges();
                 return Results.Ok(user);

@@ -1,5 +1,6 @@
 using amorphie.user.data;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SecretExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +8,6 @@ await builder.Configuration.AddVaultSecrets("user-secretstore", "user-secretstor
 var postgreSql = builder.Configuration["postgresql"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
-
-
 
 
 builder.Services.AddDaprClient();
@@ -24,6 +23,8 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 db.Database.Migrate();
 
+
+        
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
