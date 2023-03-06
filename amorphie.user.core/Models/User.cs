@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-namespace amorphie.user.data;
+using amorphie.core.Base;
 
-public class User:BaseEntity
+
+public class User:EntityBase
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
@@ -28,6 +29,6 @@ public record Phone
 {
     public int CountryCode { get; set; }
     public int Prefix { get; set; }
-    public int Number { get; set; }
+    public string Number { get; set; }
 
 }

@@ -1,14 +1,15 @@
-namespace amorphie.user.data;
+using amorphie.core.Base;
 public record GetUserTagResponse(
 Guid Id,
 string Tag,
 Guid  UserId,
 Guid CreatedBy,
-DateTime? CreatedAt,
+DateTime CreatedAt,
 Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+DateTime ModifiedAt,
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);
+
 public record PostUserTagRequest(
 string Tag,
 Guid  UserId,
@@ -16,5 +17,5 @@ Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
 DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);   

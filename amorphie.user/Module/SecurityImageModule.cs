@@ -6,7 +6,12 @@ using amorphie.user.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
+//using Core.Utilities.Results;
+//using IResult = Core.Utilities.Results.IResult;
+using Result = amorphie.core.Base.Result;
 public static class SecurityImageModule
 {
 
@@ -45,40 +50,39 @@ public static class SecurityImageModule
         .Produces<GetSecurityImageResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
     }
-    static IResult getAllSecurityImage(
+    static IResponse<List<GetSecurityImageResponse>> getAllSecurityImage(
       [FromServices] UserDBContext context,
       [FromQuery][Range(0, 100)] int page = 0,
       [FromQuery][Range(5, 100)] int pageSize = 100
       )
     {
-        var query = context!.SecurityImages!
+        var securityImages = context!.SecurityImages!
             .Skip(page * pageSize)
-            .Take(pageSize);
+            .Take(pageSize).ToList();
 
-        var securityImages = query.ToList();
 
         if (securityImages.Count() > 0)
         {
-            return Results.Ok(securityImages.Select(securityImages =>
-              new GetSecurityImageResponse(
-               securityImages.Id,
-               securityImages.Image,
-               securityImages.CreatedBy,
-               securityImages.CreatedAt,
-               securityImages.ModifiedBy,
-               securityImages.ModifiedAt,
-               securityImages.CretedByBehalfOf,
-               securityImages.ModifiedByBehalof
-                )
-            ).ToArray());
+            return new Response<List<GetSecurityImageResponse>>
+            {
+                Data = securityImages.Select(x => ObjectMapper.Mapper.Map<GetSecurityImageResponse>(x)).ToList(),
+                Result = new Result(Status.Success, "List return successfull")
+            };
         }
         else
-            return Results.NoContent();
+        {
+            return new Response<List<GetSecurityImageResponse>>
+            {
+                Data = null,
+                Result = new Result(Status.Success, "No content")
+            };
+        }
+
     }
-    static async Task<IResult> postSecurityImage(
-           [FromBody] PostSecurityImageRequest data,
-           [FromServices] UserDBContext context
-           )
+    static IResponse<GetSecurityImageResponse> postSecurityImage(
+         [FromBody] PostSecurityImageRequest data,
+         [FromServices] UserDBContext context
+         )
     {
 
         var securityImage = context!.SecurityImages!
@@ -87,18 +91,25 @@ public static class SecurityImageModule
 
         if (securityImage == null)
         {
-            var newRecord = new SecurityImage
-            {
-                Id = Guid.NewGuid(),
-                Image = data.Image,
-                CreatedAt = DateTime.Now,
-                CreatedBy = data.CreatedBy,
-                CretedByBehalfOf = data.CretedByBehalfOf
+            var newRecord = ObjectMapper.Mapper.Map<SecurityImage>(data);
+            newRecord.CreatedAt = DateTime.UtcNow;
+            // var newRecord = new SecurityImage
+            // {
+            //     Id = Guid.NewGuid(),
+            //     Image = data.Image,
+            //     CreatedAt = DateTime.Now,
+            //     CreatedBy = data.CreatedBy,
+            //     CreatedByBehalfOf = data.CreatedByBehalfOf
 
-            };
+            // };
             context!.SecurityImages!.Add(newRecord);
             context.SaveChanges();
-            return Results.Created($"/securityimage/{data.Image}", newRecord);
+            return new Response<GetSecurityImageResponse>
+            {
+                Data = ObjectMapper.Mapper.Map<GetSecurityImageResponse>(newRecord),
+                Result = new Result(Status.Success, "Add successfull")
+            };
+            // return Results.Created($"/securityimage/{data.Image}", newRecord);
         }
         else
         {
@@ -106,23 +117,36 @@ public static class SecurityImageModule
             // Apply update to only changed fields.
             if (data.Image != null && data.Image != securityImage.Image) { securityImage.Image = data.Image; hasChanges = true; }
             if (data.ModifiedBy != null && data.ModifiedBy != securityImage.ModifiedBy) { securityImage.ModifiedBy = data.ModifiedBy; hasChanges = true; }
-            if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != securityImage.ModifiedByBehalof) { securityImage.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
-                securityImage.ModifiedAt=DateTime.Now;
-            
+            if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != securityImage.ModifiedByBehalfOf) { securityImage.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
+            securityImage.ModifiedAt = DateTime.Now;
+
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok(data);
+                return new Response<GetSecurityImageResponse>
+                {
+                    Data = ObjectMapper.Mapper.Map<GetSecurityImageResponse>(securityImage),
+                    Result = new Result(Status.Success, "Update successfull")
+                };
+                //  return Results.Ok(data);
             }
             else
             {
-                return Results.Problem("Not Modified.", null, 304);
+                return new Response<GetSecurityImageResponse>
+                {
+                    Data = ObjectMapper.Mapper.Map<GetSecurityImageResponse>(securityImage),
+                    Result = new Result(Status.Error, "Not modified")
+                };
             }
 
         }
-        return Results.Conflict("Request is already used for another record.");
+        return new Response<GetSecurityImageResponse>
+        {
+            Data = ObjectMapper.Mapper.Map<GetSecurityImageResponse>(securityImage),
+            Result = new Result(Status.Error, "Request is already used for another record")
+        };
     }
-    static IResult deleteSecurityImage(
+    static IResponse deleteSecurityImage(
        [FromRoute(Name = "id")] Guid id,
        [FromServices] UserDBContext context)
     {
@@ -131,13 +155,19 @@ public static class SecurityImageModule
 
         if (recordToDelete == null)
         {
-            return Results.NotFound();
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Success, "Not found image")
+            };
         }
         else
         {
             context!.Remove(recordToDelete);
             context.SaveChanges();
-            return Results.Ok();
+             return new NoDataResponse
+            {
+                Result = new Result(Status.Error, "Delete successful")
+            };
         }
     }
 }

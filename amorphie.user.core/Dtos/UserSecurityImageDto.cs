@@ -1,20 +1,22 @@
-namespace amorphie.user.data;
+using amorphie.core.Base;
 public record GetUserSecurityImageResponse(
 Guid Id,
 string SecurityImage,
 Guid  UserId,
+ DateTime CreatedAt ,
 Guid CreatedBy,
-DateTime? CreatedAt,
+  Guid? CreatedByBehalfOf,
+DateTime ModifiedAt,
 Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? ModifiedByBehalfOf);
+
+
 public record PostUserSecurityImageRequest(
 string SecurityImage,
 Guid  UserId,
 Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+DateTime ModifiedAt,
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);

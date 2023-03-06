@@ -1,19 +1,21 @@
-namespace amorphie.user.data;
-public record GetUserResponse(Guid Id,
+using amorphie.core.Base;
+public record GetUserResponse(
+Guid Id,
 string FirstName,
 string LastName,
-string Reference,
 string Password,
 string EMail,
 Phone Phone,
+string Reference,
 string State,
 string[] Tag,
 Guid CreatedBy,
-DateTime? CreatedAt,
+DateTime CreatedAt,
 Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+DateTime ModifiedAt,
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);
+
                              
 public record PostUserRequest(string FirstName,
 string LastName,
@@ -26,8 +28,8 @@ Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
 DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof,
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof,
 string Salt);
 
 public record UserCheckPasswordRequest(string Password,Guid UserId);

@@ -2,6 +2,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
 using amorphie.user.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -47,7 +50,7 @@ public static class SecurityQuestionModule
 
 
     }
-    static IResult getAllSecurityQuestion(
+    static IResponse<List<GetSecurityQuestionResponse>> getAllSecurityQuestion(
       [FromServices] UserDBContext context,
       [FromQuery] string? Question,
       [FromQuery][Range(0, 100)] int page = 0,
@@ -67,23 +70,34 @@ public static class SecurityQuestionModule
 
         if (securityQuestions.Count() > 0)
         {
-            return Results.Ok(securityQuestions.Select(securityQuestion =>
-              new GetSecurityQuestionResponse(
-               securityQuestion.Id,
-               securityQuestion.Question,
-               securityQuestion.CreatedBy,
-               securityQuestion.CreatedAt,
-               securityQuestion.ModifiedBy,
-               securityQuestion.ModifiedAt,
-               securityQuestion.CretedByBehalfOf,
-               securityQuestion.ModifiedByBehalof
-                )
-            ).ToArray());
+               return new Response<List<GetSecurityQuestionResponse>>
+            {
+                Data = securityQuestions.Select(x => ObjectMapper.Mapper.Map<GetSecurityQuestionResponse>(x)).ToList(),
+                Result = new Result(Status.Success, "List return successfull")
+            };
+            // return Results.Ok(securityQuestions.Select(securityQuestion =>
+            //   new GetSecurityQuestionResponse(
+            //    securityQuestion.Id,
+            //    securityQuestion.Question,
+            //    securityQuestion.CreatedBy,
+            //    securityQuestion.CreatedAt,
+            //    securityQuestion.ModifiedBy,
+            //    securityQuestion.ModifiedAt,
+            //    securityQuestion.CreatedByBehalfOf,
+            //    securityQuestion.ModifiedByBehalfOf
+            //     )
+            // ).ToArray());
         }
-        else
-            return Results.NoContent();
+          else
+        {
+            return new Response<List<GetSecurityQuestionResponse>>
+            {
+                Data = null,
+                Result = new Result(Status.Success, "No content")
+            };
+        }
     }
-    static async Task<IResult> postSecurityQuestion(
+    static IResponse<GetSecurityQuestionResponse> postSecurityQuestion(
            [FromBody] PostSecurityQuestionRequest data,
            [FromServices] UserDBContext context
            )
@@ -92,17 +106,23 @@ public static class SecurityQuestionModule
           .FirstOrDefault(x => x.Question == data.Question);
         if (securityQuestion == null)
         {
-            var newRecord = new SecurityQuestion
-            {
-                Id = Guid.NewGuid(),
-                Question = data.Question,
-                CreatedAt = DateTime.Now,
-                CreatedBy = data.CreatedBy,
-                CretedByBehalfOf = data.CretedByBehalfOf
-            };
+             var newRecord = ObjectMapper.Mapper.Map<SecurityQuestion>(data);
+            newRecord.CreatedAt = DateTime.UtcNow;
+            // var newRecord = new SecurityQuestion
+            // {
+            //     Id = Guid.NewGuid(),
+            //     Question = data.Question,
+            //     CreatedAt = DateTime.Now,
+            //     CreatedBy = data.CreatedBy,
+            //     CreatedByBehalfOf = data.CreatedByBehalfOf
+            // };
             context!.SecurityQuestions!.Add(newRecord);
             context.SaveChanges();
-            return Results.Created($"/securityQuestion/{data.Question}", newRecord);
+             return new Response<GetSecurityQuestionResponse>
+            {
+                Data = ObjectMapper.Mapper.Map<GetSecurityQuestionResponse>(newRecord),
+                Result = new Result(Status.Success, "Add successfull")
+            };
         }
         else
         {
@@ -110,37 +130,55 @@ public static class SecurityQuestionModule
             // Apply update to only changed fields.
             if (data.Question != null && data.Question != securityQuestion.Question) { securityQuestion.Question = data.Question; hasChanges = true; }
             if (data.ModifiedBy != null && data.ModifiedBy != securityQuestion.ModifiedBy) { securityQuestion.ModifiedBy = data.ModifiedBy; hasChanges = true; }
-            if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != securityQuestion.ModifiedByBehalof) { securityQuestion.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
+            if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != securityQuestion.ModifiedByBehalfOf) { securityQuestion.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
             securityQuestion.ModifiedAt = DateTime.Now;
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok(data);
+                return new Response<GetSecurityQuestionResponse>
+                {
+                    Data = ObjectMapper.Mapper.Map<GetSecurityQuestionResponse>(securityQuestion),
+                    Result = new Result(Status.Success, "Update successfull")
+                };
             }
             else
             {
-                return Results.Problem("Not Modified.", null, 304);
+                return new Response<GetSecurityQuestionResponse>
+                {
+                    Data = ObjectMapper.Mapper.Map<GetSecurityQuestionResponse>(securityQuestion),
+                    Result = new Result(Status.Error, "Not modified")
+                };
             }
 
         }
-        return Results.Conflict("Request  is already used for another record.");
+        return new Response<GetSecurityQuestionResponse>
+        {
+            Data = ObjectMapper.Mapper.Map<GetSecurityQuestionResponse>(securityQuestion),
+            Result = new Result(Status.Error, "Request is already used for another record")
+        };
     }
-    static IResult deleteSecurityQuestion(
+    static IResponse deleteSecurityQuestion(
        [FromRoute(Name = "id")] Guid id,
        [FromServices] UserDBContext context)
     {
 
         var recordToDelete = context?.SecurityQuestions?.FirstOrDefault(t => t.Id == id);
 
-        if (recordToDelete == null)
+       if (recordToDelete == null)
         {
-            return Results.NotFound();
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Success, "Not found question")
+            };
         }
         else
         {
             context!.Remove(recordToDelete);
             context.SaveChanges();
-            return Results.Ok();
+             return new NoDataResponse
+            {
+                Result = new Result(Status.Error, "Delete successful")
+            };
         }
     }
 }

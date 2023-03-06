@@ -1,10 +1,10 @@
-namespace amorphie.user.data;
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-public class UserTag:BaseEntity
+using amorphie.core.Base;
+
+public class UserSecurityImage:EntityBase
 {
-    public string Tag { get; set; } = string.Empty;
+    public string SecurityImage { get; set; } = string.Empty;
 
     [ForeignKey("User")]
     public Guid UserId { get; set; }

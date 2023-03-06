@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using amorphie.user.data;
+using amorphie.core.Base;
 
-public class UserSecurityQuestion:BaseEntity
+public class UserSecurityQuestion:EntityBase
 {
     public string SecurityAnswer { get; set; } = string.Empty;
 

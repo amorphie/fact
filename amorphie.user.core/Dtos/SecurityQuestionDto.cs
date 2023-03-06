@@ -1,4 +1,4 @@
-namespace amorphie.user.data;
+using amorphie.core.Base;
 public record GetSecurityQuestionResponse(
 Guid Id,
 string Question,
@@ -6,13 +6,13 @@ Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
 DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);
 public record PostSecurityQuestionRequest(
 string Question,
 Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
 DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);

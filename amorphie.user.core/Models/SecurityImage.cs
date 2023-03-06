@@ -1,10 +1,15 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using amorphie.user.data;
+using amorphie.core.Base;
 
-public class SecurityImage:BaseEntity
+
+public class SecurityImage:EntityBase
 {
     public string Image { get; set; } = string.Empty;
     
 }
+
+
+
+

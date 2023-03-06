@@ -2,6 +2,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
 using amorphie.user.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -50,7 +53,7 @@ public static class UserSecurityQuestionModule
         .Produces(StatusCodes.Status404NotFound);
 
     }
-    static IResult getAllUserSecurityQuestion(
+    static IResponse<List<GetUserSecurityQuestionResponse>> getAllUserSecurityQuestion(
       [FromServices] UserDBContext context,
       [FromQuery] Guid UserId,
       [FromQuery][Range(0, 100)] int page = 0,
@@ -71,27 +74,38 @@ public static class UserSecurityQuestionModule
 
         if (userSecurityQuestions.Count() > 0)
         {
-            return Results.Ok(userSecurityQuestions.Select(userSecurityQuestion =>
-              new GetUserSecurityQuestionResponse(
-               userSecurityQuestion.Id,
-               userSecurityQuestion.SecurityQuestionId,
-               userSecurityQuestion.SecurityAnswer,
-               userSecurityQuestion.UserId,
-               userSecurityQuestion.CreatedBy,
-               userSecurityQuestion.CreatedAt,
-               userSecurityQuestion.ModifiedBy,
-               userSecurityQuestion.ModifiedAt,
-               userSecurityQuestion.CretedByBehalfOf,
-               userSecurityQuestion.ModifiedByBehalof
+            return new Response<List<GetUserSecurityQuestionResponse>>
+            {
+                Data = userSecurityQuestions.Select(x => ObjectMapper.Mapper.Map<GetUserSecurityQuestionResponse>(x)).ToList(),
+                Result = new Result(Status.Success, "List return successfull")
+            };
+            // return Results.Ok(userSecurityQuestions.Select(userSecurityQuestion =>
+            //   new GetUserSecurityQuestionResponse(
+            //    userSecurityQuestion.Id,
+            //    userSecurityQuestion.SecurityQuestionId,
+            //    userSecurityQuestion.SecurityAnswer,
+            //    userSecurityQuestion.UserId,
+            //    userSecurityQuestion.CreatedBy,
+            //    userSecurityQuestion.CreatedAt,
+            //    userSecurityQuestion.ModifiedBy,
+            //    userSecurityQuestion.ModifiedAt,
+            //    userSecurityQuestion.CreatedByBehalfOf,
+            //    userSecurityQuestion.ModifiedByBehalfOf
 
 
-                )
-            ).ToArray());
+            //     )
+            // ).ToArray());
         }
         else
-            return Results.NoContent();
+        {
+            return new Response<List<GetUserSecurityQuestionResponse>>
+            {
+                Data = null,
+                Result = new Result(Status.Success, "No content")
+            };
+        }
     }
-    static async Task<IResult> postUserSecurityQuestion(
+    static IResponse<GetUserSecurityQuestionResponse> postUserSecurityQuestion(
            [FromBody] PostUserSecurityQuestionRequest data,
            [FromServices] UserDBContext context
            )
@@ -108,24 +122,34 @@ public static class UserSecurityQuestionModule
                 var salt = Convert.FromBase64String(user.Salt);
                 var password = PasswordHelper.HashPassword(data.SecurityAnswer, salt);
                 var result = Convert.ToBase64String(password);
-
-                var newRecord = new UserSecurityQuestion
-                {
-                    Id = Guid.NewGuid(),
-                    SecurityAnswer = result,
-                    SecurityQuestionId = data.SecurityQuestionId,
-                    UserId = data.UserId,
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = data.CreatedBy,
-                    CretedByBehalfOf = data.CretedByBehalfOf
-                };
+                var newRecord = ObjectMapper.Mapper.Map<UserSecurityQuestion>(data);
+                newRecord.CreatedAt = DateTime.UtcNow;
+                newRecord.SecurityAnswer = result;
+                // var newRecord = new UserSecurityQuestion
+                // {
+                //     Id = Guid.NewGuid(),
+                //     SecurityAnswer = result,
+                //     SecurityQuestionId = data.SecurityQuestionId,
+                //     UserId = data.UserId,
+                //     CreatedAt = DateTime.Now,
+                //     CreatedBy = data.CreatedBy,
+                //     CreatedByBehalfOf = data.CreatedByBehalfOf
+                // };
                 context!.UserSecurityQuestions!.Add(newRecord);
                 context.SaveChanges();
-                return Results.Created($"/userSecurityQuestion/{data.UserId}", newRecord);
+                return new Response<GetUserSecurityQuestionResponse>
+                {
+                    Data = ObjectMapper.Mapper.Map<GetUserSecurityQuestionResponse>(newRecord),
+                    Result = new Result(Status.Success, "Add successfull")
+                };
             }
             else
             {
-                return Results.NotFound("User salt is null");
+                return new Response<GetUserSecurityQuestionResponse>
+                {
+                    Data = null,
+                    Result = new Result(Status.Success, "User salt not found")
+                };
             }
         }
         else
@@ -148,29 +172,45 @@ public static class UserSecurityQuestionModule
                 }
                 else
                 {
-                    return Results.NotFound("User salt is null");
+                    return new Response<GetUserSecurityQuestionResponse>
+                    {
+                        Data = null,
+                        Result = new Result(Status.Success, "User salt not found")
+                    };
                 }
                 if (data.SecurityQuestionId != null && data.SecurityQuestionId != userSecurityQuestion.SecurityQuestionId) { userSecurityQuestion.SecurityQuestionId = data.SecurityQuestionId; hasChanges = true; }
                 if (data.UserId != null && data.UserId != userSecurityQuestion.UserId) { userSecurityQuestion.UserId = data.UserId; hasChanges = true; }
                 if (data.ModifiedBy != null && data.ModifiedBy != userSecurityQuestion.ModifiedBy) { userSecurityQuestion.ModifiedBy = data.ModifiedBy; hasChanges = true; }
-                if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userSecurityQuestion.ModifiedByBehalof) { userSecurityQuestion.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
+                if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userSecurityQuestion.ModifiedByBehalfOf) { userSecurityQuestion.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
                 userSecurityQuestion.ModifiedAt = DateTime.Now;
 
                 if (hasChanges)
                 {
                     context!.SaveChanges();
-                    return Results.Ok(data);
+                    return new Response<GetUserSecurityQuestionResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserSecurityQuestionResponse>(user),
+                        Result = new Result(Status.Success, "Kaydetme başarılı")
+                    };
                 }
                 else
                 {
-                    return Results.Problem("Not Modified.", null, 304);
+                    return new Response<GetUserSecurityQuestionResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserSecurityQuestionResponse>(data),
+                        Result = new Result(Status.Error, "Not Modified")
+                    };
                 }
             }
 
         }
-        return Results.Conflict("Request is already used for another record.");
+        return new Response<GetUserSecurityQuestionResponse>
+        {
+            Data = ObjectMapper.Mapper.Map<GetUserSecurityQuestionResponse>(data),
+            Result = new Result(Status.Error, "Request  is already used for another record")
+        };
     }
-    static IResult deleteUserSecurityQuestion(
+    static IResponse deleteUserSecurityQuestion(
        [FromRoute(Name = "id")] Guid id,
        [FromServices] UserDBContext context)
     {
@@ -179,16 +219,22 @@ public static class UserSecurityQuestionModule
 
         if (recordToDelete == null)
         {
-            return Results.NotFound();
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Success, "Not found user security question")
+            };
         }
         else
         {
             context!.Remove(recordToDelete);
             context.SaveChanges();
-            return Results.Ok();
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Error, "Delete successful")
+            };
         }
     }
-    static async Task<IResult> userCheckSecurityAnswer(
+    static IResponse userCheckSecurityAnswer(
        [FromRoute(Name = "userId")] Guid userId,
        [FromRoute(Name = "securityQuestionId")] Guid securityQuestionId,
        [FromRoute(Name = "securityAnswer")] string securityAnswer,
@@ -210,33 +256,57 @@ public static class UserSecurityQuestionModule
                         var checkPassword = PasswordHelper.VerifyHash(securityAnswer, salt, byteQuestion);
                         if (checkPassword)
                         {
-                            return Results.Created($"/user/{userId}", checkPassword);
+                            return new NoDataResponse
+                            {
+                                Result = new Result(Status.Success, "Question match")
+                            };
                         }
                         else
                         {
-                            return Results.Problem("Passwords do not match", null);
+                            return new NoDataResponse
+                            {
+
+                                Result = new Result(Status.Error, "Question do not match")
+                            };
                         }
                     }
                     else
                     {
-                        return Results.NotFound("Security answer is null");
+                        return new NoDataResponse
+                        {
+
+                            Result = new Result(Status.Error, "Security answer is null")
+                        };
+
                     }
                 }
                 else
                 {
 
-                    return Results.NotFound("User salt is null");
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Success, "User salt not found")
+                    };
                 }
 
             }
             else
             {
-                return Results.NotFound("SecurityAnswer definition is not found.");
+                return new NoDataResponse
+                {
+
+                    Result = new Result(Status.Error, "SecurityAnswer definition is not found.")
+                };
+
             }
         }
         else
         {
-            return Results.NotFound("User is not found.");
+            return new NoDataResponse
+            {
+
+                Result = new Result(Status.Error, "User is not found")
+            };
         }
 
     }

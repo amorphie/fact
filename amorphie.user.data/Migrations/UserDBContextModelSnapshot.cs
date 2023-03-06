@@ -28,26 +28,26 @@ namespace amorphie.user.data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CretedByBehalfOf")
+                    b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Image")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("ModifiedAt")
+                    b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ModifiedByBehalof")
+                    b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -57,93 +57,39 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7803ed43-931f-49cc-9ac1-2307383467e0"),
-                            CreatedBy = new Guid("44143e11-acbd-48fe-ac18-a6354db7909a"),
-                            CretedByBehalfOf = new Guid("5eb17590-195a-4f6c-851f-0867475ae703"),
+                            Id = new Guid("c5b31f7f-ae14-4a56-8c5f-3b71740b4785"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3682),
+                            CreatedBy = new Guid("a95b1eaf-5862-42ed-9041-4328dab1861b"),
+                            CreatedByBehalfOf = new Guid("62b602db-4544-4169-8be9-af0c382658bd"),
                             Image = "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",
-                            ModifiedBy = new Guid("e691cffb-c7c2-40da-8883-0efc41fa31fd"),
-                            ModifiedByBehalof = new Guid("efa59b56-fddb-4d03-9fe8-75a521727e93")
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3683),
+                            ModifiedBy = new Guid("55a94cb4-d360-4281-84a3-5ca7b0b176c0"),
+                            ModifiedByBehalfOf = new Guid("1b99b24e-8825-4868-bd9a-2c600eb8f60d")
                         });
                 });
 
-            modelBuilder.Entity("UserSecurityQuestion", b =>
+            modelBuilder.Entity("SecurityQuestion", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CretedByBehalfOf")
+                    b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("ModifiedAt")
+                    b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ModifiedByBehalof")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SecurityAnswer")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("SecurityQuestionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SecurityQuestionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserSecurityQuestions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("515d186a-0aee-4382-9c1d-9d5d9e9e2b32"),
-                            CreatedBy = new Guid("173b7559-fb37-4322-a804-1cdbed7d14db"),
-                            CretedByBehalfOf = new Guid("b44fe7f6-ab4f-426e-a499-7125883fe60b"),
-                            ModifiedBy = new Guid("06676ebf-be4d-49d3-a7ac-7e2f61bcf212"),
-                            ModifiedByBehalof = new Guid("afb1a618-1edd-4856-8b0c-aa871fcce85f"),
-                            SecurityAnswer = "test",
-                            SecurityQuestionId = new Guid("f2ed6271-6098-47d6-95d3-a60ccaad6853"),
-                            UserId = new Guid("e157c83a-59a9-466c-b092-4121ed6bc918")
-                        });
-                });
-
-            modelBuilder.Entity("amorphie.user.data.SecurityQuestion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CretedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ModifiedByBehalof")
+                    b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Question")
@@ -157,28 +103,30 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f2ed6271-6098-47d6-95d3-a60ccaad6853"),
-                            CreatedBy = new Guid("9334f293-d666-41ad-911e-7032921ede43"),
-                            CretedByBehalfOf = new Guid("eae9baa2-ccb5-4e59-a2e8-300252aaaa12"),
-                            ModifiedBy = new Guid("d4f9e64c-2d50-40fa-bdc9-977ad499100f"),
-                            ModifiedByBehalof = new Guid("3a3f2959-2abe-4233-81b9-4ca3e075b045"),
+                            Id = new Guid("b7e2c4fd-fe14-4711-91c2-40db5ab36afe"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3755),
+                            CreatedBy = new Guid("436037ea-ec98-4bcd-b0fc-3cf35ec05be1"),
+                            CreatedByBehalfOf = new Guid("088e6e22-e0cf-4c78-a5ff-ae678f5423ef"),
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3756),
+                            ModifiedBy = new Guid("12338b98-7fff-4eed-860c-4d3b6f3cbde7"),
+                            ModifiedByBehalfOf = new Guid("cdc7e7f9-05ea-48cf-92b0-1a65d02037e5"),
                             Question = "ilk öğretmenin adı"
                         });
                 });
 
-            modelBuilder.Entity("amorphie.user.data.User", b =>
+            modelBuilder.Entity("User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CretedByBehalfOf")
+                    b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<string>("EMail")
@@ -193,13 +141,13 @@ namespace amorphie.user.data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("ModifiedAt")
+                    b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ModifiedByBehalof")
+                    b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Password")
@@ -228,14 +176,16 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e157c83a-59a9-466c-b092-4121ed6bc918"),
-                            CreatedBy = new Guid("8a01824a-9dc0-47a8-ab1d-2f0757030770"),
-                            CretedByBehalfOf = new Guid("b4841f0e-0deb-46fb-9097-b2d9a380ae85"),
+                            Id = new Guid("44b9ae20-4b34-4250-846f-b417a96b96c6"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3382),
+                            CreatedBy = new Guid("bc6385af-add7-4ed5-8cc1-56d797cca623"),
+                            CreatedByBehalfOf = new Guid("a81c106e-71bf-4184-b88c-da65e83a79cc"),
                             EMail = "test@gmail.com",
                             FirstName = "Damla",
                             LastName = "Erhan",
-                            ModifiedBy = new Guid("333d0897-c12b-43be-908a-635ef028ff85"),
-                            ModifiedByBehalof = new Guid("c394628b-2ce7-4752-ab3e-aa49db4fc0e6"),
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3389),
+                            ModifiedBy = new Guid("b5a8e608-d055-4254-b834-77fac1b573c7"),
+                            ModifiedByBehalfOf = new Guid("3b89000b-e4ea-4298-8d54-aedfb06d4330"),
                             Password = "123",
                             Reference = "12345678912",
                             Salt = "fertrtretregfdgffd",
@@ -243,7 +193,7 @@ namespace amorphie.user.data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("amorphie.user.data.UserDevice", b =>
+            modelBuilder.Entity("UserDevice", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -252,25 +202,25 @@ namespace amorphie.user.data.Migrations
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CretedByBehalfOf")
+                    b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<int>("DeviceId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("ModifiedAt")
+                    b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ModifiedByBehalof")
+                    b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TokenId")
@@ -288,40 +238,42 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ceb089f5-7775-4bef-8ad1-bfe6db3899b8"),
-                            ClientId = new Guid("e77633cf-1f84-43bc-9fd8-5ec07f1ce7e5"),
-                            CreatedBy = new Guid("addfa8da-ddb3-4473-99ff-4d4d5dbefa0f"),
-                            CretedByBehalfOf = new Guid("d13b64d3-a5b0-4c16-81e6-a1ff316b4e7d"),
+                            Id = new Guid("520e8107-2219-4c3b-a540-0dd591810a17"),
+                            ClientId = new Guid("f26bd7ad-f455-48b1-be94-18cd62a5d30f"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3663),
+                            CreatedBy = new Guid("2e3b2c83-1c3a-4729-a48b-1afe2c636b81"),
+                            CreatedByBehalfOf = new Guid("163b308b-a6cd-4b7c-8975-2e52a2990ba8"),
                             DeviceId = 123,
-                            ModifiedBy = new Guid("5f456ad6-29ea-471d-91ad-f21be2589247"),
-                            ModifiedByBehalof = new Guid("c79bfd59-6340-4655-81a4-7d147acb934a"),
-                            TokenId = new Guid("5d984d4c-e68c-4d39-892f-52af80a7f7ea"),
-                            UserId = new Guid("e157c83a-59a9-466c-b092-4121ed6bc918")
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3664),
+                            ModifiedBy = new Guid("1a568e21-71b7-4256-a03f-6b92c1bc70c0"),
+                            ModifiedByBehalfOf = new Guid("90740f45-d412-452e-8d46-6dae90c900a4"),
+                            TokenId = new Guid("00bbb9b8-266a-4fa2-87b6-8e4801db18de"),
+                            UserId = new Guid("44b9ae20-4b34-4250-846f-b417a96b96c6")
                         });
                 });
 
-            modelBuilder.Entity("amorphie.user.data.UserSecurityImage", b =>
+            modelBuilder.Entity("UserSecurityImage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CretedByBehalfOf")
+                    b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("ModifiedAt")
+                    b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ModifiedByBehalof")
+                    b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<string>("SecurityImage")
@@ -340,38 +292,98 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3f0eab93-4ba2-4346-888c-b2c4e134dc33"),
-                            CreatedBy = new Guid("5119623a-ce32-4417-bc74-eb2bafb34266"),
-                            CretedByBehalfOf = new Guid("6acf8bf2-9e9d-47ad-a1e1-2d5bb59508e3"),
-                            ModifiedBy = new Guid("2d96c91c-665e-49a3-b442-1f697bcfdc16"),
-                            ModifiedByBehalof = new Guid("e3f7460d-4268-4cff-93a3-b3f1da535a46"),
+                            Id = new Guid("2f3524f6-d85b-41b2-9037-14f43bba9dcd"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3698),
+                            CreatedBy = new Guid("8586387f-1db5-4516-9480-5fc926d492b0"),
+                            CreatedByBehalfOf = new Guid("b2c8c031-8430-4201-b143-e3be47969266"),
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3699),
+                            ModifiedBy = new Guid("ea0ca007-8520-4298-a5fd-eb8b4ce5a481"),
+                            ModifiedByBehalfOf = new Guid("1f9287b5-0cf4-4661-9e9e-789348618689"),
                             SecurityImage = "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",
-                            UserId = new Guid("e157c83a-59a9-466c-b092-4121ed6bc918")
+                            UserId = new Guid("44b9ae20-4b34-4250-846f-b417a96b96c6")
                         });
                 });
 
-            modelBuilder.Entity("amorphie.user.data.UserTag", b =>
+            modelBuilder.Entity("UserSecurityQuestion", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CretedByBehalfOf")
+                    b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("ModifiedAt")
+                    b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ModifiedByBehalof")
+                    b.Property<Guid?>("ModifiedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SecurityAnswer")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SecurityQuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SecurityQuestionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSecurityQuestions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("ba039539-0c69-4aa3-b8a9-e282c40094c0"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3772),
+                            CreatedBy = new Guid("fa8abf2c-cec1-4e4e-92e2-f43f1b6088f0"),
+                            CreatedByBehalfOf = new Guid("cf5030e8-617a-4c09-bc82-824ca34e08b8"),
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3773),
+                            ModifiedBy = new Guid("9562719f-12f1-4c1e-8ad0-1b523fb5a9d8"),
+                            ModifiedByBehalfOf = new Guid("17277c46-06e0-49a8-9f6f-53bac9139992"),
+                            SecurityAnswer = "test",
+                            SecurityQuestionId = new Guid("b7e2c4fd-fe14-4711-91c2-40db5ab36afe"),
+                            UserId = new Guid("44b9ae20-4b34-4250-846f-b417a96b96c6")
+                        });
+                });
+
+            modelBuilder.Entity("UserTag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Tag")
@@ -390,38 +402,21 @@ namespace amorphie.user.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("737f4f56-6e48-4f17-a947-a988316b7de4"),
-                            CreatedBy = new Guid("d5a62521-57d7-4f19-a06c-d9bdce6fe864"),
-                            CretedByBehalfOf = new Guid("663be8b4-84a4-4221-b971-8e4da36f38be"),
-                            ModifiedBy = new Guid("d95ab403-0457-4cc8-9cc0-b3c8e95ed961"),
-                            ModifiedByBehalof = new Guid("98c6fb12-0698-49be-b7a6-75fd876ab5c7"),
+                            Id = new Guid("18c4ebde-763a-44ec-b66e-bc5130fd2b51"),
+                            CreatedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3631),
+                            CreatedBy = new Guid("2a26f158-10ff-4fb2-8ecc-7f08d279874b"),
+                            CreatedByBehalfOf = new Guid("ee1438de-fee8-4f0b-8236-3da18084f83e"),
+                            ModifiedAt = new DateTime(2023, 3, 6, 11, 51, 21, 785, DateTimeKind.Utc).AddTicks(3639),
+                            ModifiedBy = new Guid("3933f784-648a-4e75-be22-3176321863c0"),
+                            ModifiedByBehalfOf = new Guid("386a2af3-fdf4-4d87-90d6-969fc206e6ee"),
                             Tag = "user-list-get",
-                            UserId = new Guid("e157c83a-59a9-466c-b092-4121ed6bc918")
+                            UserId = new Guid("44b9ae20-4b34-4250-846f-b417a96b96c6")
                         });
                 });
 
-            modelBuilder.Entity("UserSecurityQuestion", b =>
+            modelBuilder.Entity("User", b =>
                 {
-                    b.HasOne("amorphie.user.data.SecurityQuestion", "SecurityQuestions")
-                        .WithMany("UserSecurityQuestion")
-                        .HasForeignKey("SecurityQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("amorphie.user.data.User", "Users")
-                        .WithMany("UserSecurityQuestion")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SecurityQuestions");
-
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("amorphie.user.data.User", b =>
-                {
-                    b.OwnsOne("amorphie.user.data.Phone", "Phone", b1 =>
+                    b.OwnsOne("Phone", "Phone", b1 =>
                         {
                             b1.Property<Guid>("UserId")
                                 .HasColumnType("uuid");
@@ -429,8 +424,9 @@ namespace amorphie.user.data.Migrations
                             b1.Property<int>("CountryCode")
                                 .HasColumnType("integer");
 
-                            b1.Property<int>("Number")
-                                .HasColumnType("integer");
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasColumnType("text");
 
                             b1.Property<int>("Prefix")
                                 .HasColumnType("integer");
@@ -445,9 +441,9 @@ namespace amorphie.user.data.Migrations
                             b1.HasData(
                                 new
                                 {
-                                    UserId = new Guid("e157c83a-59a9-466c-b092-4121ed6bc918"),
+                                    UserId = new Guid("44b9ae20-4b34-4250-846f-b417a96b96c6"),
                                     CountryCode = 90,
-                                    Number = 1234564,
+                                    Number = "1234564",
                                     Prefix = 530
                                 });
                         });
@@ -455,9 +451,9 @@ namespace amorphie.user.data.Migrations
                     b.Navigation("Phone");
                 });
 
-            modelBuilder.Entity("amorphie.user.data.UserDevice", b =>
+            modelBuilder.Entity("UserDevice", b =>
                 {
-                    b.HasOne("amorphie.user.data.User", "Users")
+                    b.HasOne("User", "Users")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -466,9 +462,9 @@ namespace amorphie.user.data.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("amorphie.user.data.UserSecurityImage", b =>
+            modelBuilder.Entity("UserSecurityImage", b =>
                 {
-                    b.HasOne("amorphie.user.data.User", "User")
+                    b.HasOne("User", "User")
                         .WithMany("UserSecurityImages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -477,9 +473,28 @@ namespace amorphie.user.data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("amorphie.user.data.UserTag", b =>
+            modelBuilder.Entity("UserSecurityQuestion", b =>
                 {
-                    b.HasOne("amorphie.user.data.User", "User")
+                    b.HasOne("SecurityQuestion", "SecurityQuestions")
+                        .WithMany("UserSecurityQuestion")
+                        .HasForeignKey("SecurityQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User", "Users")
+                        .WithMany("UserSecurityQuestion")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SecurityQuestions");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("UserTag", b =>
+                {
+                    b.HasOne("User", "User")
                         .WithMany("UserTags")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -488,12 +503,12 @@ namespace amorphie.user.data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("amorphie.user.data.SecurityQuestion", b =>
+            modelBuilder.Entity("SecurityQuestion", b =>
                 {
                     b.Navigation("UserSecurityQuestion");
                 });
 
-            modelBuilder.Entity("amorphie.user.data.User", b =>
+            modelBuilder.Entity("User", b =>
                 {
                     b.Navigation("UserSecurityImages");
 

@@ -1,4 +1,4 @@
-namespace amorphie.user.data;
+using amorphie.core.Base;
 public record GetUserDeviceResponse(
 Guid Id,
 int DeviceId,
@@ -6,11 +6,11 @@ Guid  TokenId,
 Guid  ClientId,
 Guid UserId,
 Guid CreatedBy,
-DateTime? CreatedAt,
+DateTime CreatedAt,
 Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+DateTime ModifiedAt,
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);
 
 public record PostUserDeviceRequest(
 int DeviceId,
@@ -21,5 +21,5 @@ Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
 DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehaloff);

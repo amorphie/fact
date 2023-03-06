@@ -22,4 +22,12 @@
   <ItemGroup>
     <ProjectReference Include="..\amorphie.user.data\amorphie.user.data.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\amorphie.user.core\amorphie.user.core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+      <Reference Include="./bin/Debug/net7.0/amorphie.core.dll" />
+      <Reference Include="./bin/Debug/net7.0/amorphie.core.security.dll" />
+  </ItemGroup>
 </Project>

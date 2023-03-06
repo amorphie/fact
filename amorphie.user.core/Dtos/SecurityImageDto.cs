@@ -1,22 +1,21 @@
 
-
+using amorphie.core.Base;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace amorphie.user.data;
 public record GetSecurityImageResponse(
 Guid Id,
 string Image,
+ DateTime CreatedAt ,
 Guid CreatedBy,
-DateTime? CreatedAt,
+Guid? CreatedByBehalfOf,
+DateTime ModifiedAt,
 Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? ModifiedByBehalfOf);
 public record PostSecurityImageRequest(
 string Image,
 Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,
 DateTime? ModifiedAt,
-Guid CretedByBehalfOf,
-Guid ModifiedByBehalof);
+Guid? CreatedByBehalfOf,
+Guid? ModifiedByBehalof);

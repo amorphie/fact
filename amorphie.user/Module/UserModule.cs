@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Dapr.Client;
-using static amorphie.user.data.User;
 using Microsoft.EntityFrameworkCore;
+
 
 public static class UserModule
 {
@@ -97,7 +97,7 @@ public static class UserModule
       .Produces(StatusCodes.Status409Conflict);
 
     }
-    async  static Task<IResult> getAllUsers(
+    async static Task<IResult> getAllUsers(
       [FromServices] UserDBContext context,
       [FromQuery] string? Reference,
       HttpContext httpContext,
@@ -113,7 +113,7 @@ public static class UserModule
             return Results.Ok(cacheData);
         }
         var query = context!.Users!
-            .Include(d =>d.UserTags)
+            .Include(d => d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
 
@@ -131,23 +131,23 @@ public static class UserModule
                 user.Id,
                 user.FirstName,
                 user.LastName,
-                user.Reference,
-                user.Password,
+                 user.Password,
                 user.EMail,
                 user.Phone,
+                user.Reference,
                 user.State,
-                user.UserTags.Select(x=>x.Tag).ToArray(),
+                user.UserTags.Select(x => x.Tag).ToArray(),
                 user.CreatedBy,
                 user.CreatedAt,
                 user.ModifiedBy,
                 user.ModifiedAt,
-                user.CretedByBehalfOf,
-                user.ModifiedByBehalof
+                user.CreatedByBehalfOf,
+                user.ModifiedByBehalfOf
 
                 )
              ).ToArray();
             var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
-             await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
+            await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
             httpContext.Response.Headers.Add("X-Cache", "Miss");
             return Results.Ok(response);
         }
@@ -158,14 +158,14 @@ public static class UserModule
     static IResult getPhoneUser(
     [FromRoute(Name = "countrycode")] int countryCode,
     [FromRoute(Name = "prefix")] int prefix,
-    [FromRoute(Name = "number")] int number,
+    [FromRoute(Name = "number")] string number,
     [FromServices] UserDBContext context,
     [FromQuery][Range(0, 100)] int page = 0,
     [FromQuery][Range(5, 100)] int pageSize = 100
     )
     {
         var query = context!.Users!
-            .Include(d =>d.UserTags)
+            .Include(d => d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
 
@@ -175,21 +175,21 @@ public static class UserModule
         {
             return Results.Ok(users.Select(user =>
               new GetUserResponse(
-               user.Id,
-               user.FirstName,
-               user.LastName,
-               user.Reference,
-               user.Password,
-               user.EMail,
+             user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Password,
+                user.EMail,
                user.Phone,
-               user.State,
-               user.UserTags.Select(x=>x.Tag).ToArray(),
-               user.CreatedBy,
-               user.CreatedAt,
-               user.ModifiedBy,
-               user.ModifiedAt,
-               user.CretedByBehalfOf,
-               user.ModifiedByBehalof
+                user.Reference,
+                user.State,
+                user.UserTags.Select(x => x.Tag).ToArray(),
+                user.CreatedBy,
+                user.CreatedAt,
+                user.ModifiedBy,
+                user.ModifiedAt,
+                user.CreatedByBehalfOf,
+                user.ModifiedByBehalfOf
 
                )
             ).ToArray());
@@ -205,7 +205,7 @@ public static class UserModule
    )
     {
         var query = context!.Users!
-            .Include(d =>d.UserTags)
+            .Include(d => d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
         if (!String.IsNullOrEmpty(email))
@@ -216,21 +216,21 @@ public static class UserModule
             {
                 return Results.Ok(users.Select(user =>
                   new GetUserResponse(
-                   user.Id,
-                   user.FirstName,
-                   user.LastName,
-                   user.Reference,
-                   user.Password,
-                   user.EMail,
-                   user.Phone,
-                   user.State,
-                  user.UserTags.Select(x=>x.Tag).ToArray(),
-                   user.CreatedBy,
-                   user.CreatedAt,
-                   user.ModifiedBy,
-                   user.ModifiedAt,
-                   user.CretedByBehalfOf,
-                   user.ModifiedByBehalof
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Password,
+                user.EMail,
+                user.Phone,
+                user.Reference,
+                user.State,
+                user.UserTags.Select(x => x.Tag).ToArray(),
+                user.CreatedBy,
+                user.CreatedAt,
+                user.ModifiedBy,
+                user.ModifiedAt,
+                user.CreatedByBehalfOf,
+                user.ModifiedByBehalfOf
 
 
                    )
@@ -272,7 +272,7 @@ public static class UserModule
                 State = data.State,
                 CreatedAt = DateTime.Now,
                 CreatedBy = data.CreatedBy,
-                CretedByBehalfOf = data.CretedByBehalfOf,
+                CreatedByBehalfOf = data.CreatedByBehalfOf,
                 EMail = data.EMail,
                 Phone = data.Phone,
                 Salt = Convert.ToBase64String(salt)
@@ -306,7 +306,7 @@ public static class UserModule
             if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; }
             if (data.EMail != null && data.EMail != user.EMail) { user.EMail = data.EMail; hasChanges = true; }
             if (data.Phone != null && data.Phone != user.Phone) { user.Phone = data.Phone; hasChanges = true; }
-            if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != user.ModifiedByBehalof) { user.ModifiedByBehalof = data.ModifiedByBehalof; hasChanges = true; }
+            if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != user.ModifiedByBehalfOf) { user.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
             if (data.ModifiedBy != null && data.ModifiedBy != user.ModifiedBy) { user.ModifiedBy = data.ModifiedBy; hasChanges = true; }
             user.ModifiedAt = DateTime.Now;
             if (hasChanges)
@@ -351,23 +351,23 @@ public static class UserModule
         if (user != null)
         {
 
-                var bytePassword = Convert.FromBase64String(user.Password);
-                var salt = Convert.FromBase64String(user.Salt);
-                var checkPassword = PasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
-                if (checkPassword)
-                {
+            var bytePassword = Convert.FromBase64String(user.Password);
+            var salt = Convert.FromBase64String(user.Salt);
+            var checkPassword = PasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
+            if (checkPassword)
+            {
 
-                    var password = PasswordHelper.HashPassword(request.newPassord, salt);
-                    user.Password = Convert.ToBase64String(password);
+                var password = PasswordHelper.HashPassword(request.newPassord, salt);
+                user.Password = Convert.ToBase64String(password);
 
-                    context!.SaveChanges();
-                    return Results.Ok(user);
-                }
-                else
-                {
-                    return Results.Problem("Old Passwords do not match", null);
+                context!.SaveChanges();
+                return Results.Ok(user);
+            }
+            else
+            {
+                return Results.Problem("Old Passwords do not match", null);
 
-                }
+            }
 
         }
         else
@@ -412,9 +412,9 @@ public static class UserModule
         if (user != null)
         {
 
-                user.EMail = newEmail;
-                context!.SaveChanges();
-                return Results.Ok(user);
+            user.EMail = newEmail;
+            context!.SaveChanges();
+            return Results.Ok(user);
 
         }
         else
@@ -426,7 +426,7 @@ public static class UserModule
               [FromRoute(Name = "userId")] Guid userId,
               [FromQuery] int countryCode,
               [FromQuery] int prefix,
-              [FromQuery] int number,
+              [FromQuery] string number,
               [FromServices] UserDBContext context
      )
     {
@@ -448,3 +448,4 @@ public static class UserModule
     }
 
 }
+
