@@ -29,6 +29,6 @@ public record Phone
 {
     public int CountryCode { get; set; }
     public int Prefix { get; set; }
-    public string Number { get; set; }
+    public string Number { get; set; } = string.Empty;
 
 }

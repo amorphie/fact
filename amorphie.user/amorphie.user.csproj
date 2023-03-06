@@ -17,6 +17,8 @@
     
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.1" />
+    <PackageReference Include="amorphie.core" Version="1.0.1" />
+    <PackageReference Include="amorphie.core.security" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,8 +28,8 @@
   <ItemGroup>
     <ProjectReference Include="..\amorphie.user.core\amorphie.user.core.csproj" />
   </ItemGroup>
-  <ItemGroup>
+  <!-- <ItemGroup>
       <Reference Include="./bin/Debug/net7.0/amorphie.core.dll" />
       <Reference Include="./bin/Debug/net7.0/amorphie.core.security.dll" />
-  </ItemGroup>
+  </ItemGroup> -->
 </Project>
