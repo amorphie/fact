@@ -185,7 +185,7 @@ public static class UserSecurityImageModule
                     return new Response<GetUserSecurityImageResponse>
                     {
                         Data = ObjectMapper.Mapper.Map<GetUserSecurityImageResponse>(userSecurityImage),
-                        Result = new Result(Status.Success, "Kaydetme başarılı")
+                        Result = new Result(Status.Success, "Add successfull")
                     };
 
                 }
@@ -225,7 +225,7 @@ public static class UserSecurityImageModule
         {
             return new NoDataResponse
             {
-                Result = new Result(Status.Success, "Not found securityimage")
+                Result = new Result(Status.Success, "Security image is not found")
             };
         }
         else

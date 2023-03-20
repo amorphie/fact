@@ -78,20 +78,6 @@ public static class UserTagModule
                 Data = userTags.Select(x => ObjectMapper.Mapper.Map<GetUserTagResponse>(x)).ToList(),
                 Result = new Result(Status.Success, "List return successfull")
             };
-            // return Results.Ok(userTags.Select(userTag =>
-            //   new GetUserTagResponse(
-            //    userTag.Id,
-            //    userTag.Tag,
-            //    userTag.UserId,
-            //    userTag.CreatedBy,
-            //    userTag.CreatedAt,
-            //    userTag.ModifiedBy,
-            //    userTag.ModifiedAt,
-            //    userTag.CreatedByBehalfOf,
-            //    userTag.ModifiedByBehalfOf
-
-            //     )
-            // ).ToArray());
         }
         else
         {
@@ -116,14 +102,6 @@ public static class UserTagModule
         {
             var newRecord = ObjectMapper.Mapper.Map<UserTag>(data);
             newRecord.CreatedAt = DateTime.UtcNow;
-            // var newRecord = new UserTag { 
-            //  Id = Guid.NewGuid(),
-            //  Tag = data.Tag,
-            //  UserId=data.UserId,
-            //  CreatedAt = DateTime.Now,
-            //  CreatedBy = data.CreatedBy,
-            //  CreatedByBehalfOf = data.CreatedByBehalfOf
-            //  };
             context!.UserTags!.Add(newRecord);
             context.SaveChanges();
             return new Response<GetUserTagResponse>
@@ -178,7 +156,7 @@ public static class UserTagModule
             {
                 return new NoDataResponse
                 {
-                    Result = new Result(Status.Success, "Not found user tag")
+                    Result = new Result(Status.Success, "User tag is not found")
                 };
             }
             else

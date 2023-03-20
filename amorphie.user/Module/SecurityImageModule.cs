@@ -157,7 +157,7 @@ public static class SecurityImageModule
         {
             return new NoDataResponse
             {
-                Result = new Result(Status.Success, "Not found image")
+                Result = new Result(Status.Success, "Image is not found")
             };
         }
         else
