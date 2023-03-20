@@ -6,9 +6,6 @@ using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
-// await builder.Configuration.AddVaultSecrets("user-secretstore", "user-secretstore");
-// await builder.Configuration.AddVaultSecrets("user-secretstore", "user-register-workflow");
-// await builder.Configuration.AddVaultSecrets("user-secretstore", "user-transition-workflow");
 var postgreSql = builder.Configuration["postgresql"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
@@ -23,9 +20,9 @@ builder.Services.AddDbContext<UserDBContext>
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// using var scope = app.Services.CreateScope();
-// var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
-// db.Database.Migrate();
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
+db.Database.Migrate();
 
 
         
