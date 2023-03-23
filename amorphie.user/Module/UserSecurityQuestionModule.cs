@@ -44,7 +44,7 @@ public static class UserSecurityQuestionModule
         .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/usersecurityquestion/user/{userId}/userCheckSecurityAnswer", userCheckSecurityAnswer)
+        _app.MapPost("/usersecurityquestion/user/{userId}/userCheckSecurityAnswer", userCheckSecurityAnswer)
          .WithOpenApi()
         .WithSummary("Check security answer.")
         .WithDescription("Check security answer")

@@ -12,7 +12,7 @@ Guid? ModifiedByBehalfOf);
 
 
 public record PostUserSecurityImageRequest(
-string SecurityImage,
+Guid SecurityImageId,
 Guid UserId,
 Guid CreatedBy,
 DateTime? CreatedAt,

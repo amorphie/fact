@@ -115,14 +115,14 @@ public static class UserSecurityImageModule
         var userSecurityImage = context!.UserSecurityImages!
           .FirstOrDefault(x => x.UserId == data.UserId);
         var user = context!.Users.FirstOrDefault(x => x.Id == data.UserId);
-
+        var securityImage = context!.SecurityImages!.FirstOrDefault(x => x.Id == data.SecurityImageId);
         if (userSecurityImage == null)
         {
             if (user.Salt != null)
             {
                 var salt = Convert.FromBase64String(user.Salt);
 
-                var password = PasswordHelper.HashPassword(data.SecurityImage, salt);
+                var password = PasswordHelper.HashPassword(securityImage.Image, salt);
                 var result = Convert.ToBase64String(password);
                 var newRecord = ObjectMapper.Mapper.Map<UserSecurityImage>(data);
                 newRecord.CreatedAt = DateTime.UtcNow;
@@ -160,17 +160,17 @@ public static class UserSecurityImageModule
         {
             var hasChanges = false;
             // Apply update to only changed fields.
-            if (data.SecurityImage != null)
+            if (securityImage.Image!= null)
             {
                 if (user.Salt != null)
                 {
 
                     var bytePassword = Convert.FromBase64String(userSecurityImage.SecurityImage);
                     var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = PasswordHelper.VerifyHash(data.SecurityImage, salt, bytePassword);
+                    var checkPassword = PasswordHelper.VerifyHash(securityImage.Image, salt, bytePassword);
                     if (!checkPassword)
                     {
-                        var password = PasswordHelper.HashPassword(data.SecurityImage, salt);
+                        var password = PasswordHelper.HashPassword(securityImage.Image, salt);
                         userSecurityImage.SecurityImage = Convert.ToBase64String(password);
                         hasChanges = true;
                     }
