@@ -34,3 +34,4 @@ string Salt);
 
 public record UserCheckPasswordRequest(string Password,Guid UserId);
 public record UserPasswordUpdateRequest(string oldPassword,string newPassord);
+public record UserLoginRequest(string Reference,string Password);

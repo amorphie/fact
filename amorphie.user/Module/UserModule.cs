@@ -104,6 +104,15 @@ public static class UserModule
       .Produces(StatusCodes.Status201Created)
       .Produces(StatusCodes.Status409Conflict);
 
+        _app.MapPost("/user/login", login)
+      .WithOpenApi()
+      .WithSummary("user login with reference and password")
+      .WithDescription("User login")
+      .WithTags("User")
+      .Produces(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status201Created);
+
+
     }
 
     static async Task<IResponse<List<GetUserResponse>>> getAllUsers(
@@ -170,7 +179,7 @@ public static class UserModule
         [FromQuery][Range(5, 100)] int pageSize = 100
         )
     {
-     
+
         var query = context!.Users!
             .Include(d => d.UserTags)
             .Include(x => x.UserPasswords)
@@ -179,34 +188,34 @@ public static class UserModule
 
         if (!string.IsNullOrEmpty(SearchText))
         {
-         //1.yöntem 
-         query = query .Where(p => p.SearchVector.Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
-          //2.yöntem
+            //1.yöntem 
+            query = query.Where(p => p.SearchVector.Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
+            //2.yöntem
             //    query = query.Where(x => EF.Functions.ToTsVector("english",string.Join(" ",x.Reference,x.EMail,x.FirstName,x.LastName,x.State))
             //            .Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
         }
 
-            var users = query.ToList();
+        var users = query.ToList();
 
 
-            if (users.Count() > 0)
+        if (users.Count() > 0)
+        {
+            var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
+
+            return new Response<List<GetUserResponse>>
             {
-                var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
-
-                return new Response<List<GetUserResponse>>
-                {
-                    Data = response,
-                    Result = new Result(Status.Success, "Getirme başarılı")
-                };
-            }
-            else
+                Data = response,
+                Result = new Result(Status.Success, "Getirme başarılı")
+            };
+        }
+        else
+        {
+            return new Response<List<GetUserResponse>>
             {
-                return new Response<List<GetUserResponse>>
-                {
-                    Data = null,
-                    Result = new Result(Status.Error, "User was not found")
-                };
-            }
+                Data = null,
+                Result = new Result(Status.Error, "User was not found")
+            };
+        }
     }
 
     static IResponse<List<GetUserResponse>> getPhoneUser(
@@ -351,7 +360,7 @@ public static class UserModule
                     var passwordSalt = Convert.FromBase64String(user.Salt);
                     var password = PasswordHelper.HashPassword(data.Password, passwordSalt);
                     var resultPassword = Convert.ToBase64String(password);
-                 
+
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
 
                 }
@@ -392,7 +401,7 @@ public static class UserModule
                     Result = new Result(Status.Error, ex.ToString())
                 };
 
-                // Other steps for handling failures
+               
             }
         }
 
@@ -439,7 +448,7 @@ public static class UserModule
         .FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-            var userPassword=user.UserPasswords.OrderByDescending(o=>o.CreatedAt).Select(s=>s.HashedPassword).FirstOrDefault();
+            var userPassword = user.UserPasswords.OrderByDescending(o => o.CreatedAt).Select(s => s.HashedPassword).FirstOrDefault();
             var bytePassword = Convert.FromBase64String(userPassword);
             var salt = Convert.FromBase64String(user.Salt);
             var checkPassword = PasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
@@ -447,7 +456,7 @@ public static class UserModule
             {
 
                 var password = PasswordHelper.HashPassword(request.newPassord, salt);
-                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword =  Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
+                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
                 context!.SaveChanges();
                 return new Response<GetUserResponse>
                 {
@@ -469,24 +478,23 @@ public static class UserModule
         }
         else
         {
-        return new Response<GetUserResponse>
-        {
-            Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-            Result = new Result(Status.Error, "User is not found")
-        };
+            return new Response<GetUserResponse>
+            {
+                Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
+                Result = new Result(Status.Error, "User is not found")
+            };
 
-         }
+        }
     }
     static IResponse checkUserPassword(
-    [FromRoute(Name = "userId")] Guid userId,
-    [FromRoute(Name = "password")] string password,
+    [FromBody] UserCheckPasswordRequest checkPasswordRequest,
     [FromServices] UserDBContext context
     )
     {
 
         var user = context!.Users!
         .Include(x => x.UserPasswords)
-        .FirstOrDefault(x => x.Id == userId);
+        .FirstOrDefault(x => x.Id == checkPasswordRequest.UserId);
         if (user != null)
         {
             if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
@@ -496,7 +504,7 @@ public static class UserModule
                 {
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
                     var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = PasswordHelper.VerifyHash(password, salt, bytePassword);
+                    var checkPassword = PasswordHelper.VerifyHash(checkPasswordRequest.Password, salt, bytePassword);
                     if (checkPassword)
                     {
                         return new NoDataResponse
@@ -529,7 +537,7 @@ public static class UserModule
                 return new NoDataResponse
                 {
 
-                    Result = new Result(Status.Error, "User password list null")
+                    Result = new Result(Status.Error, "User password is null")
                 };
 
             }
@@ -595,6 +603,47 @@ public static class UserModule
             {
                 Result = new Result(Status.Success, "Change phone")
             };
+        }
+        else
+        {
+            return new NoDataResponse
+            {
+
+                Result = new Result(Status.Error, "User is not found")
+            };
+        }
+    }
+
+    static IResponse login(
+
+             [FromBody] UserLoginRequest loginRequest,
+             [FromServices] UserDBContext context
+    )
+    {
+
+        var user = context!.Users!.FirstOrDefault(x => x.Reference == loginRequest.Reference);
+        if (user != null)
+        {
+            var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
+
+            var responsePassword = checkUserPassword(passwordRequest, context);
+
+            if (responsePassword.Result.Status == Status.Success.ToString())
+            {
+
+                return new NoDataResponse
+                {
+                    Result = new Result(Status.Success, "Login is successful")
+                };
+            }
+            else
+            {
+
+                return new NoDataResponse
+                {
+                    Result = new Result(Status.Error, "Invalid reference or password")
+                };
+            }
         }
         else
         {
