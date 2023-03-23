@@ -44,7 +44,7 @@ public static class UserSecurityQuestionModule
         .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/usersecurityquestion/user/{userId}/securityQuestion/{securityQuestionId}/securityAnswer/{securityAnswer}", userCheckSecurityAnswer)
+        _app.MapGet("/usersecurityquestion/user/{userId}/userCheckSecurityAnswer", userCheckSecurityAnswer)
          .WithOpenApi()
         .WithSummary("Check security answer.")
         .WithDescription("Check security answer")
@@ -236,24 +236,23 @@ public static class UserSecurityQuestionModule
     }
     static IResponse userCheckSecurityAnswer(
        [FromRoute(Name = "userId")] Guid userId,
-       [FromRoute(Name = "securityQuestionId")] Guid securityQuestionId,
-       [FromRoute(Name = "securityAnswer")] string securityAnswer,
+       [FromBody] GetCheckUserSecurityQuestionRequest checkUserSecurityQuestionRequest,
        [FromServices] UserDBContext context
          )
     {
         var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-            var userSecurityQuestion = context!.UserSecurityQuestions!.FirstOrDefault(x => x.UserId == userId && x.SecurityQuestionId == securityQuestionId);
+            var userSecurityQuestion = context!.UserSecurityQuestions!.FirstOrDefault(x => x.UserId == userId && x.SecurityQuestionId == checkUserSecurityQuestionRequest.SecurityQuestionId);
             if (userSecurityQuestion != null)
             {
-                if (securityAnswer != null)
+                if (checkUserSecurityQuestionRequest.SecurityAnswer != null)
                 {
                     if (user.Salt != null)
                     {
                         var byteQuestion = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
                         var salt = Convert.FromBase64String(user.Salt);
-                        var checkPassword = PasswordHelper.VerifyHash(securityAnswer, salt, byteQuestion);
+                        var checkPassword = PasswordHelper.VerifyHash(checkUserSecurityQuestionRequest.SecurityAnswer, salt, byteQuestion);
                         if (checkPassword)
                         {
                             return new NoDataResponse

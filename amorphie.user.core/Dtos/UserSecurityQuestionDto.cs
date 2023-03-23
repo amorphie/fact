@@ -20,3 +20,5 @@ Guid ModifiedBy,
 DateTime? ModifiedAt,
 Guid? CreatedByBehalfOf,
 Guid? ModifiedByBehalof);
+
+public record GetCheckUserSecurityQuestionRequest(Guid SecurityQuestionId,string SecurityAnswer);

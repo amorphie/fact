@@ -9,6 +9,7 @@ using amorphie.user.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 public static class UserSecurityImageModule
 {
@@ -45,7 +46,7 @@ public static class UserSecurityImageModule
         .Produces<GetUserSecurityImageResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/usersecurityimage/user/{userId}/image/{image}", userCheckImage)
+        _app.MapGet("/usersecurityimage/user/{userId}/image/{imageId}/userCheckImage", userCheckImage)
         .WithOpenApi()
        .WithSummary("Check image.")
        .WithDescription("Check image")
@@ -232,51 +233,55 @@ public static class UserSecurityImageModule
         {
             context!.Remove(recordToDelete);
             context.SaveChanges();
-             return new NoDataResponse
+            return new NoDataResponse
             {
                 Result = new Result(Status.Error, "Delete successful")
             };
         }
     }
-    static  IResponse userCheckImage(
+    static IResponse userCheckImage(
         [FromRoute(Name = "userId")] Guid userId,
-        [FromRoute(Name = "image")] string image,
+        [FromRoute(Name = "imageId")] Guid imageId,
          [FromServices] UserDBContext context
           )
     {
-        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+        var user = context!.Users!
+      .Include(x => x.UserSecurityImages)
+      .FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-            var securityImage = context!.UserSecurityImages!.FirstOrDefault(x => x.UserId == userId);
-            if (securityImage != null)
+            var securityImage = context!.SecurityImages!.FirstOrDefault(x => x.Id == imageId);
+
+            if (user.UserSecurityImages != null && user.UserSecurityImages.Count > 0)
             {
-                var byteImage = Convert.FromBase64String(securityImage.SecurityImage);
+                var userSecurityImage = user.UserSecurityImages.FirstOrDefault();
+                var byteImage = Convert.FromBase64String(userSecurityImage.SecurityImage);
                 var salt = Convert.FromBase64String(user.Salt);
-                var checkPassword = PasswordHelper.VerifyHash(image, salt, byteImage);
+                var checkPassword = PasswordHelper.VerifyHash(securityImage.Image, salt, byteImage);
                 if (checkPassword)
                 {
-                   return new NoDataResponse
-                {
-                    Result = new Result(Status.Success, "Image match")
-                };
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Success, "Image match")
+                    };
                 }
                 else
                 {
-                   return new NoDataResponse
-                {
+                    return new NoDataResponse
+                    {
 
-                    Result = new Result(Status.Error, "Image do not match")
-                };
+                        Result = new Result(Status.Error, "Image do not match")
+                    };
                 }
             }
             else
             {
-                  return new NoDataResponse
+                return new NoDataResponse
                 {
 
                     Result = new Result(Status.Error, "SecurityImage definition is not found. Please check userId is exists in definitions")
                 };
-     
+
             }
         }
         else
@@ -289,5 +294,56 @@ public static class UserSecurityImageModule
         }
 
     }
+    //  static  IResponse userCheckImage(
+    //     [FromRoute(Name = "userId")] Guid userId,
+    //     [FromRoute(Name = "image")] string image,
+    //      [FromServices] UserDBContext context
+    //       )
+    // {
+    //     var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
+    //     if (user != null)
+    //     {
+    //         var securityImage = context!.UserSecurityImages!.FirstOrDefault(x => x.UserId == userId);
+    //         if (securityImage != null)
+    //         {
+    //             var byteImage = Convert.FromBase64String(securityImage.SecurityImage);
+    //             var salt = Convert.FromBase64String(user.Salt);
+    //             var checkPassword = PasswordHelper.VerifyHash(image, salt, byteImage);
+    //             if (checkPassword)
+    //             {
+    //                return new NoDataResponse
+    //             {
+    //                 Result = new Result(Status.Success, "Image match")
+    //             };
+    //             }
+    //             else
+    //             {
+    //                return new NoDataResponse
+    //             {
+
+    //                 Result = new Result(Status.Error, "Image do not match")
+    //             };
+    //             }
+    //         }
+    //         else
+    //         {
+    //               return new NoDataResponse
+    //             {
+
+    //                 Result = new Result(Status.Error, "SecurityImage definition is not found. Please check userId is exists in definitions")
+    //             };
+
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return new NoDataResponse
+    //         {
+
+    //             Result = new Result(Status.Error, "User is not found")
+    //         };
+    //     }
+
+    // }
 }
 
