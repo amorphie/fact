@@ -7,13 +7,14 @@ public class ObjectMapper
 {
     var config = new MapperConfiguration(cfg =>
     {
-     cfg.AddProfile<UserMapper>();
+        cfg.AddProfile<UserMapper>();
         cfg.AddProfile<SecurityImageMapper>();
         cfg.AddProfile<UserDeviceMapper>();
         cfg.AddProfile<SecurityQuestionMapper>();
         cfg.AddProfile<UserSecurityImageMapper>();
         cfg.AddProfile<UserSecurityQuestionMapper>();
         cfg.AddProfile<UserTagMapper>();
+        cfg.AddProfile<ClientMapper>();
     });
 
     return config.CreateMapper();
