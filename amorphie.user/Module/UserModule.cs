@@ -20,13 +20,13 @@ public static class UserModule
     {
         _app = app;
 
-        _app.MapGet("/user", getAllUsers)
-       .WithOpenApi()
-       .WithSummary("Gets registered users.")
-       .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
-       .WithTags("User")
-       .Produces<GetUserResponse>(StatusCodes.Status200OK)
-       .Produces(StatusCodes.Status404NotFound);
+    //     _app.MapGet("/user", getAllUsers)
+    //    .WithOpenApi()
+    //    .WithSummary("Gets registered users.")
+    //    .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
+    //    .WithTags("User")
+    //    .Produces<GetUserResponse>(StatusCodes.Status200OK)
+    //    .Produces(StatusCodes.Status404NotFound);
 
         _app.MapGet("/user/search", getAllUserWithFullTextSearch)
        .WithOpenApi()
@@ -115,62 +115,62 @@ public static class UserModule
 
     }
 
-    static async Task<IResponse<List<GetUserResponse>>> getAllUsers(
-      [FromServices] UserDBContext context,
-      [FromQuery] string? Reference,
-      HttpContext httpContext,
-      [FromServices] DaprClient client,
-      [FromQuery][Range(0, 100)] int page = 0,
-      [FromQuery][Range(5, 100)] int pageSize = 100
-      )
-    {
-        var cacheData = await client.GetStateAsync<List<GetUserResponse>>(STATE_STORE, "GetAllUsers");
-        if (cacheData != null)
-        {
-            httpContext.Response.Headers.Add("X-Cache", "Hit");
-            return new Response<List<GetUserResponse>>
-            {
-                Data = cacheData,
-                Result = new Result(Status.Success, "Getirme başarılı")
-            };
-            // return Results.Ok(cacheData);
-        }
-        var query = context!.Users!
-            .Include(d => d.UserTags)
-            .Include(x => x.UserPasswords)
-            .Skip(page * pageSize)
-            .Take(pageSize);
+    // static async Task<IResponse<List<GetUserResponse>>> getAllUsers(
+    //   [FromServices] UserDBContext context,
+    //   [FromQuery] string? Reference,
+    //   HttpContext httpContext,
+    //   [FromServices] DaprClient client,
+    //   [FromQuery][Range(0, 100)] int page = 0,
+    //   [FromQuery][Range(5, 100)] int pageSize = 100
+    //   )
+    // {
+    //     var cacheData = await client.GetStateAsync<List<GetUserResponse>>(STATE_STORE, "GetAllUsers");
+    //     if (cacheData != null)
+    //     {
+    //         httpContext.Response.Headers.Add("X-Cache", "Hit");
+    //         return new Response<List<GetUserResponse>>
+    //         {
+    //             Data = cacheData,
+    //             Result = new Result(Status.Success, "Getirme başarılı")
+    //         };
+    //         // return Results.Ok(cacheData);
+    //     }
+    //     var query = context!.Users!
+    //         .Include(d => d.UserTags)
+    //         .Include(x => x.UserPasswords)
+    //         .Skip(page * pageSize)
+    //         .Take(pageSize);
 
-        if (!string.IsNullOrEmpty(Reference))
-        {
-            query = query.Where(t => t.Reference == Reference);
-        }
+    //     if (!string.IsNullOrEmpty(Reference))
+    //     {
+    //         query = query.Where(t => t.Reference == Reference);
+    //     }
 
-        var users = query.ToList();
+    //     var users = query.ToList();
 
 
-        if (users.Count() > 0)
-        {
-            var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
+    //     if (users.Count() > 0)
+    //     {
+    //         var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
 
-            var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
-            await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
-            httpContext.Response.Headers.Add("X-Cache", "Miss");
-            return new Response<List<GetUserResponse>>
-            {
-                Data = response,
-                Result = new Result(Status.Success, "Getirme başarılı")
-            };
-        }
-        else
-        {
-            return new Response<List<GetUserResponse>>
-            {
-                Data = null,
-                Result = new Result(Status.Error, "the user was not found")
-            };
-        }
-    }
+    //         var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
+    //         await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
+    //         httpContext.Response.Headers.Add("X-Cache", "Miss");
+    //         return new Response<List<GetUserResponse>>
+    //         {
+    //             Data = response,
+    //             Result = new Result(Status.Success, "Getirme başarılı")
+    //         };
+    //     }
+    //     else
+    //     {
+    //         return new Response<List<GetUserResponse>>
+    //         {
+    //             Data = null,
+    //             Result = new Result(Status.Error, "the user was not found")
+    //         };
+    //     }
+    // }
     static async Task<IResponse<List<GetUserResponse>>> getAllUserWithFullTextSearch(
         [FromServices] UserDBContext context,
         [FromQuery] string SearchText,
