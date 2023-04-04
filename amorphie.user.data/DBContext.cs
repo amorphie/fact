@@ -24,6 +24,7 @@ public class UserDBContext : DbContext
     public DbSet<SecurityQuestion>? SecurityQuestions { get; set; }
     public DbSet<SecurityImage>? SecurityImages { get; set; }
     public DbSet<UserSecurityImage>? UserSecurityImages { get; set; }
+    public DbSet<Client>?  Clients { get; set; }
 
     public DbSet<UserPassword>? UserPasswords { get; set; }
     public UserDBContext(DbContextOptions options) : base(options) { }
@@ -54,16 +55,14 @@ public class UserDBContext : DbContext
        .HasIndex(b => new { b.Id, b.Tag, b.UserId })
         .HasMethod("GIN")
        .IsTsVectorExpressionIndex("english");
-        // modelBuilder.Entity<UserTag>().HasIndex(item => item.SearchVector).HasMethod("GIN");
-        // modelBuilder.Entity<UserTag>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Id","UserId","Tag"}), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
+     
 
 
         modelBuilder.Entity<UserDevice>()
        .HasIndex(b => new { b.Id, b.DeviceId, b.UserId })
         .HasMethod("GIN")
        .IsTsVectorExpressionIndex("english");
-        //   modelBuilder.Entity<UserDevice>().HasIndex(item => item.SearchVector).HasMethod("GIN");
-        // modelBuilder.Entity<UserDevice>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Id","UserId","DeviceId"}), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
+       
 
         modelBuilder.Entity<SecurityQuestion>()
      .HasIndex(b => new { b.Id, b.Question })
@@ -75,12 +74,6 @@ public class UserDBContext : DbContext
 .HasMethod("GIN")
 .IsTsVectorExpressionIndex("english");
 
-
-        // modelBuilder.Entity<SecurityQuestion>().HasIndex(item => item.SearchVector).HasMethod("GIN");
-        // modelBuilder.Entity<SecurityQuestion>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Id","Question"}), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
-
-        // modelBuilder.Entity<UserSecurityQuestion>().HasIndex(item => item.SearchVector).HasMethod("GIN");
-        // modelBuilder.Entity<UserSecurityQuestion>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Id","SecurityQuestionId","UserId"}), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
 
 
         modelBuilder.Entity<User>().HasIndex(item => item.SearchVector).HasMethod("GIN");
