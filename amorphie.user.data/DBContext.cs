@@ -24,6 +24,7 @@ public class UserDBContext : DbContext
     public DbSet<SecurityQuestion>? SecurityQuestions { get; set; }
     public DbSet<SecurityImage>? SecurityImages { get; set; }
     public DbSet<UserSecurityImage>? UserSecurityImages { get; set; }
+    public DbSet<Client>?  Clients { get; set; }
 
     public DbSet<UserPassword>? UserPasswords { get; set; }
     public UserDBContext(DbContextOptions options) : base(options) { }
