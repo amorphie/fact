@@ -9,6 +9,7 @@ using amorphie.fact.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 public static class UserTagModule
 {
@@ -19,7 +20,20 @@ public static class UserTagModule
     {
         _app = app;
 
-        _app.MapGet("/usertag", getAllUserTag)
+    //     _app.MapGet("/usertag", getAllUserTag)
+    //    .WithTags("UserTag")
+    //    .WithOpenApi(operation =>
+    //    {
+    //        operation.Summary = "Returns saved usertag records.";
+    //        operation.Parameters[0].Description = "Filtering parameter. Given **usertag** is used to filter users.";
+    //        operation.Parameters[1].Description = "Paging parameter. **limit** is the page size of resultset.";
+    //        operation.Parameters[2].Description = "Paging parameter. **Token** is returned from last query.";
+    //        return operation;
+    //    })
+    //    .Produces<GetUserTagResponse[]>(StatusCodes.Status200OK)
+    //    .Produces(StatusCodes.Status204NoContent);
+
+          _app.MapGet("/usertag", getAllUserTagFullTextSearch)
        .WithTags("UserTag")
        .WithOpenApi(operation =>
        {
@@ -53,9 +67,44 @@ public static class UserTagModule
 
 
     }
-    static IResponse<List<GetUserTagResponse>> getAllUserTag(
+    // static IResponse<List<GetUserTagResponse>> getAllUserTag(
+    //   [FromServices] UserDBContext context,
+    //   [FromQuery] string? Tag,
+    //   [FromQuery][Range(0, 100)] int page = 0,
+    //   [FromQuery][Range(5, 100)] int pageSize = 100
+    //   )
+    // {
+    //     var query = context!.UserTags!
+    //         .Skip(page * pageSize)
+    //         .Take(pageSize);
+
+    //     if (!string.IsNullOrEmpty(Tag))
+    //     {
+    //         query = query.Where(x => x.Tag.Contains(Tag));
+    //     }
+
+    //     var userTags = query.ToList();
+
+    //     if (userTags.Count() > 0)
+    //     {
+    //         return new Response<List<GetUserTagResponse>>
+    //         {
+    //             Data = userTags.Select(x => ObjectMapper.Mapper.Map<GetUserTagResponse>(x)).ToList(),
+    //             Result = new Result(Status.Success, "List return successfull")
+    //         };
+    //     }
+    //     else
+    //     {
+    //         return new Response<List<GetUserTagResponse>>
+    //         {
+    //             Data = null,
+    //             Result = new Result(Status.Success, "No content")
+    //         };
+    //     }
+    // }
+     static IResponse<List<GetUserTagResponse>> getAllUserTagFullTextSearch(
       [FromServices] UserDBContext context,
-      [FromQuery] string? Tag,
+      [FromQuery] string? SearchText,
       [FromQuery][Range(0, 100)] int page = 0,
       [FromQuery][Range(5, 100)] int pageSize = 100
       )
@@ -64,9 +113,11 @@ public static class UserTagModule
             .Skip(page * pageSize)
             .Take(pageSize);
 
-        if (!string.IsNullOrEmpty(Tag))
+        if (!string.IsNullOrEmpty(SearchText))
         {
-            query = query.Where(x => x.Tag.Contains(Tag));
+            query = query.Where(x => EF.Functions.ToTsVector("english",string.Join(" ",x.Tag,x.UserId,x.Id))
+           .Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
+  
         }
 
         var userTags = query.ToList();

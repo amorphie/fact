@@ -9,7 +9,7 @@ using amorphie.fact.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
 public static class UserDeviceModule
 {
 
@@ -19,7 +19,19 @@ public static class UserDeviceModule
     {
         _app = app;
 
-        _app.MapGet("/userdevice", getAllUserDevice)
+    //     _app.MapGet("/userdevice", getAllUserDevice)
+    //    .WithTags("UserDevice")
+    //    .WithOpenApi(operation =>
+    //    {
+    //        operation.Summary = "Returns saved userdevice records.";
+    //        operation.Parameters[0].Description = "Filtering parameter. Given **userdevice** is used to filter userdevice.";
+    //        operation.Parameters[1].Description = "Paging parameter. **limit** is the page size of resultset.";
+    //        return operation;
+    //    })
+    //    .Produces<GetUserDeviceResponse[]>(StatusCodes.Status200OK)
+    //    .Produces(StatusCodes.Status204NoContent);
+
+     _app.MapGet("/userdevice", getAllUserDeviceFullTextSearch)
        .WithTags("UserDevice")
        .WithOpenApi(operation =>
        {
@@ -30,7 +42,6 @@ public static class UserDeviceModule
        })
        .Produces<GetUserDeviceResponse[]>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status204NoContent);
-
 
         _app.MapGet("/userdevice/{userId}", getUserDevice)
        .WithTags("UserDevice")
@@ -63,9 +74,60 @@ public static class UserDeviceModule
         .Produces(StatusCodes.Status404NotFound);
 
     }
-    static IResponse<List<GetUserDeviceResponse>> getAllUserDevice(
+    // static IResponse<List<GetUserDeviceResponse>> getAllUserDevice(
+    //   [FromServices] UserDBContext context,
+    //   [FromQuery] Guid ClientId,
+    //   [FromQuery][Range(0, 100)] int page = 0,
+    //   [FromQuery][Range(5, 100)] int pageSize = 100
+    //   )
+    // {
+    //     var query = context!.UserDevices!
+    //         .Skip(page * pageSize)
+    //         .Take(pageSize);
+
+    //     if (ClientId != null)
+    //     {
+    //         query = query.Where(t => t.ClientId == ClientId);
+    //     }
+
+    //     var userDevices = query.ToList();
+
+    //     if (userDevices.Count() > 0)
+    //     {
+    //         return new Response<List<GetUserDeviceResponse>>
+    //         {
+    //             Data = userDevices.Select(x => ObjectMapper.Mapper.Map<GetUserDeviceResponse>(x)).ToList(),
+    //             Result = new Result(Status.Success, "List return successfull")
+    //         };
+    //         // return Results.Ok(userDevices.Select(userDevice =>
+    //         //   new GetUserDeviceResponse(
+    //         //    userDevice.Id,
+    //         //    userDevice.DeviceId,
+    //         //    userDevice.TokenId,
+    //         //    userDevice.ClientId,
+    //         //    userDevice.UserId,   
+    //         //    userDevice.CreatedBy,
+    //         //    userDevice.CreatedAt,
+    //         //    userDevice.ModifiedBy,
+    //         //    userDevice.ModifiedAt,
+    //         //    userDevice.CreatedByBehalfOf,
+    //         //    userDevice.ModifiedByBehalfOf
+
+    //         //     )
+    //         // ).ToArray());
+    //     }
+    //     else
+    //     {
+    //         return new Response<List<GetUserDeviceResponse>>
+    //         {
+    //             Data = null,
+    //             Result = new Result(Status.Success, "No content")
+    //         };
+    //     }
+    // }
+     static IResponse<List<GetUserDeviceResponse>> getAllUserDeviceFullTextSearch(
       [FromServices] UserDBContext context,
-      [FromQuery] Guid ClientId,
+      [FromQuery] string? SearchText,
       [FromQuery][Range(0, 100)] int page = 0,
       [FromQuery][Range(5, 100)] int pageSize = 100
       )
@@ -74,9 +136,11 @@ public static class UserDeviceModule
             .Skip(page * pageSize)
             .Take(pageSize);
 
-        if (ClientId != null)
+         if (!string.IsNullOrEmpty(SearchText))
         {
-            query = query.Where(t => t.ClientId == ClientId);
+            query = query.Where(x => EF.Functions.ToTsVector("english",string.Join(" ",x.DeviceId,x.UserId,x.Id))
+           .Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
+  
         }
 
         var userDevices = query.ToList();
@@ -88,22 +152,7 @@ public static class UserDeviceModule
                 Data = userDevices.Select(x => ObjectMapper.Mapper.Map<GetUserDeviceResponse>(x)).ToList(),
                 Result = new Result(Status.Success, "List return successfull")
             };
-            // return Results.Ok(userDevices.Select(userDevice =>
-            //   new GetUserDeviceResponse(
-            //    userDevice.Id,
-            //    userDevice.DeviceId,
-            //    userDevice.TokenId,
-            //    userDevice.ClientId,
-            //    userDevice.UserId,   
-            //    userDevice.CreatedBy,
-            //    userDevice.CreatedAt,
-            //    userDevice.ModifiedBy,
-            //    userDevice.ModifiedAt,
-            //    userDevice.CreatedByBehalfOf,
-            //    userDevice.ModifiedByBehalfOf
-
-            //     )
-            // ).ToArray());
+          
         }
         else
         {

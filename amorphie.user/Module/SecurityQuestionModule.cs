@@ -9,6 +9,7 @@ using amorphie.fact.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 public static class SecurityQuestionModule
 {
@@ -19,7 +20,19 @@ public static class SecurityQuestionModule
     {
         _app = app;
 
-        _app.MapGet("/securityquestion", getAllSecurityQuestion)
+    //     _app.MapGet("/securityquestion", getAllSecurityQuestion)
+    //    .WithTags("SecurityQuestion")
+    //    .WithOpenApi(operation =>
+    //    {
+    //        operation.Summary = "Returns saved usertag records.";
+    //        operation.Parameters[0].Description = "Filtering parameter. Given **securityQuestion** is used to filter securityQuestions.";
+    //        operation.Parameters[1].Description = "Paging parameter. **limit** is the page size of resultset.";
+    //        return operation;
+    //    })
+    //    .Produces<GetUserResponse[]>(StatusCodes.Status200OK)
+    //    .Produces(StatusCodes.Status204NoContent);
+
+        _app.MapGet("/securityquestion", getAllSecurityQuestionFullTextSearch)
        .WithTags("SecurityQuestion")
        .WithOpenApi(operation =>
        {
@@ -50,9 +63,56 @@ public static class SecurityQuestionModule
 
 
     }
-    static IResponse<List<GetSecurityQuestionResponse>> getAllSecurityQuestion(
+    // static IResponse<List<GetSecurityQuestionResponse>> getAllSecurityQuestion(
+    //   [FromServices] UserDBContext context,
+    //   [FromQuery] string? Question,
+    //   [FromQuery][Range(0, 100)] int page = 0,
+    //   [FromQuery][Range(5, 100)] int pageSize = 100
+    //   )
+    // {
+    //     var query = context!.SecurityQuestions!
+    //         .Skip(page * pageSize)
+    //         .Take(pageSize);
+
+    //     if (!string.IsNullOrEmpty(Question))
+    //     {
+    //          query= query.Where(x => x.Question.Contains(Question));
+    //     }
+
+    //     var securityQuestions = query.ToList();
+
+    //     if (securityQuestions.Count() > 0)
+    //     {
+    //            return new Response<List<GetSecurityQuestionResponse>>
+    //         {
+    //             Data = securityQuestions.Select(x => ObjectMapper.Mapper.Map<GetSecurityQuestionResponse>(x)).ToList(),
+    //             Result = new Result(Status.Success, "List return successfull")
+    //         };
+    //         // return Results.Ok(securityQuestions.Select(securityQuestion =>
+    //         //   new GetSecurityQuestionResponse(
+    //         //    securityQuestion.Id,
+    //         //    securityQuestion.Question,
+    //         //    securityQuestion.CreatedBy,
+    //         //    securityQuestion.CreatedAt,
+    //         //    securityQuestion.ModifiedBy,
+    //         //    securityQuestion.ModifiedAt,
+    //         //    securityQuestion.CreatedByBehalfOf,
+    //         //    securityQuestion.ModifiedByBehalfOf
+    //         //     )
+    //         // ).ToArray());
+    //     }
+    //       else
+    //     {
+    //         return new Response<List<GetSecurityQuestionResponse>>
+    //         {
+    //             Data = null,
+    //             Result = new Result(Status.Success, "No content")
+    //         };
+    //     }
+    // }
+      static IResponse<List<GetSecurityQuestionResponse>> getAllSecurityQuestionFullTextSearch(
       [FromServices] UserDBContext context,
-      [FromQuery] string? Question,
+      [FromQuery] string? SearchText,
       [FromQuery][Range(0, 100)] int page = 0,
       [FromQuery][Range(5, 100)] int pageSize = 100
       )
@@ -61,9 +121,10 @@ public static class SecurityQuestionModule
             .Skip(page * pageSize)
             .Take(pageSize);
 
-        if (!string.IsNullOrEmpty(Question))
+        if (!string.IsNullOrEmpty(SearchText))
         {
-             query= query.Where(x => x.Question.Contains(Question));
+             query = query.Where(x => EF.Functions.ToTsVector("english",string.Join(" ",x.Question,x.Id))
+           .Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
         }
 
         var securityQuestions = query.ToList();
