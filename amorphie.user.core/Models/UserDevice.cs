@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using amorphie.core.Base;
+using NpgsqlTypes;
 
 
-
-public class UserDevice:EntityBase
+public class UserDevice : EntityBase
 {
     public int DeviceId { get; set; }
     public Guid TokenId { get; set; }
@@ -12,5 +12,8 @@ public class UserDevice:EntityBase
     [ForeignKey("User")]
     public Guid UserId { get; set; }
     public User? Users { get; set; }
+    public int Status { get; set; }
+
+
 
 }
