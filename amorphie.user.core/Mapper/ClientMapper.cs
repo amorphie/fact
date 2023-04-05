@@ -1,3 +1,4 @@
+using amorphie.core.Base;
 using AutoMapper;
 class ClientMapper : Profile
 {
@@ -5,5 +6,8 @@ class ClientMapper : Profile
     {
         CreateMap<Client, ClientDto>().ReverseMap();
         CreateMap<SaveClientRequest, Client>();
+
+        CreateMap<Translation, MultilanguageText>().ReverseMap();
+        CreateMap<HeaderConfiguration, HeaderConfigurationDto>().ReverseMap();
     }
 }
