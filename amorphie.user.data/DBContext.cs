@@ -38,18 +38,46 @@ public class UserDBContext : DbContext
         modelBuilder.Entity<User>()
         .HasIndex(e => e.Reference).IsUnique();
 
+        modelBuilder.Entity<UserSecurityQuestion>()
+     .HasIndex(e => e.SecurityQuestionId).IsUnique();
+
+        modelBuilder.Entity<UserSecurityQuestion>()
+     .HasIndex(e => e.UserId).IsUnique();
+
+        //      modelBuilder.Entity<UserSecurityImage>()
+        // .HasIndex(e => e.UserId).IsUnique();
 
         modelBuilder.Entity<User>().OwnsOne(e => e.Phone);
 
 
 
-        //  modelBuilder.Entity<User>()
-        // .HasIndex(b => new { b.Reference, b.EMail,b.FirstName,b.LastName,b.State, b.Phone})
-        //  .HasMethod("GIN")
-        // .IsTsVectorExpressionIndex("english");
+        modelBuilder.Entity<UserTag>()
+       .HasIndex(b => new { b.Id, b.Tag, b.UserId })
+        .HasMethod("GIN")
+       .IsTsVectorExpressionIndex("english");
+     
+
+
+        modelBuilder.Entity<UserDevice>()
+       .HasIndex(b => new { b.Id, b.DeviceId, b.UserId })
+        .HasMethod("GIN")
+       .IsTsVectorExpressionIndex("english");
+       
+
+        modelBuilder.Entity<SecurityQuestion>()
+     .HasIndex(b => new { b.Id, b.Question })
+      .HasMethod("GIN")
+     .IsTsVectorExpressionIndex("english");
+
+        modelBuilder.Entity<UserSecurityQuestion>()
+.HasIndex(b => new { b.Id, b.UserId, b.SecurityQuestionId })
+.HasMethod("GIN")
+.IsTsVectorExpressionIndex("english");
+
+
 
         modelBuilder.Entity<User>().HasIndex(item => item.SearchVector).HasMethod("GIN");
-        modelBuilder.Entity<User>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Reference", "EMail", "FirstName", "LastName", "State", "Number"}), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
+        modelBuilder.Entity<User>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Reference", "EMail", "FirstName", "LastName", "Number" }), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
 
         var UserId = Guid.NewGuid();
 
@@ -71,7 +99,7 @@ public class UserDBContext : DbContext
                CreatedByBehalfOf = Guid.NewGuid(),
                ModifiedByBehalfOf = Guid.NewGuid(),
                Salt = "fertrtretregfdgffd",
-               
+
            });
             c.OwnsOne(e => e.Phone).HasData(new { UserId = UserId, CountryCode = 90, Prefix = 530, Number = "1234564" });
         });
@@ -102,6 +130,7 @@ public class UserDBContext : DbContext
             ModifiedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
             CreatedByBehalfOf = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
+            Status = 1,
 
         });
         var securityImageId = Guid.NewGuid();
@@ -158,6 +187,7 @@ public class UserDBContext : DbContext
             ModifiedByBehalfOf = Guid.NewGuid(),
 
         });
+
         modelBuilder.Entity<UserPassword>(c =>
        {
            c.HasData(
@@ -178,7 +208,6 @@ public class UserDBContext : DbContext
        });
     }
 }
-
 
 
 
