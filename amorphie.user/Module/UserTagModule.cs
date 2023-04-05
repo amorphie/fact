@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
-using amorphie.user.data;
+using amorphie.fact.data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

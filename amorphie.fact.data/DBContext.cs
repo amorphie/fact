@@ -1,7 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-namespace amorphie.user.data;
+namespace amorphie.fact.data;
 
 
 public class UserDbContextFactory : IDesignTimeDbContextFactory<UserDBContext>

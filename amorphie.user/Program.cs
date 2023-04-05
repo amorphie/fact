@@ -1,7 +1,6 @@
-using amorphie.user.data;
+using amorphie.fact.data;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
- using SecretExtensions;
  using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +14,7 @@ builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserDBContext>
-    (options => options.UseNpgsql(postgreSql,b => b.MigrationsAssembly("amorphie.user.data")));
+    (options => options.UseNpgsql(postgreSql,b => b.MigrationsAssembly("amorphie.fact.data")));
 
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
