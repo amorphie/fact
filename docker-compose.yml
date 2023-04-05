@@ -12,6 +12,18 @@ services:
       - placement
     networks:
       - bbt-development
+  amorphie.client:
+    image: ${DOCKER_REGISTRY-}amorphie.client
+    build:
+      context: .
+      dockerfile: Dockerfile-Client
+    ports:
+      - '5001:5001'
+    depends_on:
+      - redis
+      - placement
+    networks:
+      - bbt-development
   placement:
     image: "daprio/dapr"
     command: ["./placement", "-port", "50006"]

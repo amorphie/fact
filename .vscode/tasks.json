@@ -56,6 +56,18 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build-amorphie-client",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/amorphie.client/amorphie.client.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "appId": "amorphie-user",
             "appPort": 4501,
             "httpPort": 45010,
@@ -69,8 +81,26 @@
          
         },
         {
+            "appId": "amorphie-client",
+            "appPort": 4901,
+            "httpPort": 49010,
+            "grpcPort": 49011,
+            "label": "dapr-debug-amorphie-client",
+            "type": "daprd",
+            "dependsOn": "build-amorphie-client",
+            "componentsPath": "dapr/components",
+            "config": "dapr/config.yaml",
+            "metricsPort": 49012
+         
+        },
+        {
             "appId": "amorphie-user",
             "label": "daprd-down-amorphie-user",
+            "type": "daprd-down"
+        },
+        {
+            "appId": "amorphie-client",
+            "label": "daprd-down-amorphie-client",
             "type": "daprd-down"
         }
        
