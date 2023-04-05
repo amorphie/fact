@@ -4,7 +4,7 @@ using NpgsqlTypes;
 
 #nullable disable
 
-namespace amorphie.user.data.Migrations
+namespace amorphie.fact.data.Migrations
 {
     /// <inheritdoc />
     public partial class clientv3 : Migration

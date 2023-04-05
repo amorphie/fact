@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
-using amorphie.user.data;
+using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

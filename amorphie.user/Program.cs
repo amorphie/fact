@@ -1,7 +1,6 @@
-using amorphie.user.data;
+using amorphie.fact.data;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
- using SecretExtensions;
  using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

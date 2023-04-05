@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\amorphie.user.data\amorphie.user.data.csproj" />
+    <ProjectReference Include="..\amorphie.fact.data\amorphie.fact.data.csproj" />
   </ItemGroup>
   
   <ItemGroup>

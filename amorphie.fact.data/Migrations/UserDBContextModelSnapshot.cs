@@ -2,22 +2,19 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
-using amorphie.user.data;
+using amorphie.fact.data;
 
 #nullable disable
 
-namespace amorphie.user.data.Migrations
+namespace amorphie.fact.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    [Migration("20230405105716_clientv3")]
-    partial class clientv3
+    partial class UserDBContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
