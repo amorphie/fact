@@ -1,4 +1,4 @@
-using amorphie.core.Base;
+
 public record GetUserSecurityImageResponse(
 Guid Id,
 string SecurityImage,
