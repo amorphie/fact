@@ -173,7 +173,7 @@ public static class UserModule
     // }
     static async Task<IResponse<List<GetUserResponse>>> getAllUserWithFullTextSearch(
         [FromServices] UserDBContext context,
-        [FromQuery] string SearchText,
+        [FromQuery] string? SearchText,
         HttpContext httpContext,
         [FromQuery][Range(0, 100)] int page = 0,
         [FromQuery][Range(5, 100)] int pageSize = 100
@@ -194,7 +194,7 @@ public static class UserModule
             //    query = query.Where(x => EF.Functions.ToTsVector("english",string.Join(" ",x.Reference,x.EMail,x.FirstName,x.LastName,x.State))
             //            .Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
         }
-
+        
         var users = query.ToList();
 
 
