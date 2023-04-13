@@ -433,7 +433,7 @@ public static class UserModule
             context.SaveChanges();
             return new NoDataResponse
             {
-                Result = new Result(Status.Error, "Delete successful")
+                Result = new Result(Status.Success, "Delete successful")
             };
         }
     }
