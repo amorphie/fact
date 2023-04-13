@@ -292,7 +292,7 @@ public static class UserDeviceModule
         {
             return new NoDataResponse
             {
-                Result = new Result(Status.Success, "Device is not found")
+                Result = new Result(Status.Error, "Device is not found")
             };
         }
         else

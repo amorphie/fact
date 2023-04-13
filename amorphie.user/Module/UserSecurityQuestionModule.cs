@@ -182,7 +182,7 @@ public static class UserSecurityQuestionModule
                     return new Response<List<GetUserSecurityQuestionResponse>>
                     {
                         Data = null,
-                        Result = new Result(Status.Success, "User salt not found")
+                        Result = new Result(Status.Error, "User salt not found")
                     };
                 }
             }
@@ -270,7 +270,7 @@ static IResponse deleteUserSecurityQuestion(
     {
         return new NoDataResponse
         {
-            Result = new Result(Status.Success, "Not found user security question")
+            Result = new Result(Status.Error, "Not found user security question")
         };
     }
     else
@@ -333,7 +333,7 @@ static IResponse userCheckSecurityAnswer(
 
                 return new NoDataResponse
                 {
-                    Result = new Result(Status.Success, "User salt not found")
+                    Result = new Result(Status.Error, "User salt not found")
                 };
             }
 

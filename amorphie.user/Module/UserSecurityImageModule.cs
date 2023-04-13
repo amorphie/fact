@@ -204,7 +204,7 @@ public static class UserSecurityImageModule
                 return new Response<GetUserSecurityImageResponse>
                 {
                     Data = null,
-                    Result = new Result(Status.Success, "User salt not found")
+                    Result = new Result(Status.Error, "User salt not found")
                 };
             }
 
@@ -226,7 +226,7 @@ public static class UserSecurityImageModule
         {
             return new NoDataResponse
             {
-                Result = new Result(Status.Success, "Security image is not found")
+                Result = new Result(Status.Error, "Security image is not found")
             };
         }
         else
@@ -235,7 +235,7 @@ public static class UserSecurityImageModule
             context.SaveChanges();
             return new NoDataResponse
             {
-                Result = new Result(Status.Error, "Delete successful")
+                Result = new Result(Status.Success, "Delete successful")
             };
         }
     }
@@ -289,7 +289,7 @@ public static class UserSecurityImageModule
             return new NoDataResponse
             {
 
-                Result = new Result(Status.Success, "User is not found")
+                Result = new Result(Status.Error, "User is not found")
             };
         }
 

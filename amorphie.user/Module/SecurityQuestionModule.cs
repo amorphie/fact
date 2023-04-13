@@ -229,7 +229,7 @@ public static class SecurityQuestionModule
         {
             return new NoDataResponse
             {
-                Result = new Result(Status.Success, "Not found question")
+                Result = new Result(Status.Error, "Not found question")
             };
         }
         else
