@@ -196,6 +196,7 @@ public class UserDBContext : DbContext
               Id = Guid.NewGuid(),
               UserId = UserId,
               HashedPassword = String.Empty,
+              IsArgonHash=true,
               CreatedBy = Guid.NewGuid(),
               CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
               ModifiedBy = Guid.NewGuid(),

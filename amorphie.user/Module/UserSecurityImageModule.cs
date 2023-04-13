@@ -122,7 +122,7 @@ public static class UserSecurityImageModule
             {
                 var salt = Convert.FromBase64String(user.Salt);
 
-                var password = PasswordHelper.HashPassword(securityImage.Image, salt);
+                var password = ArgonPasswordHelper.HashPassword(securityImage.Image, salt);
                 var result = Convert.ToBase64String(password);
                 var newRecord = ObjectMapper.Mapper.Map<UserSecurityImage>(data);
                 newRecord.CreatedAt = DateTime.UtcNow;
@@ -167,10 +167,10 @@ public static class UserSecurityImageModule
 
                     var bytePassword = Convert.FromBase64String(userSecurityImage.SecurityImage);
                     var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = PasswordHelper.VerifyHash(securityImage.Image, salt, bytePassword);
+                    var checkPassword = ArgonPasswordHelper.VerifyHash(securityImage.Image, salt, bytePassword);
                     if (!checkPassword)
                     {
-                        var password = PasswordHelper.HashPassword(securityImage.Image, salt);
+                        var password = ArgonPasswordHelper.HashPassword(securityImage.Image, salt);
                         userSecurityImage.SecurityImage = Convert.ToBase64String(password);
                         hasChanges = true;
                     }
@@ -257,7 +257,7 @@ public static class UserSecurityImageModule
                 var userSecurityImage = user.UserSecurityImages.FirstOrDefault();
                 var byteImage = Convert.FromBase64String(userSecurityImage.SecurityImage);
                 var salt = Convert.FromBase64String(user.Salt);
-                var checkPassword = PasswordHelper.VerifyHash(securityImage.Image, salt, byteImage);
+                var checkPassword = ArgonPasswordHelper.VerifyHash(securityImage.Image, salt, byteImage);
                 if (checkPassword)
                 {
                     return new NoDataResponse
@@ -289,7 +289,7 @@ public static class UserSecurityImageModule
             return new NoDataResponse
             {
 
-                Result = new Result(Status.Error, "User is not found")
+                Result = new Result(Status.Success, "User is not found")
             };
         }
 
