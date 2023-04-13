@@ -315,16 +315,25 @@ public static class UserModule
         {
             try
             {
-                var salt = ArgonPasswordHelper.CreateSalt();
-                var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
-                var result = Convert.ToBase64String(password);
+                string hash=null;
                 var record = ObjectMapper.Mapper.Map<User>(data);
                 record.CreatedAt = DateTime.UtcNow;
                 record.State = "new";
-                record.Salt = Convert.ToBase64String(salt);
-
+                if (data.IsArgonHash)
+                {
+                    var salt = ArgonPasswordHelper.CreateSalt();
+                    var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
+                     hash = Convert.ToBase64String(password);
+                    record.Salt = Convert.ToBase64String(salt);
+             
+                }
+                else
+                {
+                      hash=data.Password;
+                    
+                }
                 context!.Users!.Add(record);
-                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
+                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = hash, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = data.IsArgonHash, UserId = record.Id });
 
                 context.SaveChanges();
                 transaction.Commit();
@@ -361,7 +370,7 @@ public static class UserModule
                     var password = ArgonPasswordHelper.HashPassword(data.Password, passwordSalt);
                     var resultPassword = Convert.ToBase64String(password);
 
-                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0,IsArgonHash=true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
+                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
 
                 }
 
