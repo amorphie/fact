@@ -1,10 +1,11 @@
-using amorphie.core.Base;
+
 public record GetUserDeviceResponse(
 Guid Id,
 int DeviceId,
 Guid  TokenId,
 Guid  ClientId,
 Guid UserId,
+int Status,
 Guid CreatedBy,
 DateTime CreatedAt,
 Guid ModifiedBy,
@@ -17,6 +18,7 @@ int DeviceId,
 Guid  TokenId,
 Guid ClientId,
 Guid UserId,
+int Status,
 Guid CreatedBy,
 DateTime? CreatedAt,
 Guid ModifiedBy,

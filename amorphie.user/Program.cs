@@ -1,7 +1,8 @@
-using amorphie.fact.data;
+
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
  using amorphie.core.security.Extensions;
+using amorphie.fact.data;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});

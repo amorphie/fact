@@ -207,7 +207,7 @@ public static class UserTagModule
             {
                 return new NoDataResponse
                 {
-                    Result = new Result(Status.Success, "User tag is not found")
+                    Result = new Result(Status.Error, "User tag is not found")
                 };
             }
             else
@@ -216,7 +216,7 @@ public static class UserTagModule
                 context.SaveChanges();
                 return new NoDataResponse
                 {
-                    Result = new Result(Status.Error, "Delete successful")
+                    Result = new Result(Status.Success, "Delete successful")
                 };
             }
         }

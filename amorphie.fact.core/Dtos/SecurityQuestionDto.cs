@@ -1,4 +1,4 @@
-using amorphie.core.Base;
+
 public record GetSecurityQuestionResponse(
 Guid Id,
 string Question,

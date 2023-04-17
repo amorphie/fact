@@ -153,7 +153,7 @@ public static class UserSecurityQuestionModule
                 if (user.Salt != null)
                 {
                     var salt = Convert.FromBase64String(user.Salt);
-                    var password = PasswordHelper.HashPassword(item.SecurityAnswer, salt);
+                    var password = ArgonPasswordHelper.HashPassword(item.SecurityAnswer, salt);
                     var result = Convert.ToBase64String(password);
                     var newRecord = ObjectMapper.Mapper.Map<UserSecurityQuestion>(item);
                     newRecord.CreatedAt = DateTime.UtcNow;
@@ -182,7 +182,7 @@ public static class UserSecurityQuestionModule
                     return new Response<List<GetUserSecurityQuestionResponse>>
                     {
                         Data = null,
-                        Result = new Result(Status.Success, "User salt not found")
+                        Result = new Result(Status.Error, "User salt not found")
                     };
                 }
             }
@@ -196,10 +196,10 @@ public static class UserSecurityQuestionModule
                     {
                         var bytePassword = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
                         var salt = Convert.FromBase64String(user.Salt);
-                        var checkPassword = PasswordHelper.VerifyHash(item.SecurityAnswer, salt, bytePassword);
+                        var checkPassword = ArgonPasswordHelper.VerifyHash(item.SecurityAnswer, salt, bytePassword);
                         if (!checkPassword)
                         {
-                            var password = PasswordHelper.HashPassword(item.SecurityAnswer, salt);
+                            var password = ArgonPasswordHelper.HashPassword(item.SecurityAnswer, salt);
                             userSecurityQuestion.SecurityAnswer = Convert.ToBase64String(password);
                             hasChanges = true;
                         }
@@ -270,7 +270,7 @@ static IResponse deleteUserSecurityQuestion(
     {
         return new NoDataResponse
         {
-            Result = new Result(Status.Success, "Not found user security question")
+            Result = new Result(Status.Error, "Not found user security question")
         };
     }
     else
@@ -279,7 +279,7 @@ static IResponse deleteUserSecurityQuestion(
         context.SaveChanges();
         return new NoDataResponse
         {
-            Result = new Result(Status.Error, "Delete successful")
+            Result = new Result(Status.Success, "Delete successful")
         };
     }
 }
@@ -301,7 +301,7 @@ static IResponse userCheckSecurityAnswer(
                 {
                     var byteQuestion = Convert.FromBase64String(userSecurityQuestion.SecurityAnswer);
                     var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = PasswordHelper.VerifyHash(checkUserSecurityQuestionRequest.SecurityAnswer, salt, byteQuestion);
+                    var checkPassword = ArgonPasswordHelper.VerifyHash(checkUserSecurityQuestionRequest.SecurityAnswer, salt, byteQuestion);
                     if (checkPassword)
                     {
                         return new NoDataResponse
@@ -333,7 +333,7 @@ static IResponse userCheckSecurityAnswer(
 
                 return new NoDataResponse
                 {
-                    Result = new Result(Status.Success, "User salt not found")
+                    Result = new Result(Status.Error, "User salt not found")
                 };
             }
 

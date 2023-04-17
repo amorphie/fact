@@ -20,13 +20,13 @@ public static class UserModule
     {
         _app = app;
 
-    //     _app.MapGet("/user", getAllUsers)
-    //    .WithOpenApi()
-    //    .WithSummary("Gets registered users.")
-    //    .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
-    //    .WithTags("User")
-    //    .Produces<GetUserResponse>(StatusCodes.Status200OK)
-    //    .Produces(StatusCodes.Status404NotFound);
+        //     _app.MapGet("/user", getAllUsers)
+        //    .WithOpenApi()
+        //    .WithSummary("Gets registered users.")
+        //    .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
+        //    .WithTags("User")
+        //    .Produces<GetUserResponse>(StatusCodes.Status200OK)
+        //    .Produces(StatusCodes.Status404NotFound);
 
         _app.MapGet("/user/search", getAllUserWithFullTextSearch)
        .WithOpenApi()
@@ -173,7 +173,7 @@ public static class UserModule
     // }
     static async Task<IResponse<List<GetUserResponse>>> getAllUserWithFullTextSearch(
         [FromServices] UserDBContext context,
-        [FromQuery] string SearchText,
+        [FromQuery] string? SearchText,
         HttpContext httpContext,
         [FromQuery][Range(0, 100)] int page = 0,
         [FromQuery][Range(5, 100)] int pageSize = 100
@@ -315,8 +315,8 @@ public static class UserModule
         {
             try
             {
-                var salt = PasswordHelper.CreateSalt();
-                var password = PasswordHelper.HashPassword(data.Password, salt);
+                var salt = ArgonPasswordHelper.CreateSalt();
+                var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
                 var result = Convert.ToBase64String(password);
                 var record = ObjectMapper.Mapper.Map<User>(data);
                 record.CreatedAt = DateTime.UtcNow;
@@ -324,7 +324,7 @@ public static class UserModule
                 record.Salt = Convert.ToBase64String(salt);
 
                 context!.Users!.Add(record);
-                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, UserId = record.Id });
+                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
 
                 context.SaveChanges();
                 transaction.Commit();
@@ -358,10 +358,10 @@ public static class UserModule
                 {
 
                     var passwordSalt = Convert.FromBase64String(user.Salt);
-                    var password = PasswordHelper.HashPassword(data.Password, passwordSalt);
+                    var password = ArgonPasswordHelper.HashPassword(data.Password, passwordSalt);
                     var resultPassword = Convert.ToBase64String(password);
 
-                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
+                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0,IsArgonHash=true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
 
                 }
 
@@ -401,7 +401,7 @@ public static class UserModule
                     Result = new Result(Status.Error, ex.ToString())
                 };
 
-               
+
             }
         }
 
@@ -433,7 +433,7 @@ public static class UserModule
             context.SaveChanges();
             return new NoDataResponse
             {
-                Result = new Result(Status.Error, "Delete successful")
+                Result = new Result(Status.Success, "Delete successful")
             };
         }
     }
@@ -448,33 +448,63 @@ public static class UserModule
         .FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-            var userPassword = user.UserPasswords.OrderByDescending(o => o.CreatedAt).Select(s => s.HashedPassword).FirstOrDefault();
-            var bytePassword = Convert.FromBase64String(userPassword);
-            var salt = Convert.FromBase64String(user.Salt);
-            var checkPassword = PasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
-            if (checkPassword)
+            var userPassword = user.UserPasswords.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+            if (userPassword.IsArgonHash)
             {
-
-                var password = PasswordHelper.HashPassword(request.newPassord, salt);
-                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
-                context!.SaveChanges();
-                return new Response<GetUserResponse>
+                var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
+                var salt = Convert.FromBase64String(user.Salt);
+                var checkPassword = ArgonPasswordHelper.VerifyHash(request.oldPassword, salt, bytePassword);
+                if (checkPassword)
                 {
-                    Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                    Result = new Result(Status.Success, "Change password")
-                };
+
+                    var password = ArgonPasswordHelper.HashPassword(request.newPassord, salt);
+                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
+                    context!.SaveChanges();
+                    return new Response<GetUserResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
+                        Result = new Result(Status.Success, "Change password")
+                    };
+
+                }
+                else
+                {
+                    return new Response<GetUserResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
+                        Result = new Result(Status.Error, "Old Passwords do not match")
+                    };
+
+                }
 
             }
             else
             {
-                return new Response<GetUserResponse>
+                var checkPasswordRequest = new UserCheckPasswordRequest(request.oldPassword, user.Id);
+
+                var pbkdfPassword = checkUserPbkdfPassword(checkPasswordRequest, context);
+                if (pbkdfPassword.Result.Status == Status.Success.ToString())
                 {
-                    Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                    Result = new Result(Status.Error, "Old Passwords do not match")
-                };
-
+                    var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
+                    var salt = Convert.FromBase64String(user.Salt);
+                    var password = ArgonPasswordHelper.HashPassword(request.newPassord, salt);
+                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
+                    context!.SaveChanges();
+                    return new Response<GetUserResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
+                        Result = new Result(Status.Success, "Change password")
+                    };
+                }
+                else
+                {
+                    return new Response<GetUserResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
+                        Result = new Result(Status.Error, "Old Passwords do not match")
+                    };
+                }
             }
-
         }
         else
         {
@@ -499,13 +529,82 @@ public static class UserModule
         {
             if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
             {
-                var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+                var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id && x.IsArgonHash == true).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
                 if (userPassword != null)
                 {
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
                     var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = PasswordHelper.VerifyHash(checkPasswordRequest.Password, salt, bytePassword);
+                    var checkPassword = ArgonPasswordHelper.VerifyHash(checkPasswordRequest.Password, salt, bytePassword);
                     if (checkPassword)
+                    {
+                        return new NoDataResponse
+                        {
+                            Result = new Result(Status.Success, "Password match")
+                        };
+                    }
+
+                    else
+                    {
+                        return new NoDataResponse
+                        {
+
+                            Result = new Result(Status.Error, "Passwords do not match")
+                        };
+
+                    }
+                }
+                else
+                {
+                    return new NoDataResponse
+                    {
+
+                        Result = new Result(Status.Error, "User password is null")
+                    };
+                }
+            }
+            else
+            {
+                return new NoDataResponse
+                {
+
+                    Result = new Result(Status.Error, "User password is null")
+                };
+
+            }
+
+
+        }
+        else
+        {
+            return new NoDataResponse
+            {
+
+                Result = new Result(Status.Error, "User is not found")
+            };
+
+        }
+    }
+    static IResponse checkUserPbkdfPassword(
+   [FromBody] UserCheckPasswordRequest checkPasswordRequest,
+   [FromServices] UserDBContext context
+   )
+    {
+
+        var user = context!.Users!
+        .Include(x => x.UserPasswords)
+        .FirstOrDefault(x => x.Id == checkPasswordRequest.UserId);
+        if (user != null)
+        {
+            if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
+            {
+                var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id && x.IsArgonHash == false).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+                if (userPassword != null)
+                {
+                    var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
+                    var salt = Convert.FromBase64String(user.Salt);
+                    PbkdfPasswordHelper pbkdfPasswordHelper = new PbkdfPasswordHelper();
+                    PasswordVerificationResult checkPassword = pbkdfPasswordHelper.VerifyHashedPassword(userPassword.HashedPassword, checkPasswordRequest.Password, user.Salt);
+                    if (checkPassword == PasswordVerificationResult.Success)
                     {
                         return new NoDataResponse
                         {
@@ -621,28 +720,57 @@ public static class UserModule
     )
     {
 
-        var user = context!.Users!.FirstOrDefault(x => x.Reference == loginRequest.Reference);
+        var user = context!.Users!
+        .Include(x => x.UserPasswords)
+        .FirstOrDefault(x => x.Reference == loginRequest.Reference);
         if (user != null)
         {
-            var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
-
-            var responsePassword = checkUserPassword(passwordRequest, context);
-
-            if (responsePassword.Result.Status == Status.Success.ToString())
+            var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+            if (userPassword.IsArgonHash == true)
             {
+                var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
 
-                return new NoDataResponse
+                var responsePassword = checkUserPassword(passwordRequest, context);
+
+                if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    Result = new Result(Status.Success, "Login is successful")
-                };
+
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Success, "Login is successful")
+                    };
+                }
+                else
+                {
+
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Error, "Invalid reference or password")
+                    };
+                }
             }
             else
             {
+                var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
 
-                return new NoDataResponse
+                var responsePassword = checkUserPbkdfPassword(passwordRequest, context);
+
+                if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    Result = new Result(Status.Error, "Invalid reference or password")
-                };
+
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Success, "Login is successful")
+                    };
+                }
+                else
+                {
+
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Error, "Invalid reference or password")
+                    };
+                }
             }
         }
         else

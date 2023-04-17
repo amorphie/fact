@@ -1,4 +1,4 @@
-using amorphie.core.Base;
+
 public record GetUserSecurityQuestionResponse(
 Guid Id,
 Guid SecurityQuestionId,

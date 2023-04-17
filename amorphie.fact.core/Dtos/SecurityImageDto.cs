@@ -1,7 +1,4 @@
 
-using amorphie.core.Base;
-using static System.Net.Mime.MediaTypeNames;
-
 public record GetSecurityImageResponse(
 Guid Id,
 string Image,

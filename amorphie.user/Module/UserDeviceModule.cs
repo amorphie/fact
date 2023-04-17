@@ -252,6 +252,7 @@ public static class UserDeviceModule
             if (data.DeviceId != 0 && data.DeviceId != userDevice.DeviceId) { userDevice.DeviceId = data.DeviceId; hasChanges = true; }
             if (data.TokenId != null && data.TokenId != userDevice.TokenId) { userDevice.TokenId = data.TokenId; hasChanges = true; }
             if (data.UserId != null && data.UserId != userDevice.UserId) { userDevice.UserId = data.UserId; hasChanges = true; }
+            if (data.Status != null && data.Status != userDevice.Status) { userDevice.Status = data.Status; hasChanges = true; }
             if (data.ModifiedByBehaloff != null && data.ModifiedByBehaloff != userDevice.ModifiedByBehalfOf) { userDevice.ModifiedByBehalfOf = data.ModifiedByBehaloff; hasChanges = true; }
             if (data.ModifiedBy != null && data.ModifiedBy != userDevice.ModifiedBy) { userDevice.ModifiedBy = data.ModifiedBy; hasChanges = true; }
             userDevice.ModifiedAt = DateTime.Now;
@@ -291,7 +292,7 @@ public static class UserDeviceModule
         {
             return new NoDataResponse
             {
-                Result = new Result(Status.Success, "Device is not found")
+                Result = new Result(Status.Error, "Device is not found")
             };
         }
         else
@@ -300,7 +301,7 @@ public static class UserDeviceModule
             context.SaveChanges();
             return new NoDataResponse
             {
-                Result = new Result(Status.Error, "Delete successful")
+                Result = new Result(Status.Success, "Delete successful")
             };
         }
     }

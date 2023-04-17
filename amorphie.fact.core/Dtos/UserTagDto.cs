@@ -1,4 +1,4 @@
-using amorphie.core.Base;
+
 public record GetUserTagResponse(
 Guid Id,
 string Tag,
