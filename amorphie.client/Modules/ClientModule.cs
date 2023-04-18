@@ -168,7 +168,7 @@ public static class ClientModule
     {
         var hasChanges = false;
 
-        if (data.Type != null && data.Type != existingRecord.Type)
+        if (data.Type != existingRecord.Type)
         {
             existingRecord.Type = data.Type;
             hasChanges = true;
