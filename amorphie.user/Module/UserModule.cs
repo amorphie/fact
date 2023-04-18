@@ -69,7 +69,7 @@ public static class UserModule
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/user/userId/{userId}/password/{password}", checkUserPassword)
+        _app.MapPost("/user/checkUserPassword", checkUserPassword)
         .WithOpenApi()
         .WithSummary("Check user password.")
         .WithDescription("Check user password")
@@ -784,6 +784,7 @@ public static class UserModule
         }
         else
         {
+
             return new NoDataResponse
             {
 
