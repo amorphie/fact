@@ -4,8 +4,8 @@ using Newtonsoft.Json;
  using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
-var postgreSql = builder.Configuration["postgresql"];
+var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
+
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
@@ -32,6 +32,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapClientEndpoints();
+app.MapClientTokenEndpoints();
 
 try
 {

@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
+using System.Text;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
@@ -42,7 +44,7 @@ public static class ClientModule
                     operation.Summary = "Saves or updates requested client.";
                     return operation;
                 })
-                .Produces<ClientDto>(StatusCodes.Status200OK)
+                .Produces<ClientSaveDto>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
 
         //deleteClient
@@ -53,7 +55,17 @@ public static class ClientModule
                 return operation;
             })
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status204NoContent);         
+            .Produces(StatusCodes.Status204NoContent);
+
+        //valideClient
+        app.MapPost("/client/validate/", validateClient)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Validate requested client.";
+                return operation;
+            })
+            .Produces<ClientSaveDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     static IResponse<List<ClientDto>> getAllClients(
@@ -85,17 +97,17 @@ public static class ClientModule
         };
     }
 
-     static IResponse<ClientDto> getClient(
-        [FromRoute(Name = "clientId")] Guid clientId,
-        [FromServices] UserDBContext context
-        )
+    static IResponse<ClientDto> getClient(
+       [FromRoute(Name = "clientId")] Guid clientId,
+       [FromServices] UserDBContext context
+       )
     {
-        var resource = context!.Clients!
+        var client = context!.Clients!
             .Include(t => t.HeaderConfig)
             .Include(t => t.Names)
             .FirstOrDefault(t => t.Id == clientId);
 
-        if (resource == null)
+        if (client == null)
         {
             return new Response<ClientDto>
             {
@@ -106,12 +118,12 @@ public static class ClientModule
 
         return new Response<ClientDto>
         {
-            Data = ObjectMapper.Mapper.Map<ClientDto>(resource),
+            Data = ObjectMapper.Mapper.Map<ClientDto>(client),
             Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
         };
     }
 
-    static IResponse<ClientDto> saveClient(
+    static IResponse<ClientSaveDto> saveClient(
         [FromBody] SaveClientRequest data,
         [FromServices] UserDBContext context
         )
@@ -133,13 +145,17 @@ public static class ClientModule
         if (existingRecord == null)
         {
             var client = ObjectMapper.Mapper.Map<Client>(data);
+            string secret = Guid.NewGuid().ToString();
+            client.Secret = ComputeSha256Hash(secret);
             client.CreatedAt = DateTime.UtcNow;
             context!.Clients!.Add(client);
             context.SaveChanges();
 
-            return new Response<ClientDto>
+            // To return unencrpted secret only once
+            client.Secret = secret;
+            return new Response<ClientSaveDto>
             {
-                Data = ObjectMapper.Mapper.Map<ClientDto>(client),
+                Data = ObjectMapper.Mapper.Map<ClientSaveDto>(client),
                 Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi")
             };
         }
@@ -149,16 +165,16 @@ public static class ClientModule
             {
                 context!.SaveChanges();
 
-                return new Response<ClientDto>
+                return new Response<ClientSaveDto>
                 {
-                    Data = ObjectMapper.Mapper.Map<ClientDto>(existingRecord),
+                    Data = ObjectMapper.Mapper.Map<ClientSaveDto>(existingRecord),
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
 
-            return new Response<ClientDto>
+            return new Response<ClientSaveDto>
             {
-                Data = ObjectMapper.Mapper.Map<ClientDto>(existingRecord),
+                Data = ObjectMapper.Mapper.Map<ClientSaveDto>(existingRecord),
                 Result = new Result(Status.Error, "Değişiklik yok")
             };
         }
@@ -183,12 +199,6 @@ public static class ClientModule
         if (data.AvailableFlows != null && data.AvailableFlows != existingRecord.AvailableFlows)
         {
             existingRecord.AvailableFlows = data.AvailableFlows;
-            hasChanges = true;
-        }
-
-        if (data.Secret != null && data.ReturnUrl != existingRecord.ReturnUrl)
-        {
-            existingRecord.ReturnUrl = data.ReturnUrl;
             hasChanges = true;
         }
 
@@ -262,6 +272,54 @@ public static class ClientModule
             {
                 Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
             };
+        }
+    }
+
+    static IResponse<ClientDto> validateClient(
+        [FromBody] ValidateClientRequest data,
+        [FromServices] UserDBContext context
+       )
+    {
+        var hashedSecret = ComputeSha256Hash(data.Secret);
+
+        var client = context!.Clients!        
+            .Include(t => t.HeaderConfig)
+            .Include(t => t.Names)
+            .Include(t => t.Tokens)
+            .FirstOrDefault(t => t.Id == data.ClientId 
+                && t.Secret == hashedSecret 
+                && (string.IsNullOrEmpty(t.ReturnUrl) || data.ReturnUrl == data.ReturnUrl));
+
+        if (client == null)
+        {
+            return new Response<ClientDto>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
+        }
+
+        return new Response<ClientDto>
+        {
+            Data = ObjectMapper.Mapper.Map<ClientDto>(client),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+    }
+    static string ComputeSha256Hash(string rawData)
+    {
+        // Create a SHA256   
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            // ComputeHash - returns byte array  
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+
+            // Convert byte array to a string   
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
         }
     }
 }

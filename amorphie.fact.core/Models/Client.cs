@@ -11,6 +11,7 @@ public class Client : EntityBase
     public string? Secret { get; set; }
     public string? ReturnUrl { get; set; }
     public HeaderConfiguration? HeaderConfig { get; set; }
+    public ICollection<ClientToken> Tokens { get; set; } = default!;
 }
 
 public enum ClientType : byte
