@@ -32,7 +32,7 @@
                 "ef",
                 "database",
                 "update",
-                "--project", "${workspaceFolder}/amorphie.user.data/amorphie.user.data.csproj"
+                "--project", "${workspaceFolder}/amorphie.fact.data/amorphie.fact.data.csproj"
             ],
             "runOptions": {
                 "runOn": "folderOpen"

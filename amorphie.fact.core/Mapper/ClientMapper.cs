@@ -5,6 +5,7 @@ class ClientMapper : Profile
     public ClientMapper()
     {
         CreateMap<Client, ClientDto>().ReverseMap();
+        CreateMap<Client, ClientSaveDto>().ReverseMap();
         CreateMap<SaveClientRequest, Client>();
 
         CreateMap<Translation, MultilanguageText>().ReverseMap();

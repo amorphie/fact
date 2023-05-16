@@ -24,8 +24,8 @@ public class UserDBContext : DbContext
     public DbSet<SecurityQuestion>? SecurityQuestions { get; set; }
     public DbSet<SecurityImage>? SecurityImages { get; set; }
     public DbSet<UserSecurityImage>? UserSecurityImages { get; set; }
-    public DbSet<Client>?  Clients { get; set; }
-    public DbSet<ClientToken>?  ClientTokens { get; set; }
+    public DbSet<Client>? Clients { get; set; }
+    public DbSet<ClientToken>? ClientTokens { get; set; }
 
     public DbSet<UserPassword>? UserPasswords { get; set; }
     public UserDBContext(DbContextOptions options) : base(options) { }
@@ -56,14 +56,14 @@ public class UserDBContext : DbContext
        .HasIndex(b => new { b.Id, b.Tag, b.UserId })
         .HasMethod("GIN")
        .IsTsVectorExpressionIndex("english");
-     
+
 
 
         modelBuilder.Entity<UserDevice>()
        .HasIndex(b => new { b.Id, b.DeviceId, b.UserId })
         .HasMethod("GIN")
        .IsTsVectorExpressionIndex("english");
-       
+
 
         modelBuilder.Entity<SecurityQuestion>()
      .HasIndex(b => new { b.Id, b.Question })
@@ -197,7 +197,7 @@ public class UserDBContext : DbContext
               Id = Guid.NewGuid(),
               UserId = UserId,
               HashedPassword = String.Empty,
-              IsArgonHash=true,
+              IsArgonHash = true,
               CreatedBy = Guid.NewGuid(),
               CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
               ModifiedBy = Guid.NewGuid(),
