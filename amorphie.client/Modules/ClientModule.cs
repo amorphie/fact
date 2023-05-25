@@ -77,6 +77,8 @@ public static class ClientModule
     {
         var clients = context!.Clients!
             .Include(t => t.HeaderConfig)
+            .Include(t => t.Jws)
+            .Include(t => t.Idempotency)
             .Include(t => t.Names.Where(t => t.Language == language))
             .Skip(page * pageSize).Take(pageSize)
             .AsQueryable().ToList();
@@ -104,6 +106,8 @@ public static class ClientModule
     {
         var client = context!.Clients!
             .Include(t => t.HeaderConfig)
+            .Include(t => t.Jws)
+            .Include(t => t.Idempotency)
             .Include(t => t.Names)
             .FirstOrDefault(t => t.Id == clientId);
 
@@ -138,6 +142,8 @@ public static class ClientModule
         {
             existingRecord = context?.Clients!
             .Include(t => t.HeaderConfig)
+            .Include(t => t.Jws)
+            .Include(t => t.Idempotency)
             .Include(t => t.Names)
             .FirstOrDefault(t => t.Id == data.Id);
         }
@@ -253,6 +259,8 @@ public static class ClientModule
     {
         var existingRecord = context?.Clients!
             .Include(t => t.HeaderConfig)
+            .Include(t => t.Jws)
+            .Include(t => t.Idempotency)
             .Include(t => t.Names)
             .FirstOrDefault(t => t.Id == clientId);
 
@@ -284,6 +292,8 @@ public static class ClientModule
 
         var client = context!.Clients!        
             .Include(t => t.HeaderConfig)
+            .Include(t => t.Jws)
+            .Include(t => t.Idempotency)
             .Include(t => t.Names)
             .Include(t => t.Tokens)
             .FirstOrDefault(t => t.Id == data.ClientId 

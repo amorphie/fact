@@ -9,7 +9,12 @@ public class ClientDto : DtoBase
     public string? Validations { get; set; }
     public string[]? AvailableFlows { get; set; }
     public string? ReturnUrl { get; set; }
+    public string? LoginUrl { get; set; }
+    public string? LogoutUrl { get; set; }
+    public string? Pkce { get; set; }
     public HeaderConfigurationDto? HeaderConfig { get; set; }
+    public Jws? Jws { get; set; }
+    public Idempotency? Idempotency { get; set; }
     public ICollection<ClientToken> Tokens { get; set; } = default!;
 }
 
@@ -28,7 +33,13 @@ public class SaveClientRequest
     public string? Validations { get; set; }
     public string[]? AvailableFlows { get; set; }
     public string? ReturnUrl { get; set; }
+    public string? LoginUrl { get; set; }
+    public string? LogoutUrl { get; set; }
+    public string? Pkce { get; set; }
     public HeaderConfigurationDto? HeaderConfig { get; set; }
+    public Jws? Jws { get; set; }
+    public Idempotency? Idempotency { get; set; }
+    public ICollection<ClientToken> Tokens { get; set; } = default!;
     public Guid CreatedBy { get; set; }
     public Guid? CreatedByBehalfOf { get; set; }
     public Guid ModifiedBy { get; set; }
