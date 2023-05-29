@@ -2,6 +2,11 @@ using amorphie.fact.data;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using amorphie.core.security.Extensions;
+using amorphie.core.Identity;
+using amorphie.core.Repository;
+using amorphie.core.Extension;
+using FluentValidation;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
@@ -15,6 +20,15 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
+builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
+
+var assemblies = new Assembly[] { typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly };
+
+builder.Services.AddValidatorsFromAssemblies(assemblies);
+builder.Services.AddAutoMapper(assemblies);
+
 builder.Services.AddDbContext<UserDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
 
@@ -32,12 +46,12 @@ app.MapSubscribeHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapClientEndpoints();
 app.MapClientTokenEndpoints();
 
 try
 {
     app.Logger.LogInformation("Starting application...");
+    app.AddRoutes();
     app.Run();
 }
 catch (Exception ex)
