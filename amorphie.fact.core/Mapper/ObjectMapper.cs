@@ -14,7 +14,6 @@ public class ObjectMapper
         cfg.AddProfile<UserSecurityImageMapper>();
         cfg.AddProfile<UserSecurityQuestionMapper>();
         cfg.AddProfile<UserTagMapper>();
-        cfg.AddProfile<ClientTokenMapper>();
     });
 
     return config.CreateMapper();
