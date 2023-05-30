@@ -9,7 +9,7 @@ using FluentValidation;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
+await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
 
 // var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
@@ -24,7 +24,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
 builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
 
-var assemblies = new Assembly[] { typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly };
+var assemblies = new Assembly[]
+                {
+                     typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly,
+                     typeof(ClientTokenValidator).Assembly, typeof(ClientTokenMapper).Assembly 
+                };
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
@@ -45,8 +49,6 @@ app.MapSubscribeHandler();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
-app.MapClientTokenEndpoints();
 
 try
 {
