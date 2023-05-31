@@ -448,13 +448,8 @@ public static class UserModule
         try
         {
             // Check any ID is exists ?
-            // var json = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
-            // var entityData = Newtonsoft.Json.JsonConvert.DeserializeObject<PostUserRequest>(json);
             if (userWithId == null)
             {
-            //     var Reference = (workflowData.entityData.Reference as string);
-            //     var userWithReferenceId = context!.Users!
-            //  .FirstOrDefault(x => x.Reference == Reference);
     var userWithReferenceId = context!.Users!
              .FirstOrDefault(x => x.Reference == workflowData.entityData.Reference);
                 if (userWithReferenceId != null)
@@ -475,10 +470,6 @@ public static class UserModule
                 Result = new Result(Status.Error, "Unexpected error:" + ex.ToString())
             };
         }
-
-
-
-
         return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(workflowData), context, configuration).Result;
     }
 

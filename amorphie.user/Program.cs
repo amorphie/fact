@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 using amorphie.fact.data;
 
 var builder = WebApplication.CreateBuilder(args);
-// await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
-// var postgreSql = builder.Configuration["postgresql"];
- var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
+await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
+var postgreSql = builder.Configuration["postgresql"];
+ //var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
