@@ -60,6 +60,14 @@ public static class UserModule
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
+        _app.MapPost("/postWorkflowStatus", postWorkflowStatus)
+.WithOpenApi()
+.WithSummary("Save user")
+.WithDescription("It is update or creates new user.")
+.WithTags("User")
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status201Created)
+.Produces(StatusCodes.Status409Conflict);
 
         _app.MapDelete("/user/{id}", deleteUser)
         .WithOpenApi()
@@ -315,7 +323,7 @@ public static class UserModule
         {
             try
             {
-                string hash=null;
+                string hash = null;
                 var record = ObjectMapper.Mapper.Map<User>(data);
                 record.CreatedAt = DateTime.UtcNow;
                 record.State = "new";
@@ -323,17 +331,22 @@ public static class UserModule
                 {
                     var salt = ArgonPasswordHelper.CreateSalt();
                     var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
-                     hash = Convert.ToBase64String(password);
+                    hash = Convert.ToBase64String(password);
                     record.Salt = Convert.ToBase64String(salt);
-             
+
                 }
                 else
                 {
-                      hash=data.Password;
-                    
+                    hash = data.Password;
+
                 }
                 context!.Users!.Add(record);
-                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = hash, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = data.IsArgonHash, UserId = record.Id });
+                Guid? IdFromData = data.Id;
+                if (!IdFromData.HasValue)
+                {
+                    IdFromData = new Guid();
+                }
+                context.UserPasswords.Add(new UserPassword { Id = IdFromData.Value, HashedPassword = hash, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = data.IsArgonHash, UserId = record.Id });
 
                 context.SaveChanges();
                 transaction.Commit();
@@ -420,6 +433,53 @@ public static class UserModule
             Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
             Result = new Result(Status.Error, "Request  is already used for another record")
         };
+    }
+    //
+
+    static async Task<IResponse<GetUserResponse>> postWorkflowStatus(
+            [FromBody] PostWorkflowDto? workflowData,
+            [FromServices] UserDBContext context,
+              IConfiguration configuration
+            )
+
+    {
+        var userWithId = context!.Users!
+         .FirstOrDefault(x => x.Id == workflowData!.recordId);
+        try
+        {
+            // Check any ID is exists ?
+            // var json = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+            // var entityData = Newtonsoft.Json.JsonConvert.DeserializeObject<PostUserRequest>(json);
+            if (userWithId == null)
+            {
+            //     var Reference = (workflowData.entityData.Reference as string);
+            //     var userWithReferenceId = context!.Users!
+            //  .FirstOrDefault(x => x.Reference == Reference);
+    var userWithReferenceId = context!.Users!
+             .FirstOrDefault(x => x.Reference == workflowData.entityData.Reference);
+                if (userWithReferenceId != null)
+                {
+                    return new Response<GetUserResponse>
+                    {
+                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(userWithId),
+                        Result = new Result(Status.Error, "Reference already exist but workflow recordid is not:" + workflowData.recordId)
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return new Response<GetUserResponse>
+            {
+                Data = ObjectMapper.Mapper.Map<GetUserResponse>(userWithId),
+                Result = new Result(Status.Error, "Unexpected error:" + ex.ToString())
+            };
+        }
+
+
+
+
+        return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(workflowData), context, configuration).Result;
     }
 
     static IResponse deleteUser(
