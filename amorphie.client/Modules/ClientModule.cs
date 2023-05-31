@@ -9,6 +9,7 @@ using amorphie.fact.data;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace amorphie.client;
 
@@ -31,8 +32,8 @@ public class ClientModule
         routeGroupBuilder.MapPost("validate", validateClient);
     }
 
-   async ValueTask<IResult> validateClient([FromBody] ValidateClientRequest data,
-        [FromServices] UserDBContext context)
+    async ValueTask<IResult> validateClient([FromBody] ValidateClientRequest data,
+         [FromServices] UserDBContext context)
     {
         var hashedSecret = ComputeSha256Hash(data.Secret!);
 
@@ -55,13 +56,90 @@ public class ClientModule
 
     }
 
-
-    protected override ValueTask<IResult> Upsert([FromServices] IMapper mapper,
+    protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
     [FromServices] ClientValidator validator, [FromServices] IBBTRepository<Client, UserDBContext> repository, [FromBody] ClientDto data)
     {
-        string secret = Guid.NewGuid().ToString();
-        data.Secret = ComputeSha256Hash(secret);
-        return base.Upsert(mapper, validator, repository, data);
+        var dbModelData = mapper.Map<Client>(data);
+
+        FluentValidation.Results.ValidationResult validationResult = await validator.ValidateAsync(dbModelData);
+
+        if (!validationResult.IsValid)
+        {
+            return Results.ValidationProblem(validationResult.ToDictionary());
+        }
+
+        bool IsChange = false;
+        Client? dataFromDB = await repository.GetById(dbModelData.Id);
+
+        if (dataFromDB != null)
+        {
+            if (PropertyCheckList != null)
+            {
+                object? dbValue;
+                object? dtoValue;
+
+                foreach (string property in PropertyCheckList)
+                {
+                    dbValue = typeof(Client).GetProperties().First(p => p.Name.Equals(property)).GetValue(dataFromDB);
+                    dtoValue = typeof(ClientDto).GetProperties().First(p => p.Name.Equals(property)).GetValue(data);
+
+                    if (dbValue != null && !dbValue.Equals(dtoValue))
+                    {
+                        typeof(Client).GetProperties().First(p => p.Name.Equals(property)).SetValue(dataFromDB, dtoValue);
+                        IsChange = true;
+                    }
+                }
+            }
+
+            if (IsChange)
+                await repository.SaveChangesAsync();
+
+            return Results.NoContent();
+        }
+        else
+        {
+            string secret = Guid.NewGuid().ToString();
+            dbModelData.Secret = ComputeSha256Hash(secret);
+
+            await repository.Insert(dbModelData);
+
+            dbModelData.Secret = secret;
+
+            return Results.Created($"/{dbModelData.Id}", dbModelData);
+        }
+    }
+
+    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
+    {
+        var model = await repository.GetById(id);
+
+        if (model is Client)
+        {
+            model.Secret = null;
+            return TypedResults.Ok(model);
+        }
+
+        return TypedResults.NotFound();
+    }
+
+
+    protected override async ValueTask<IResult> GetAll([FromServices] IBBTRepository<Client, UserDBContext> repository,
+            [FromQuery][Range(0, 100)] int page,
+            [FromQuery][Range(5, 100)] int pageSize)
+    {
+        IList<Client> resultList = await repository.GetAll(page, pageSize).ToListAsync();
+
+        if (resultList != null && resultList.Count() > 0)
+        {
+            foreach (Client client in resultList)
+            {
+                client.Secret = null;
+            }
+
+            return Results.Ok(resultList);
+        }
+
+        return Results.NoContent();
     }
 
     string ComputeSha256Hash(string rawData)
