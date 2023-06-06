@@ -1,34 +1,28 @@
-
-
 using System.ComponentModel.DataAnnotations;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
-using amorphie.fact;
+using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
-using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
-public static class UserModule
+public class UserModule : BaseRoute
 {
+
+    public UserModule(WebApplication app) : base(app)
+    {
+
+    }
+
     const string STATE_STORE = "amorphie-cache";
     static WebApplication _app = default!;
 
-    public static void MapUserEndpoints(this WebApplication app)
+    public override string? UrlFragment => "user";
+
+    public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
-        _app = app;
-
-        //     _app.MapGet("/user", getAllUsers)
-        //    .WithOpenApi()
-        //    .WithSummary("Gets registered users.")
-        //    .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
-        //    .WithTags("User")
-        //    .Produces<GetUserResponse>(StatusCodes.Status200OK)
-        //    .Produces(StatusCodes.Status404NotFound);
-
-        _app.MapGet("/user/search", getAllUserWithFullTextSearch)
+        routeGroupBuilder.MapGet("/search", getAllUserWithFullTextSearch)
        .WithOpenApi()
        .WithSummary("Gets registered users.")
        .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
@@ -36,7 +30,7 @@ public static class UserModule
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/user/phone/countrycode/{countrycode}/prefix/{prefix}/number/{number}", getPhoneUser)
+        routeGroupBuilder.MapGet("/phone/countrycode/{countrycode}/prefix/{prefix}/number/{number}", getPhoneUser)
         .WithOpenApi()
         .WithSummary("Returns phone users records.")
         .WithDescription("Returns phone users records")
@@ -44,7 +38,7 @@ public static class UserModule
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapGet("/user/email/{email}/", getEmailUser)
+        routeGroupBuilder.MapGet("/email/{email}/", getEmailUser)
       .WithOpenApi()
       .WithSummary("Returns email users records.")
       .WithDescription("Returns email users records")
@@ -52,7 +46,7 @@ public static class UserModule
       .Produces<GetUserResponse>(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapPost("/user", postUser)
+        routeGroupBuilder.MapPost("/", postUser)
         .WithOpenApi()
         .WithSummary("Save user")
         .WithDescription("It is update or creates new user.")
@@ -60,16 +54,8 @@ public static class UserModule
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
-        _app.MapPost("/postWorkflowStatus", postWorkflowStatus)
-.WithOpenApi()
-.WithSummary("Save user")
-.WithDescription("It is update or creates new user.")
-.WithTags("User")
-.Produces(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status201Created)
-.Produces(StatusCodes.Status409Conflict);
 
-        _app.MapDelete("/user/{id}", deleteUser)
+        routeGroupBuilder.MapDelete("/{id}", deleteUser)
         .WithOpenApi()
         .WithSummary("Deletes user")
         .WithDescription("Delete user.")
@@ -77,7 +63,7 @@ public static class UserModule
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapPost("/user/checkUserPassword", checkUserPassword)
+        routeGroupBuilder.MapGet("/userId/{userId}/password/{password}", checkUserPassword)
         .WithOpenApi()
         .WithSummary("Check user password.")
         .WithDescription("Check user password")
@@ -85,7 +71,7 @@ public static class UserModule
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        _app.MapPost("/user/{userId}/updatePassword", updateUserPassword)
+        routeGroupBuilder.MapPost("/{userId}/updatePassword", updateUserPassword)
         .WithOpenApi()
         .WithSummary("Update user password.")
         .WithDescription("Update user password.")
@@ -94,7 +80,7 @@ public static class UserModule
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
 
-        _app.MapPost("/user/{userId}/updateEmail", updateUserEmail)
+        routeGroupBuilder.MapPost("/{userId}/updateEmail", updateUserEmail)
        .WithOpenApi()
        .WithSummary("Update user mail.")
        .WithDescription("Update user mail.")
@@ -103,7 +89,7 @@ public static class UserModule
        .Produces(StatusCodes.Status201Created)
        .Produces(StatusCodes.Status409Conflict);
 
-        _app.MapPost("/user/{userId}/updatePhone", updateUserPhone)
+        routeGroupBuilder.MapPost("/{userId}/updatePhone", updateUserPhone)
       .WithOpenApi()
       .WithSummary("Update user phone.")
       .WithDescription("Update user phone.")
@@ -112,121 +98,44 @@ public static class UserModule
       .Produces(StatusCodes.Status201Created)
       .Produces(StatusCodes.Status409Conflict);
 
-        _app.MapPost("/user/login", login)
+        routeGroupBuilder.MapPost("/login", login)
       .WithOpenApi()
       .WithSummary("user login with reference and password")
       .WithDescription("User login")
       .WithTags("User")
       .Produces(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status201Created);
-
-
     }
 
-    // static async Task<IResponse<List<GetUserResponse>>> getAllUsers(
-    //   [FromServices] UserDBContext context,
-    //   [FromQuery] string? Reference,
-    //   HttpContext httpContext,
-    //   [FromServices] DaprClient client,
-    //   [FromQuery][Range(0, 100)] int page = 0,
-    //   [FromQuery][Range(5, 100)] int pageSize = 100
-    //   )
-    // {
-    //     var cacheData = await client.GetStateAsync<List<GetUserResponse>>(STATE_STORE, "GetAllUsers");
-    //     if (cacheData != null)
-    //     {
-    //         httpContext.Response.Headers.Add("X-Cache", "Hit");
-    //         return new Response<List<GetUserResponse>>
-    //         {
-    //             Data = cacheData,
-    //             Result = new Result(Status.Success, "Getirme başarılı")
-    //         };
-    //         // return Results.Ok(cacheData);
-    //     }
-    //     var query = context!.Users!
-    //         .Include(d => d.UserTags)
-    //         .Include(x => x.UserPasswords)
-    //         .Skip(page * pageSize)
-    //         .Take(pageSize);
-
-    //     if (!string.IsNullOrEmpty(Reference))
-    //     {
-    //         query = query.Where(t => t.Reference == Reference);
-    //     }
-
-    //     var users = query.ToList();
-
-
-    //     if (users.Count() > 0)
-    //     {
-    //         var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
-
-    //         var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
-    //         await client.SaveStateAsync(STATE_STORE, "GetAllUsers", response, metadata: metadata);
-    //         httpContext.Response.Headers.Add("X-Cache", "Miss");
-    //         return new Response<List<GetUserResponse>>
-    //         {
-    //             Data = response,
-    //             Result = new Result(Status.Success, "Getirme başarılı")
-    //         };
-    //     }
-    //     else
-    //     {
-    //         return new Response<List<GetUserResponse>>
-    //         {
-    //             Data = null,
-    //             Result = new Result(Status.Error, "the user was not found")
-    //         };
-    //     }
-    // }
-    static async Task<IResponse<List<GetUserResponse>>> getAllUserWithFullTextSearch(
-        [FromServices] UserDBContext context,
-        [FromQuery] string? SearchText,
-        HttpContext httpContext,
-        [FromQuery][Range(0, 100)] int page = 0,
-        [FromQuery][Range(5, 100)] int pageSize = 100
-        )
+    async ValueTask<IResult> getAllUserWithFullTextSearch(
+       [FromServices] UserDBContext context,
+       [AsParameters] UserSearch userSearch
+       )
     {
-
         var query = context!.Users!
             .Include(d => d.UserTags)
             .Include(x => x.UserPasswords)
-            .Skip(page * pageSize)
-            .Take(pageSize);
+            .Skip(userSearch.Page * userSearch.PageSize)
+            .Take(userSearch.PageSize);
 
-        if (!string.IsNullOrEmpty(SearchText))
+        if (!string.IsNullOrEmpty(userSearch.Keyword))
         {
-            //1.yöntem 
-            query = query.Where(p => p.SearchVector.Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
-            //2.yöntem
-            //    query = query.Where(x => EF.Functions.ToTsVector("english",string.Join(" ",x.Reference,x.EMail,x.FirstName,x.LastName,x.State))
-            //            .Matches(EF.Functions.PlainToTsQuery("english", SearchText)));
+            query = query.AsNoTracking().Where(p => p.SearchVector.Matches(EF.Functions.PlainToTsQuery("english", userSearch.Keyword)));
         }
 
         var users = query.ToList();
-
 
         if (users.Count() > 0)
         {
             var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
 
-            return new Response<List<GetUserResponse>>
-            {
-                Data = response,
-                Result = new Result(Status.Success, "Getirme başarılı")
-            };
+            return Results.Ok(response);
         }
-        else
-        {
-            return new Response<List<GetUserResponse>>
-            {
-                Data = null,
-                Result = new Result(Status.Error, "User was not found")
-            };
-        }
+
+        return Results.NoContent();
     }
 
-    static IResponse<List<GetUserResponse>> getPhoneUser(
+    async ValueTask<IResult> getPhoneUser(
     [FromRoute(Name = "countrycode")] int countryCode,
     [FromRoute(Name = "prefix")] int prefix,
     [FromRoute(Name = "number")] string number,
@@ -240,130 +149,80 @@ public static class UserModule
             .Skip(page * pageSize)
             .Take(pageSize);
 
-        var users = query.Where(t => t.Phone.CountryCode == countryCode && t.Phone.Prefix == prefix && t.Phone.Number == number).ToList();
+        var users = query.AsNoTracking().Where(t => t.Phone.CountryCode == countryCode && t.Phone.Prefix == prefix && t.Phone.Number == number).ToList();
 
         if (users.Count() > 0)
         {
             var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
-            return new Response<List<GetUserResponse>>
-            {
-                Data = response,
-                Result = new Result(Status.Success, "List return successfull")
-            };
 
+            return Results.Ok(response);
         }
-        else
-        {
-            return new Response<List<GetUserResponse>>
-            {
-                Data = null,
-                Result = new Result(Status.Error, "User is not found")
-            };
-        }
+
+        return Results.NoContent();
     }
-    static IResponse<List<GetUserResponse>> getEmailUser(
-   [FromRoute(Name = "email")] string email,
-   [FromServices] UserDBContext context,
-   [FromQuery][Range(0, 100)] int page = 0,
-   [FromQuery][Range(5, 100)] int pageSize = 100
-   )
+    async ValueTask<IResult> getEmailUser(
+  [FromRoute(Name = "email")] string email,
+  [FromServices] UserDBContext context,
+  [FromQuery][Range(0, 100)] int page = 0,
+  [FromQuery][Range(5, 100)] int pageSize = 100
+  )
     {
         var query = context!.Users!
             .Include(d => d.UserTags)
             .Skip(page * pageSize)
             .Take(pageSize);
+
         if (!String.IsNullOrEmpty(email))
         {
-            var users = query.Where(t => t.EMail == email).ToList();
+            var users = query.AsNoTracking().Where(t => t.EMail == email).ToList();
 
             if (users.Count() > 0)
             {
                 var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
-                return new Response<List<GetUserResponse>>
-                {
-                    Data = response,
-                    Result = new Result(Status.Success, "Getirme başarılı")
-                };
-            }
-            else
-            {
-                return new Response<List<GetUserResponse>>
-                {
-                    Data = null,
-                    Result = new Result(Status.Error, "User is not found")
-                };
-            }
-        }
-        else
-        {
-            return new Response<List<GetUserResponse>>
-            {
-                Data = null,
-                Result = new Result(Status.Error, "Email is null")
-            };
 
+                return Results.Ok(response);
+            }
         }
+
+        return Results.NoContent();
     }
-    static async Task<IResponse<GetUserResponse>> postUser(
-           [FromBody] PostUserRequest data,
-           [FromServices] UserDBContext context,
-             IConfiguration configuration
-           )
-
+    async ValueTask<IResult> postUser(
+          [FromBody] PostUserRequest data,
+          [FromServices] UserDBContext context,
+            IConfiguration configuration
+          )
     {
-
         using var transaction = context.Database.BeginTransaction();
 
         // Check any Reference is exists ?
         var user = context!.Users!
           .FirstOrDefault(x => x.Reference == data.Reference);
 
-
         if (user == null)
         {
             try
             {
-                string hash = null;
+                var salt = ArgonPasswordHelper.CreateSalt();
+                var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
+                var result = Convert.ToBase64String(password);
                 var record = ObjectMapper.Mapper.Map<User>(data);
                 record.CreatedAt = DateTime.UtcNow;
                 record.State = "new";
-                if (data.IsArgonHash)
-                {
-                    var salt = ArgonPasswordHelper.CreateSalt();
-                    var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
-                    hash = Convert.ToBase64String(password);
-                    record.Salt = Convert.ToBase64String(salt);
+                record.Salt = Convert.ToBase64String(salt);
 
-                }
-                else
-                {
-                    hash = data.Password;
-
-                }
                 context!.Users!.Add(record);
-                Guid? IdFromData = data.Id;
-                if (!IdFromData.HasValue)
-                {
-                    IdFromData = new Guid();
-                }
-                context.UserPasswords.Add(new UserPassword { Id = IdFromData.Value, HashedPassword = hash, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = data.IsArgonHash, UserId = record.Id });
+                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
 
                 context.SaveChanges();
                 transaction.Commit();
-                return new Response<GetUserResponse>
-                {
-                    Data = ObjectMapper.Mapper.Map<GetUserResponse>(record),
-                    Result = new Result(Status.Success, "Add successfull")
-                };
+
+                return Results.Created($"/{record.Id}", record);
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return new Response<GetUserResponse>
-                {
-                    Data = null,
-                    Result = new Result(Status.Error, ex.ToString())
-                };
+
+                return Results.Problem(ex.ToString());
 
                 // Other steps for handling failures
             }
@@ -398,114 +257,45 @@ public static class UserModule
                 {
                     context!.SaveChanges();
                     transaction.Commit();
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                        Result = new Result(Status.Success, "Add successfull")
-                    };
                 }
-                else
-                {
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                        Result = new Result(Status.Error, "Not Modified")
-                    };
 
-                }
+                return Results.NoContent();
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return new Response<GetUserResponse>
-                {
-                    Data = null,
-                    Result = new Result(Status.Error, ex.ToString())
-                };
 
-
+                return Results.Problem(ex.ToString());
             }
         }
-
-
-        return new Response<GetUserResponse>
-        {
-            Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-            Result = new Result(Status.Error, "Request  is already used for another record")
-        };
-    }
-    //
-
-    static async Task<IResponse<GetUserResponse>> postWorkflowStatus(
-            [FromBody] PostWorkflowDto? workflowData,
-            [FromServices] UserDBContext context,
-              IConfiguration configuration
-            )
-
-    {
-        var userWithId = context!.Users!
-         .FirstOrDefault(x => x.Id == workflowData!.recordId);
-        try
-        {
-            // Check any ID is exists ?
-            if (userWithId == null)
-            {
-    var userWithReferenceId = context!.Users!
-             .FirstOrDefault(x => x.Reference == workflowData.entityData.Reference);
-                if (userWithReferenceId != null)
-                {
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(userWithId),
-                        Result = new Result(Status.Error, "Reference already exist but workflow recordid is not:" + workflowData.recordId)
-                    };
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            return new Response<GetUserResponse>
-            {
-                Data = ObjectMapper.Mapper.Map<GetUserResponse>(userWithId),
-                Result = new Result(Status.Error, "Unexpected error:" + ex.ToString())
-            };
-        }
-        return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(workflowData), context, configuration).Result;
     }
 
-    static IResponse deleteUser(
-       [FromRoute(Name = "id")] Guid id,
-       [FromServices] UserDBContext context)
+    async ValueTask<IResult> deleteUser(
+      [FromRoute(Name = "id")] Guid id,
+      [FromServices] UserDBContext context)
     {
-
-        var existingRecord = context?.Users?.FirstOrDefault(t => t.Id == id);
+        var existingRecord = await context!.Users!.FirstOrDefaultAsync(t => t.Id == id);
 
         if (existingRecord == null)
         {
-            return new NoDataResponse
-            {
-                Result = new Result(Status.Error, "Not found user")
-            };
+            return Results.NotFound();
         }
-        else
-        {
-            context!.Remove(existingRecord);
-            context.SaveChanges();
-            return new NoDataResponse
-            {
-                Result = new Result(Status.Success, "Delete successful")
-            };
-        }
+
+        context!.Remove(existingRecord);
+        context.SaveChanges();
+
+        return Results.Ok(existingRecord);
     }
-    static IResponse<GetUserResponse> updateUserPassword(
+    async ValueTask<IResult> updateUserPassword(
         [FromRoute(Name = "userId")] Guid userId,
         [FromBody] UserPasswordUpdateRequest request,
         [FromServices] UserDBContext context
           )
     {
-        var user = context!.Users!
+        var user = await context!.Users!
         .Include(x => x.UserPasswords)
-        .FirstOrDefault(x => x.Id == userId);
+        .FirstOrDefaultAsync(x => x.Id == userId);
+
         if (user != null)
         {
             var userPassword = user.UserPasswords.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
@@ -520,29 +310,18 @@ public static class UserModule
                     var password = ArgonPasswordHelper.HashPassword(request.newPassord, salt);
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
                     context!.SaveChanges();
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                        Result = new Result(Status.Success, "Change password")
-                    };
 
-                }
-                else
-                {
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                        Result = new Result(Status.Error, "Old Passwords do not match")
-                    };
-
+                    return Results.Ok("Change password");
                 }
 
+                return Results.Problem("Old Passwords do not match");
             }
             else
             {
                 var checkPasswordRequest = new UserCheckPasswordRequest(request.oldPassword, user.Id);
 
-                var pbkdfPassword = checkUserPbkdfPassword(checkPasswordRequest, context);
+                var pbkdfPassword = await checkUserPbkdfPassword(checkPasswordRequest, context);
+                
                 if (pbkdfPassword.Result.Status == Status.Success.ToString())
                 {
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
@@ -550,41 +329,26 @@ public static class UserModule
                     var password = ArgonPasswordHelper.HashPassword(request.newPassord, salt);
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
                     context!.SaveChanges();
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                        Result = new Result(Status.Success, "Change password")
-                    };
+
+                    return Results.Ok("Change password");
                 }
-                else
-                {
-                    return new Response<GetUserResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                        Result = new Result(Status.Error, "Old Passwords do not match")
-                    };
-                }
+
+                return Results.Problem("Old Passwords do not match");
             }
         }
-        else
-        {
-            return new Response<GetUserResponse>
-            {
-                Data = ObjectMapper.Mapper.Map<GetUserResponse>(user),
-                Result = new Result(Status.Error, "User is not found")
-            };
 
-        }
+        return Results.Problem("User is not found");
     }
-    static IResponse checkUserPassword(
-    [FromBody] UserCheckPasswordRequest checkPasswordRequest,
-    [FromServices] UserDBContext context
-    )
-    {
 
-        var user = context!.Users!
+    async ValueTask<IResult> checkUserPassword(
+   [FromBody] UserCheckPasswordRequest checkPasswordRequest,
+   [FromServices] UserDBContext context
+   )
+    {
+        var user = await context!.Users!
         .Include(x => x.UserPasswords)
-        .FirstOrDefault(x => x.Id == checkPasswordRequest.UserId);
+        .FirstOrDefaultAsync(x => x.Id == checkPasswordRequest.UserId);
+
         if (user != null)
         {
             if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
@@ -595,75 +359,46 @@ public static class UserModule
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
                     var salt = Convert.FromBase64String(user.Salt);
                     var checkPassword = ArgonPasswordHelper.VerifyHash(checkPasswordRequest.Password, salt, bytePassword);
+
                     if (checkPassword)
                     {
-                        return new NoDataResponse
-                        {
-                            Result = new Result(Status.Success, "Password match")
-                        };
+                        return Results.Ok("Password match");
                     }
 
-                    else
-                    {
-                        return new NoDataResponse
-                        {
-
-                            Result = new Result(Status.Error, "Passwords do not match")
-                        };
-
-                    }
+                    return Results.Problem("Passwords do not match");
                 }
-                else
-                {
-                    return new NoDataResponse
-                    {
 
-                        Result = new Result(Status.Error, "User password is null")
-                    };
-                }
-            }
-            else
-            {
-                return new NoDataResponse
-                {
-
-                    Result = new Result(Status.Error, "User password is null")
-                };
-
+                return Results.Problem("User password is null");
             }
 
-
+            return Results.Problem("User password is null");
         }
-        else
-        {
-            return new NoDataResponse
-            {
 
-                Result = new Result(Status.Error, "User is not found")
-            };
-
-        }
+        return Results.Problem("User is not found");
     }
-    static IResponse checkUserPbkdfPassword(
-   [FromBody] UserCheckPasswordRequest checkPasswordRequest,
-   [FromServices] UserDBContext context
-   )
-    {
 
-        var user = context!.Users!
+    async ValueTask<IResponse> checkUserPbkdfPassword(
+  [FromBody] UserCheckPasswordRequest checkPasswordRequest,
+  [FromServices] UserDBContext context
+  )
+    {
+        var user = await context!.Users!
         .Include(x => x.UserPasswords)
-        .FirstOrDefault(x => x.Id == checkPasswordRequest.UserId);
+        .FirstOrDefaultAsync(x => x.Id == checkPasswordRequest.UserId);
+
         if (user != null)
         {
             if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
             {
                 var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id && x.IsArgonHash == false).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+
                 if (userPassword != null)
                 {
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
                     var salt = Convert.FromBase64String(user.Salt);
                     PbkdfPasswordHelper pbkdfPasswordHelper = new PbkdfPasswordHelper();
                     PasswordVerificationResult checkPassword = pbkdfPasswordHelper.VerifyHashedPassword(userPassword.HashedPassword, checkPasswordRequest.Password, user.Salt);
+
                     if (checkPassword == PasswordVerificationResult.Success)
                     {
                         return new NoDataResponse
@@ -676,7 +411,6 @@ public static class UserModule
                     {
                         return new NoDataResponse
                         {
-
                             Result = new Result(Status.Error, "Passwords do not match")
                         };
 
@@ -686,7 +420,6 @@ public static class UserModule
                 {
                     return new NoDataResponse
                     {
-
                         Result = new Result(Status.Error, "User password is null")
                     };
                 }
@@ -695,13 +428,9 @@ public static class UserModule
             {
                 return new NoDataResponse
                 {
-
                     Result = new Result(Status.Error, "User password is null")
                 };
-
             }
-
-
         }
         else
         {
@@ -713,76 +442,52 @@ public static class UserModule
 
         }
     }
-    static IResponse updateUserEmail(
-          [FromRoute(Name = "userId")] Guid userId,
-          [FromQuery] string newEmail,
-          [FromServices] UserDBContext context
-            )
+    async ValueTask<IResult> updateUserEmail(
+         [FromRoute(Name = "userId")] Guid userId,
+         [FromQuery] string newEmail,
+         [FromServices] UserDBContext context
+           )
     {
+        var user = await context!.Users!.FirstOrDefaultAsync(x => x.Id == userId);
 
-        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-
             user.EMail = newEmail;
             context!.SaveChanges();
-            return new NoDataResponse
-            {
-                Result = new Result(Status.Success, "Change email")
-            };
-
         }
-        else
-        {
-            return new NoDataResponse
-            {
 
-                Result = new Result(Status.Error, "User is not found")
-            };
-        }
+        return Results.NoContent();
     }
-    static IResponse updateUserPhone(
-              [FromRoute(Name = "userId")] Guid userId,
-              [FromQuery] int countryCode,
-              [FromQuery] int prefix,
-              [FromQuery] string number,
-              [FromServices] UserDBContext context
-     )
+    async ValueTask<IResult> updateUserPhone(
+            [FromRoute(Name = "userId")] Guid userId,
+            [FromQuery] int countryCode,
+            [FromQuery] int prefix,
+            [FromQuery] string number,
+            [FromServices] UserDBContext context
+   )
     {
+        var user = await context!.Users!.FirstOrDefaultAsync(x => x.Id == userId);
 
-        var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
         if (user != null)
         {
-
             user.Phone.CountryCode = countryCode;
             user.Phone.Prefix = prefix;
             user.Phone.Number = number;
             context!.SaveChanges();
-            return new NoDataResponse
-            {
-                Result = new Result(Status.Success, "Change phone")
-            };
         }
-        else
-        {
-            return new NoDataResponse
-            {
 
-                Result = new Result(Status.Error, "User is not found")
-            };
-        }
+        return Results.NoContent();
     }
 
-    static IResponse login(
-
-             [FromBody] UserLoginRequest loginRequest,
-             [FromServices] UserDBContext context
-    )
+    async ValueTask<IResult> login(
+            [FromBody] UserLoginRequest loginRequest,
+            [FromServices] UserDBContext context
+   )
     {
-
-        var user = context!.Users!
+        var user = await context!.Users!
         .Include(x => x.UserPasswords)
-        .FirstOrDefault(x => x.Reference == loginRequest.Reference);
+        .FirstOrDefaultAsync(x => x.Reference == loginRequest.Reference);
+
         if (user != null)
         {
             var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
@@ -792,57 +497,32 @@ public static class UserModule
 
                 var responsePassword = checkUserPassword(passwordRequest, context);
 
-                if (responsePassword.Result.Status == Status.Success.ToString())
+                if (responsePassword.Result == Results.Ok("Password match"))
                 {
-
-                    return new NoDataResponse
-                    {
-                        Result = new Result(Status.Success, "Login is successful")
-                    };
+                    return Results.Ok("Login is successful");
                 }
-                else
-                {
 
-                    return new NoDataResponse
-                    {
-                        Result = new Result(Status.Error, "Invalid reference or password")
-                    };
-                }
+                return Results.Problem("Invalid reference or password");
             }
             else
             {
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
 
-                var responsePassword = checkUserPbkdfPassword(passwordRequest, context);
+                var responsePassword = await checkUserPbkdfPassword(passwordRequest, context);
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-
-                    return new NoDataResponse
-                    {
-                        Result = new Result(Status.Success, "Login is successful")
-                    };
+                    return Results.Ok("Login is successful");
                 }
-                else
-                {
 
-                    return new NoDataResponse
-                    {
-                        Result = new Result(Status.Error, "Invalid reference or password")
-                    };
-                }
+                return Results.Problem("Invalid reference or password");
+
             }
         }
         else
         {
-
-            return new NoDataResponse
-            {
-
-                Result = new Result(Status.Error, "User is not found")
-            };
+            return Results.Problem("User is not found");
         }
     }
+
 }
-
-

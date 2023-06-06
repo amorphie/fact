@@ -1,4 +1,3 @@
-
 public record GetUserResponse(
 Guid Id,
 string FirstName,
@@ -8,7 +7,7 @@ string EMail,
 Phone Phone,
 string Reference,
 string State,
-string[] Tag ,
+string[] Tag,
 Guid CreatedBy,
 DateTime CreatedAt,
 Guid ModifiedBy,
@@ -16,7 +15,7 @@ DateTime ModifiedAt,
 Guid? CreatedByBehalfOf,
 Guid? ModifiedByBehalof);
 
-                             
+
 public record PostUserRequest(string FirstName,
 string LastName,
 string Reference,
@@ -33,6 +32,6 @@ Guid? ModifiedByBehalof,
 string Salt,
 bool IsArgonHash,Guid? Id);
 
-public record UserCheckPasswordRequest(string Password,Guid UserId);
-public record UserPasswordUpdateRequest(string oldPassword,string newPassord);
-public record UserLoginRequest(string Reference,string Password);
+public record UserCheckPasswordRequest(string Password, Guid UserId);
+public record UserPasswordUpdateRequest(string oldPassword, string newPassord);
+public record UserLoginRequest(string Reference, string Password);

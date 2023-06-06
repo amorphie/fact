@@ -16,7 +16,7 @@ public class User : EntityBase
 
     public string Salt { get; set; } = string.Empty;
 
-     public NpgsqlTsVector SearchVector { get; set; }
+    public NpgsqlTsVector SearchVector { get; set; }
     public ICollection<UserTag>? UserTags { get; set; } = new List<UserTag>();
 
     public ICollection<UserSecurityQuestion>? UserSecurityQuestion { get; set; } = new List<UserSecurityQuestion>();
@@ -36,5 +36,10 @@ public record Phone
     public int Prefix { get; set; }
     [Column("Number")]
     public string Number { get; set; } = string.Empty;
+
+}
+
+public class UserSearch : DtoSearchBase
+{
 
 }

@@ -1,5 +1,5 @@
 using AutoMapper;
-class UserMapper : Profile
+public class UserMapper : Profile
 {
     public UserMapper()
     {
