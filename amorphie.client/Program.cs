@@ -1,6 +1,5 @@
 using amorphie.fact.data;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using amorphie.core.security.Extensions;
 using amorphie.core.Identity;
 using amorphie.core.Repository;

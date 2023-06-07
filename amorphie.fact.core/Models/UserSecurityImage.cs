@@ -9,8 +9,4 @@ public class UserSecurityImage:EntityBase
     [ForeignKey("User")]
     public Guid UserId { get; set; }
     public User? User { get; set; }
-
-
-
-
 }

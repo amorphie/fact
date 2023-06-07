@@ -1,18 +1,12 @@
+using amorphie.core.Base;
 
-public record GetSecurityQuestionResponse(
-Guid Id,
-string Question,
-Guid CreatedBy,
-DateTime? CreatedAt,
-Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid? CreatedByBehalfOf,
-Guid? ModifiedByBehalof);
-public record PostSecurityQuestionRequest(
-string Question,
-Guid CreatedBy,
-DateTime? CreatedAt,
-Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid? CreatedByBehalfOf,
-Guid? ModifiedByBehalof);
+public class SecurityQuestionDto : DtoBase
+{
+    public string Question { get; set; } = string.Empty;
+    public ICollection<UserSecurityQuestion>? UserSecurityQuestion { get; set; }
+}
+
+public class SecurityQuestionSearch : DtoSearchBase
+{
+
+}

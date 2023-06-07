@@ -13,7 +13,4 @@ public class UserSecurityQuestion:EntityBase
     public Guid UserId { get; set; }
     public User? Users { get; set; }
     public SecurityQuestion? SecurityQuestions { get; set; }
-
-   
-
 }

@@ -1,10 +1,8 @@
 using AutoMapper;
-class SecurityImageMapper : Profile
+public class SecurityImageMapper : Profile
 {
     public SecurityImageMapper()
     {
-        CreateMap<SecurityImage, GetSecurityImageResponse>().ReverseMap();
-
-        CreateMap<PostSecurityImageRequest, SecurityImage>();
+        CreateMap<SecurityImage, SecurityImageDto>().ReverseMap();
     }
 }

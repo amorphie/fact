@@ -1,21 +1,13 @@
+using amorphie.core.Base;
 
-public record GetUserTagResponse(
-Guid Id,
-string Tag,
-Guid  UserId,
-Guid CreatedBy,
-DateTime CreatedAt,
-Guid ModifiedBy,
-DateTime ModifiedAt,
-Guid? CreatedByBehalfOf,
-Guid? ModifiedByBehalof);
+public class UserTagDto : DtoBase
+{
+    public string Tag { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public User? User { get; set; }
+}
 
-public record PostUserTagRequest(
-string Tag,
-Guid  UserId,
-Guid CreatedBy,
-DateTime? CreatedAt,
-Guid ModifiedBy,
-DateTime? ModifiedAt,
-Guid? CreatedByBehalfOf,
-Guid? ModifiedByBehalof);   
+public class UserTagSearch : DtoSearchBase
+{
+
+}
