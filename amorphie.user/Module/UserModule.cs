@@ -26,7 +26,6 @@ public class UserModule : BaseRoute
        .WithOpenApi()
        .WithSummary("Gets registered users.")
        .WithDescription("Returns existing users with metadata.Query parameter reference is can contain request or order reference of user.")
-       .WithTags("User")
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
@@ -34,7 +33,6 @@ public class UserModule : BaseRoute
         .WithOpenApi()
         .WithSummary("Returns phone users records.")
         .WithDescription("Returns phone users records")
-        .WithTags("User")
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
@@ -42,7 +40,6 @@ public class UserModule : BaseRoute
       .WithOpenApi()
       .WithSummary("Returns email users records.")
       .WithDescription("Returns email users records")
-      .WithTags("User")
       .Produces<GetUserResponse>(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status404NotFound);
 
@@ -50,7 +47,6 @@ public class UserModule : BaseRoute
         .WithOpenApi()
         .WithSummary("Save user")
         .WithDescription("It is update or creates new user.")
-        .WithTags("User")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
@@ -59,7 +55,6 @@ public class UserModule : BaseRoute
         .WithOpenApi()
         .WithSummary("Deletes user")
         .WithDescription("Delete user.")
-        .WithTags("User")
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
@@ -67,7 +62,6 @@ public class UserModule : BaseRoute
         .WithOpenApi()
         .WithSummary("Check user password.")
         .WithDescription("Check user password")
-        .WithTags("User")
         .Produces<GetUserResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
@@ -75,7 +69,6 @@ public class UserModule : BaseRoute
         .WithOpenApi()
         .WithSummary("Update user password.")
         .WithDescription("Update user password.")
-        .WithTags("User")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
@@ -84,7 +77,6 @@ public class UserModule : BaseRoute
        .WithOpenApi()
        .WithSummary("Update user mail.")
        .WithDescription("Update user mail.")
-       .WithTags("User")
        .Produces(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status201Created)
        .Produces(StatusCodes.Status409Conflict);
@@ -93,7 +85,6 @@ public class UserModule : BaseRoute
       .WithOpenApi()
       .WithSummary("Update user phone.")
       .WithDescription("Update user phone.")
-      .WithTags("User")
       .Produces(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status201Created)
       .Produces(StatusCodes.Status409Conflict);
@@ -102,7 +93,6 @@ public class UserModule : BaseRoute
       .WithOpenApi()
       .WithSummary("user login with reference and password")
       .WithDescription("User login")
-      .WithTags("User")
       .Produces(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status201Created);
     }

@@ -24,8 +24,6 @@ public class User : EntityBase
     public ICollection<UserSecurityImage>? UserSecurityImages { get; set; } = new List<UserSecurityImage>();
 
     public ICollection<UserPassword>? UserPasswords { get; set; } = new List<UserPassword>();
-
-
 }
 
 public record Phone
@@ -39,7 +37,3 @@ public record Phone
 
 }
 
-public class UserSearch : DtoSearchBase
-{
-
-}

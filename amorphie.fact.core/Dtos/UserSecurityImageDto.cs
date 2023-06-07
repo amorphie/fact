@@ -1,22 +1,8 @@
+using amorphie.core.Base;
 
-public record GetUserSecurityImageResponse(
-Guid Id,
-string SecurityImage,
-Guid UserId,
-DateTime CreatedAt,
-Guid CreatedBy,
-Guid? CreatedByBehalfOf,
-DateTime ModifiedAt,
-Guid ModifiedBy,
-Guid? ModifiedByBehalfOf);
-
-
-public record PostUserSecurityImageRequest(
-Guid SecurityImageId,
-Guid UserId,
-Guid CreatedBy,
-DateTime? CreatedAt,
-Guid ModifiedBy,
-DateTime ModifiedAt,
-Guid? CreatedByBehalfOf,
-Guid? ModifiedByBehalof);
+public class UserSecurityImageDto:DtoBase
+{
+    public string SecurityImage { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public User? User { get; set; }
+}

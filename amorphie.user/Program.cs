@@ -1,6 +1,4 @@
-
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using amorphie.core.security.Extensions;
 using amorphie.fact.data;
 using amorphie.core.Identity;
@@ -16,7 +14,6 @@ var postgreSql = builder.Configuration["postgresql"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
-
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -26,7 +23,13 @@ builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
 
 var assemblies = new Assembly[]
                 {
-                     typeof(UserValidator).Assembly, typeof(UserMapper).Assembly
+                     typeof(UserValidator).Assembly, typeof(UserMapper).Assembly,
+                     typeof(SecurityImageValidator).Assembly, typeof(SecurityImageMapper).Assembly,
+                     typeof(SecurityQuestionValidator).Assembly, typeof(SecurityQuestionMapper).Assembly,
+                     typeof(UserDeviceValidator).Assembly, typeof(UserDeviceMapper).Assembly,
+                     typeof(UserSecurityImageValidator).Assembly, typeof(UserSecurityImageMapper).Assembly,
+                     typeof(UserSecurityQuestionValidator).Assembly, typeof(UserSecurityQuestionMapper).Assembly,
+                     typeof(UserTagValidator).Assembly, typeof(UserTagMapper).Assembly,
                 };
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
@@ -42,22 +45,12 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 db.Database.Migrate();
 
-
-
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// app.MapUserEndpoints();
-app.MapUserTagEndpoints();
-app.MapSecurityQuestionEndpoints();
-app.MapUserSecurityQuestionEndpoints();
-app.MapSecurityImageEndpoints();
-app.MapUserSecurityImageEndpoints();
-app.MapUserDeviceEndpoints();
 
 try
 {

@@ -1,121 +1,39 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using amorphie.core.Base;
-using amorphie.core.Enums;
-using amorphie.core.IBase;
+using amorphie.core.Repository;
 using amorphie.fact.data;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using amorphie.user;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public static class UserSecurityImageModule
+public class UserSecurityImageModule : BaseUserSecurityImageModule<UserSecurityImageDto, UserSecurityImage, UserSecurityImageValidator>
 {
-
-    static WebApplication _app = default!;
-
-    public static void MapUserSecurityImageEndpoints(this WebApplication app)
+    public UserSecurityImageModule(WebApplication app) : base(app)
     {
-        _app = app;
-
-        _app.MapGet("/usersecurityimage", getAllUserSecurityImage)
-        .WithOpenApi()
-       .WithSummary("Returns saved usersecurityimage records.")
-       .WithDescription("Returns existing usersecurityimage with metadata.Query parameter usersecurityimage is can contain request or order SecurityQuestion of usersecurityimages.")
-       .WithTags("UserSecurityImage")
-       .Produces<GetUserSecurityImageResponse>(StatusCodes.Status200OK)
-       .Produces(StatusCodes.Status404NotFound);
-
-
-        _app.MapPost("/usersecurityimage", postUserSecurityImage)
-         .WithOpenApi()
-         .WithSummary("Save usersecurityimage.")
-         .WithDescription("Save usersecurityimage.")
-         .WithTags("UserSecurityImage")
-         .Produces(StatusCodes.Status200OK)
-         .Produces(StatusCodes.Status201Created)
-         .Produces(StatusCodes.Status409Conflict);
-
-        _app.MapDelete("/usersecurityimage/{id}", deleteUserSecurityImage)
-        .WithOpenApi()
-        .WithSummary("Deletes usersecurityimage")
-        .WithDescription("Delete usersecurityimage.")
-        .WithTags("UserSecurityImage")
-        .Produces<GetUserSecurityImageResponse>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound);
-
-        _app.MapGet("/usersecurityimage/user/{userId}/image/{imageId}/userCheckImage", userCheckImage)
-        .WithOpenApi()
-       .WithSummary("Check image.")
-       .WithDescription("Check image")
-       .WithTags("UserSecurityImage")
-       .Produces<GetUserSecurityImageResponse>(StatusCodes.Status200OK)
-       .Produces(StatusCodes.Status404NotFound);
-
-
     }
-    static IResponse<List<GetUserSecurityImageResponse>> getAllUserSecurityImage(
-      [FromServices] UserDBContext context,
-      [FromQuery] Guid UserId,
-      [FromQuery][Range(0, 100)] int page = 0,
-      [FromQuery][Range(5, 100)] int pageSize = 100
-      )
+
+    public override string[]? PropertyCheckList => new string[] { };
+
+    public override string? UrlFragment => "userSecurityImage";
+
+    public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
-        var query = context!.UserSecurityImages!
+        base.AddRoutes(routeGroupBuilder);
 
-            .Skip(page * pageSize)
-            .Take(pageSize);
-
-        if (UserId != null)
-        {
-            query = query.Where(t => t.UserId == UserId);
-        }
-
-        var userSecurityImages = query.ToList();
-
-        if (userSecurityImages.Count() > 0)
-        {
-            return new Response<List<GetUserSecurityImageResponse>>
-            {
-                Data = userSecurityImages.Select(x => ObjectMapper.Mapper.Map<GetUserSecurityImageResponse>(x)).ToList(),
-                Result = new Result(Status.Success, "List return successfull")
-            };
-            //     return Results.Ok(userSecurityImages.Select(userSecurityImage =>
-            //       new GetUserSecurityImageResponse(
-            //        userSecurityImage.Id,
-            //        userSecurityImage.SecurityImage,
-            //        userSecurityImage.UserId,
-            //            userSecurityImage.CreatedAt,
-            //        userSecurityImage.CreatedBy,
-            //    userSecurityImage.CreatedByBehalfOf,
-            //    userSecurityImage.ModifiedAt,
-            //        userSecurityImage.ModifiedBy,
-            //        userSecurityImage.ModifiedByBehalfOf
-
-            //         )
-            //     ).ToArray());
-        }
-        else
-        {
-            return new Response<List<GetUserSecurityImageResponse>>
-            {
-                Data = null,
-                Result = new Result(Status.Success, "No content")
-            };
-        }
+        routeGroupBuilder.MapGet("/user/{userId}/image/{imageId}/userCheckImage", userCheckImage);
     }
-    static IResponse<GetUserSecurityImageResponse> postUserSecurityImage(
-           [FromBody] PostUserSecurityImageRequest data,
-           [FromServices] UserDBContext context
-           )
+
+    protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
+      [FromServices] UserSecurityImageValidator validator,
+      [FromServices] IBBTRepository<UserSecurityImage, UserDBContext> repository,
+      [FromBody] UserSecurityImageDto data)
     {
 
-        var userSecurityImage = context!.UserSecurityImages!
+        var userSecurityImage = repository.DbContext.UserSecurityImages!
           .FirstOrDefault(x => x.UserId == data.UserId);
-        var user = context!.Users.FirstOrDefault(x => x.Id == data.UserId);
-        var securityImage = context!.SecurityImages!.FirstOrDefault(x => x.Id == data.SecurityImageId);
+
+        var user = repository.DbContext!.Users.FirstOrDefault(x => x.Id == data.UserId);
+        var securityImage = repository.DbContext!.SecurityImages!.FirstOrDefault(x => x.Id == data.Id);
+
         if (userSecurityImage == null)
         {
             if (user.Salt != null)
@@ -128,39 +46,19 @@ public static class UserSecurityImageModule
                 newRecord.CreatedAt = DateTime.UtcNow;
                 newRecord.SecurityImage = result;
 
+                repository.DbContext!.UserSecurityImages!.Add(newRecord);
+                repository.DbContext.SaveChanges();
 
-                // var newRecord = new UserSecurityImage
-                // {
-                //     Id = Guid.NewGuid(),
-                //     SecurityImage = result,
-                //     UserId = data.UserId,
-                //     CreatedAt = DateTime.Now,
-                //     CreatedBy = data.CreatedBy,
-                //     CreatedByBehalfOf = data.CreatedByBehalfOf
-                // };
-                context!.UserSecurityImages!.Add(newRecord);
-                context.SaveChanges();
-                return new Response<GetUserSecurityImageResponse>
-                {
-                    Data = ObjectMapper.Mapper.Map<GetUserSecurityImageResponse>(newRecord),
-                    Result = new Result(Status.Success, "Add successfull")
-                };
+                return Results.Ok(newRecord);
             }
-            else
-            {
-                return new Response<GetUserSecurityImageResponse>
-                {
-                    Data = null,
-                    Result = new Result(Status.Success, "User salt not found")
-                };
 
-            }
+            return Results.Problem("User salt not found");
         }
         else
         {
             var hasChanges = false;
             // Apply update to only changed fields.
-            if (securityImage.Image!= null)
+            if (securityImage.Image != null)
             {
                 if (user.Salt != null)
                 {
@@ -168,86 +66,43 @@ public static class UserSecurityImageModule
                     var bytePassword = Convert.FromBase64String(userSecurityImage.SecurityImage);
                     var salt = Convert.FromBase64String(user.Salt);
                     var checkPassword = ArgonPasswordHelper.VerifyHash(securityImage.Image, salt, bytePassword);
+
                     if (!checkPassword)
                     {
                         var password = ArgonPasswordHelper.HashPassword(securityImage.Image, salt);
                         userSecurityImage.SecurityImage = Convert.ToBase64String(password);
                         hasChanges = true;
                     }
-                    if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != userSecurityImage.ModifiedByBehalfOf) { userSecurityImage.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
+
+                    if (data.ModifiedByBehalfOf != null && data.ModifiedByBehalfOf != userSecurityImage.ModifiedByBehalfOf) { userSecurityImage.ModifiedByBehalfOf = data.ModifiedByBehalfOf; hasChanges = true; }
                     if (data.ModifiedBy != null && data.ModifiedBy != userSecurityImage.ModifiedBy) { userSecurityImage.ModifiedBy = data.ModifiedBy; hasChanges = true; }
                     userSecurityImage.ModifiedAt = DateTime.Now;
-
                 }
 
                 if (hasChanges)
                 {
-                    context!.SaveChanges();
-                    return new Response<GetUserSecurityImageResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserSecurityImageResponse>(userSecurityImage),
-                        Result = new Result(Status.Success, "Add successfull")
-                    };
+                    repository.DbContext!.SaveChanges();
+                }
 
-                }
-                else
-                {
-                    return new Response<GetUserSecurityImageResponse>
-                    {
-                        Data = ObjectMapper.Mapper.Map<GetUserSecurityImageResponse>(data),
-                        Result = new Result(Status.Error, "Not Modified")
-                    };
-                }
+                return Results.NoContent();
             }
             else
             {
-                return new Response<GetUserSecurityImageResponse>
-                {
-                    Data = null,
-                    Result = new Result(Status.Error, "User salt not found")
-                };
+                return Results.Problem("User salt not found");
             }
-
-        }
-        return new Response<GetUserSecurityImageResponse>
-        {
-            Data = ObjectMapper.Mapper.Map<GetUserSecurityImageResponse>(data),
-            Result = new Result(Status.Error, "Request  is already used for another record")
-        };
-    }
-    static IResponse deleteUserSecurityImage(
-       [FromRoute(Name = "id")] Guid id,
-       [FromServices] UserDBContext context)
-    {
-
-        var recordToDelete = context?.UserSecurityImages?.FirstOrDefault(t => t.Id == id);
-
-        if (recordToDelete == null)
-        {
-            return new NoDataResponse
-            {
-                Result = new Result(Status.Error, "Security image is not found")
-            };
-        }
-        else
-        {
-            context!.Remove(recordToDelete);
-            context.SaveChanges();
-            return new NoDataResponse
-            {
-                Result = new Result(Status.Success, "Delete successful")
-            };
         }
     }
-    static IResponse userCheckImage(
-        [FromRoute(Name = "userId")] Guid userId,
-        [FromRoute(Name = "imageId")] Guid imageId,
-         [FromServices] UserDBContext context
-          )
+
+    async ValueTask<IResult> userCheckImage(
+       [FromRoute(Name = "userId")] Guid userId,
+       [FromRoute(Name = "imageId")] Guid imageId,
+        [FromServices] UserDBContext context
+         )
     {
         var user = context!.Users!
       .Include(x => x.UserSecurityImages)
       .FirstOrDefault(x => x.Id == userId);
+
         if (user != null)
         {
             var securityImage = context!.SecurityImages!.FirstOrDefault(x => x.Id == imageId);
@@ -258,92 +113,18 @@ public static class UserSecurityImageModule
                 var byteImage = Convert.FromBase64String(userSecurityImage.SecurityImage);
                 var salt = Convert.FromBase64String(user.Salt);
                 var checkPassword = ArgonPasswordHelper.VerifyHash(securityImage.Image, salt, byteImage);
+
                 if (checkPassword)
                 {
-                    return new NoDataResponse
-                    {
-                        Result = new Result(Status.Success, "Image match")
-                    };
+                    return Results.Ok("Image match");
                 }
-                else
-                {
-                    return new NoDataResponse
-                    {
 
-                        Result = new Result(Status.Error, "Image do not match")
-                    };
-                }
+                return Results.Problem("Image do not match");
             }
-            else
-            {
-                return new NoDataResponse
-                {
 
-                    Result = new Result(Status.Error, "SecurityImage definition is not found. Please check userId is exists in definitions")
-                };
-
-            }
-        }
-        else
-        {
-            return new NoDataResponse
-            {
-
-                Result = new Result(Status.Error, "User is not found")
-            };
+            return Results.Problem("SecurityImage definition is not found. Please check userId is exists in definitions");
         }
 
+        return Results.Problem("User is not found");
     }
-    //  static  IResponse userCheckImage(
-    //     [FromRoute(Name = "userId")] Guid userId,
-    //     [FromRoute(Name = "image")] string image,
-    //      [FromServices] UserDBContext context
-    //       )
-    // {
-    //     var user = context!.Users!.FirstOrDefault(x => x.Id == userId);
-    //     if (user != null)
-    //     {
-    //         var securityImage = context!.UserSecurityImages!.FirstOrDefault(x => x.UserId == userId);
-    //         if (securityImage != null)
-    //         {
-    //             var byteImage = Convert.FromBase64String(securityImage.SecurityImage);
-    //             var salt = Convert.FromBase64String(user.Salt);
-    //             var checkPassword = PasswordHelper.VerifyHash(image, salt, byteImage);
-    //             if (checkPassword)
-    //             {
-    //                return new NoDataResponse
-    //             {
-    //                 Result = new Result(Status.Success, "Image match")
-    //             };
-    //             }
-    //             else
-    //             {
-    //                return new NoDataResponse
-    //             {
-
-    //                 Result = new Result(Status.Error, "Image do not match")
-    //             };
-    //             }
-    //         }
-    //         else
-    //         {
-    //               return new NoDataResponse
-    //             {
-
-    //                 Result = new Result(Status.Error, "SecurityImage definition is not found. Please check userId is exists in definitions")
-    //             };
-
-    //         }
-    //     }
-    //     else
-    //     {
-    //         return new NoDataResponse
-    //         {
-
-    //             Result = new Result(Status.Error, "User is not found")
-    //         };
-    //     }
-
-    // }
 }
-

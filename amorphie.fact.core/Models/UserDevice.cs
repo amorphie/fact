@@ -13,7 +13,4 @@ public class UserDevice : EntityBase
     public Guid UserId { get; set; }
     public User? Users { get; set; }
     public int Status { get; set; }
-
-
-
 }

@@ -6,13 +6,13 @@ using amorphie.fact.data;
 
 namespace amorphie.user;
 
-    public abstract class BaseUserModule<TDTOModel, TDBModel, TValidator>
+    public abstract class BaseSecurityQuestionModule<TDTOModel, TDBModel, TValidator>
         : BaseBBTRouteRepository<TDTOModel, TDBModel, TValidator, UserDBContext, IBBTRepository<TDBModel, UserDBContext>>
         where TDTOModel : class, new()
         where TDBModel : EntityBase
         where TValidator : AbstractValidator<TDBModel>
     {
-        protected BaseUserModule(WebApplication app) : base(app)
+        protected BaseSecurityQuestionModule(WebApplication app) : base(app)
         {
         }
 
