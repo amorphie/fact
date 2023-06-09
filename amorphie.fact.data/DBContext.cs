@@ -24,9 +24,12 @@ public class UserDBContext : DbContext
     public DbSet<SecurityQuestion>? SecurityQuestions { get; set; }
     public DbSet<SecurityImage>? SecurityImages { get; set; }
     public DbSet<UserSecurityImage>? UserSecurityImages { get; set; }
+    public DbSet<UserPassword>? UserPasswords { get; set; }
     public DbSet<Client>? Clients { get; set; }
     public DbSet<ClientToken>? ClientTokens { get; set; }
-    public DbSet<UserPassword>? UserPasswords { get; set; }
+    public DbSet<ClientGrantType>? ClientGrantTypes { get; set; }
+    public DbSet<ClientFlow>? ClientFlows { get; set; }
+
     public UserDBContext(DbContextOptions options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
