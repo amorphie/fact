@@ -1,7 +1,4 @@
-using amorphie.core.Module.minimal_api;
 using amorphie.core.Repository;
-using FluentValidation;
-using amorphie.core.Base;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
@@ -9,7 +6,6 @@ using amorphie.fact.data;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace amorphie.client;
 
@@ -44,8 +40,7 @@ public class ClientModule
             .Include(t => t.Names)
             .Include(t => t.Tokens)
             .FirstOrDefault(t => t.Id == data.ClientId
-                && t.Secret == hashedSecret
-                && (string.IsNullOrEmpty(t.ReturnUrl) || data.ReturnUrl == data.ReturnUrl));
+                && t.Secret == hashedSecret);
 
         if (client == null)
         {
@@ -53,7 +48,6 @@ public class ClientModule
         }
 
         return Results.Ok(client);
-
     }
 
     protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
@@ -115,7 +109,7 @@ public class ClientModule
 
         if (model is Client)
         {
-            model.Secret = null;
+            // model.Secret = null;
             return TypedResults.Ok(model);
         }
 
@@ -131,10 +125,10 @@ public class ClientModule
 
         if (resultList != null && resultList.Count() > 0)
         {
-            foreach (Client client in resultList)
-            {
-                client.Secret = null;
-            }
+            // foreach (Client client in resultList)
+            // {
+            //     client.Secret = null;
+            // }
 
             return Results.Ok(resultList);
         }

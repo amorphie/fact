@@ -1,15 +1,3 @@
-using amorphie.core.Module.minimal_api;
-using amorphie.core.Repository;
-using FluentValidation;
-using amorphie.core.Base;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using AutoMapper;
-using amorphie.fact.data;
-using System.Text;
-using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
-
 namespace amorphie.client;
 
 public class ClientTokenModule

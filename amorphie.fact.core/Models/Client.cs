@@ -7,7 +7,6 @@ public class Client : EntityBase
     public string? Status { get; set; }
     public ClientType Type { get; set; }
     public string? Validations { get; set; }
-    public string[]? AvailableFlows { get; set; }
     public string? Secret { get; set; }
     public string? ReturnUrl { get; set; }
     public string? LoginUrl { get; set; }
