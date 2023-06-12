@@ -82,6 +82,10 @@ public class UserDBContext : DbContext
         modelBuilder.Entity<User>().HasIndex(item => item.SearchVector).HasMethod("GIN");
         modelBuilder.Entity<User>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Reference", "EMail", "FirstName", "LastName", "Number" }), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
 
+        modelBuilder.Entity<Client>().HasIndex(item => item.SearchVector).HasMethod("GIN");
+        modelBuilder.Entity<Client>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "ReturnUrl", "LoginUrl", "LogoutUrl" }), true);
+
+
         var UserId = Guid.NewGuid();
 
         modelBuilder.Entity<User>(c =>

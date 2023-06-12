@@ -23,13 +23,7 @@ builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
 
 var assemblies = new Assembly[]
                 {
-                     typeof(UserValidator).Assembly, typeof(UserMapper).Assembly,
-                     typeof(SecurityImageValidator).Assembly, typeof(SecurityImageMapper).Assembly,
-                     typeof(SecurityQuestionValidator).Assembly, typeof(SecurityQuestionMapper).Assembly,
-                     typeof(UserDeviceValidator).Assembly, typeof(UserDeviceMapper).Assembly,
-                     typeof(UserSecurityImageValidator).Assembly, typeof(UserSecurityImageMapper).Assembly,
-                     typeof(UserSecurityQuestionValidator).Assembly, typeof(UserSecurityQuestionMapper).Assembly,
-                     typeof(UserTagValidator).Assembly, typeof(UserTagMapper).Assembly,
+                     typeof(UserValidator).Assembly, typeof(UserMapper).Assembly
                 };
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);

@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using amorphie.core.Base;
+using NpgsqlTypes;
 
 public class Client : EntityBase
 {
@@ -16,6 +18,10 @@ public class Client : EntityBase
     public Jws? Jws { get; set; }
     public Idempotency? Idempotency { get; set; }
     public ICollection<ClientToken> Tokens { get; set; } = default!;
+    public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
+
+    [NotMapped]
+    public virtual NpgsqlTsVector SearchVector { get; set; }
 }
 
 public enum ClientType : byte

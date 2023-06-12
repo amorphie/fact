@@ -1,4 +1,5 @@
 using amorphie.core.Base;
+using NpgsqlTypes;
 
 public class ClientDto : DtoBase
 {
@@ -7,7 +8,6 @@ public class ClientDto : DtoBase
     public string? Status { get; set; }
     public ClientType Type { get; set; }
     public string? Validations { get; set; }
-    public string[]? AvailableFlows { get; set; }
     public string? Secret { get; set; }
     public string? ReturnUrl { get; set; }
     public string? LoginUrl { get; set; }
@@ -17,10 +17,17 @@ public class ClientDto : DtoBase
     public Jws? Jws { get; set; }
     public Idempotency? Idempotency { get; set; }
     public ICollection<ClientToken> Tokens { get; set; } = default!;
+    public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
 }
 
 public class ValidateClientRequest
 {
     public Guid ClientId { get; set; }
     public string Secret { get; set; } = default!;
+}
+
+
+public class ClientSearch : DtoSearchBase
+{
+
 }
