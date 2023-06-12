@@ -25,10 +25,7 @@ builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
 
 var assemblies = new Assembly[]
                 {
-                     typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly,
-                     typeof(ClientTokenValidator).Assembly, typeof(ClientTokenMapper).Assembly ,
-                     typeof(ClientFlowValidator).Assembly, typeof(ClientFlowMapper).Assembly,
-                     typeof(ClientGrantTypeValidator).Assembly, typeof(ClientGrantTypeMapper).Assembly  
+                     typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly
                 };
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);

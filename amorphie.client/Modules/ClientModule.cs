@@ -26,6 +26,52 @@ public class ClientModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapPost("validate", validateClient);
+        routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
+    }
+
+    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
+    {
+        var client = repository.DbContext.Clients!
+         .Include(t => t.HeaderConfig)
+         .Include(t => t.Jws)
+         .Include(t => t.Idempotency)
+         .Include(t => t.Names)
+         .Include(t => t.Tokens)
+         .Include(t => t.AllowedGrantTypes)
+         .FirstOrDefault(t => t.Id == id);
+
+        var model = await repository.GetById(id);
+
+        if (model is Client)
+        {
+            return TypedResults.Ok(model);
+        }
+
+        return TypedResults.NotFound();
+    }
+
+
+    protected override async ValueTask<IResult> GetAll([FromServices] IBBTRepository<Client, UserDBContext> repository,
+            [FromQuery][Range(0, 100)] int page,
+            [FromQuery][Range(5, 100)] int pageSize)
+    {
+        var resultList = await repository.DbContext!.Clients!
+        .Include(t => t.HeaderConfig)
+       .Include(t => t.Jws)
+       .Include(t => t.Idempotency)
+       .Include(t => t.Names)
+       .Include(t => t.Tokens)
+       .Include(t => t.AllowedGrantTypes)
+       .Skip(page * pageSize)
+       .Take(pageSize)
+       .ToListAsync();
+
+        if (resultList != null && resultList.Count() > 0)
+        {
+            return Results.Ok(resultList);
+        }
+
+        return Results.NoContent();
     }
 
     async ValueTask<IResult> validateClient([FromBody] ValidateClientRequest data,
@@ -103,39 +149,6 @@ public class ClientModule
         }
     }
 
-    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
-    {
-        var model = await repository.GetById(id);
-
-        if (model is Client)
-        {
-            // model.Secret = null;
-            return TypedResults.Ok(model);
-        }
-
-        return TypedResults.NotFound();
-    }
-
-
-    protected override async ValueTask<IResult> GetAll([FromServices] IBBTRepository<Client, UserDBContext> repository,
-            [FromQuery][Range(0, 100)] int page,
-            [FromQuery][Range(5, 100)] int pageSize)
-    {
-        IList<Client> resultList = await repository.GetAll(page, pageSize).ToListAsync();
-
-        if (resultList != null && resultList.Count() > 0)
-        {
-            // foreach (Client client in resultList)
-            // {
-            //     client.Secret = null;
-            // }
-
-            return Results.Ok(resultList);
-        }
-
-        return Results.NoContent();
-    }
-
     string ComputeSha256Hash(string rawData)
     {
         // Create a SHA256   
@@ -152,6 +165,33 @@ public class ClientModule
             }
             return builder.ToString();
         }
+    }
+
+    async ValueTask<IResult> getAllClientFullTextSearch(
+      [FromServices] UserDBContext context,
+      [AsParameters] ClientSearch dataSearch,
+      [FromServices] IMapper mapper
+    )
+    {
+        var query = context!.Clients!
+            .Skip(dataSearch.Page * dataSearch.PageSize)
+            .Take(dataSearch.PageSize);
+
+        if (!string.IsNullOrEmpty(dataSearch.Keyword))
+        {
+            query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.ReturnUrl, x.LoginUrl, x.LogoutUrl))
+           .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
+        }
+
+        var clients = query.ToList();
+
+        if (clients.Count() > 0)
+        {
+            var response = clients.Select(x => mapper.Map<ClientDto>(x)).ToList();
+            return Results.Ok(response);
+        }
+
+        return Results.NoContent();
     }
 
 }
