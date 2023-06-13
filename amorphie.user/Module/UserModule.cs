@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
@@ -46,6 +47,13 @@ public class UserModule : BaseRoute
         routeGroupBuilder.MapPost("/", postUser)
         .WithOpenApi()
         .WithSummary("Save user")
+        .WithDescription("It is update or creates new user.")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict);
+        routeGroupBuilder.MapPost("/postWorkflowStatus", postWorkflowStatus)
+        .WithOpenApi()
+        .WithSummary("Get Workflow Status")
         .WithDescription("It is update or creates new user.")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
@@ -204,14 +212,19 @@ public class UserModule : BaseRoute
                 record.CreatedAt = DateTime.UtcNow;
                 record.State = "new";
                 record.Salt = Convert.ToBase64String(salt);
-
+                if(record.Id==null)
+                {
+                    record.Id=new Guid();
+                }
+              
+                
                 context!.Users!.Add(record);
                 context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
-
+            
                 context.SaveChanges();
                 transaction.Commit();
 
-                return Results.Created($"/{record.Id}", record);
+                return Results.Ok(record);
             }
             catch (Exception ex)
             {
@@ -240,7 +253,45 @@ public class UserModule : BaseRoute
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
 
                 }
-
+                if (data.tags != null&&data.tags.Count>0)
+                {
+                    if(user.UserTags==null||(user.UserTags!=null&&user.UserTags.Count==0))
+                    {
+                      user.UserTags=  data.tags.Select(s=>new UserTag(){
+                            Tag=s,
+                            UserId=user.Id
+                            
+                        }).ToList();
+                         hasChanges=true;
+                    }
+                    else{
+                        foreach(var tag in data.tags)
+                    {
+                        //User Tag if not exist add
+                        if(!user.UserTags.Any(w=>w.Tag==tag))
+                        {
+                            context.UserTags.Add(new UserTag(){
+                                Tag=tag,
+                                UserId=user.Id
+                            });
+                             hasChanges=true;
+                        }
+                        
+                    }
+                    //
+                    foreach(var tag in user.UserTags)
+                    {
+                        //User Tag delete
+                        if(!data.tags.Any(w=>w==tag.Tag))
+                        {
+                            context.UserTags.Remove(tag);
+                        }
+                        hasChanges=true;
+                    }
+                    }
+                    
+                    
+                }
                 if (data.Reference != null && data.Reference != user.Reference) { user.Reference = data.Reference; hasChanges = true; }
                 if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; }
                 if (data.EMail != null && data.EMail != user.EMail) { user.EMail = data.EMail; hasChanges = true; }
@@ -252,9 +303,12 @@ public class UserModule : BaseRoute
                 {
                     context!.SaveChanges();
                     transaction.Commit();
+                  return Results.Ok(user);
                 }
-
-                return Results.NoContent();
+                else{
+                         return Results.NoContent();
+                }
+                
             }
             catch (Exception ex)
             {
@@ -264,7 +318,49 @@ public class UserModule : BaseRoute
             }
         }
     }
+    async Task<IResult> postWorkflowStatus(
+            [FromBody] PostWorkflow? workflowData,
+            [FromServices] UserDBContext context,
+              IConfiguration configuration
+            )
 
+    {
+        if(workflowData!=null&&workflowData.workflowName=="user")
+        {
+            var serializeEntityData = JsonSerializer.Serialize(workflowData.entityData);
+            var serializeWorkflowData = JsonSerializer.Serialize(workflowData);
+            PostUserRequest requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<PostUserRequest>(serializeEntityData)!;
+            PostWorkflowDtoUser request = Newtonsoft.Json.JsonConvert.DeserializeObject<PostWorkflowDtoUser>(serializeWorkflowData)!;
+            request.data=requestEntity;
+            var userWithId = context!.Users!
+         .FirstOrDefault(x => x.Id == workflowData!.recordId);
+        try
+        {
+            // Check any ID is exists ?
+            if (userWithId == null)
+            {
+    var userWithReferenceId = context!.Users!
+             .FirstOrDefault(x => x.Reference == requestEntity.Reference);
+                if (userWithReferenceId != null)
+                {
+                    return Results.Problem("Reference already exist but workflow recordid is not:" + workflowData.recordId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.ToString());
+        }
+        return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, configuration).Result;
+        }
+        else if(workflowData!=null&&workflowData.workflowName=="user-reset-password")
+        {
+                //Reset Password
+                //entity data değeri => PostWorkflowUserReset
+                //class PostWorkflowUserReset{ public string  newPassword {get;set;}}
+        }
+        return Results.Ok();
+    }
     async ValueTask<IResult> deleteUser(
       [FromRoute(Name = "id")] Guid id,
       [FromServices] UserDBContext context)
