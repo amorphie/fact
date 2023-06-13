@@ -113,6 +113,11 @@ public class UserModule : BaseRoute
             query = query.AsNoTracking().Where(p => p.SearchVector.Matches(EF.Functions.PlainToTsQuery("english", userSearch.Keyword)));
         }
 
+        if (!string.IsNullOrEmpty(userSearch.UserTag))
+        {
+            query = query.AsNoTracking().Where(p => p.UserTags.Any(t => t.Tag == userSearch.UserTag));
+        }
+
         var users = query.ToList();
 
         if (users.Count() > 0)
@@ -311,7 +316,7 @@ public class UserModule : BaseRoute
                 var checkPasswordRequest = new UserCheckPasswordRequest(request.oldPassword, user.Id);
 
                 var pbkdfPassword = await checkUserPbkdfPassword(checkPasswordRequest, context);
-                
+
                 if (pbkdfPassword.Result.Status == Status.Success.ToString())
                 {
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
