@@ -34,6 +34,7 @@ Guid? ModifiedByBehalof,
 string Salt,
 bool IsArgonHash,Guid? Id,List<string>? tags);
 
+
 public record UserCheckPasswordRequest(string Password, Guid UserId);
 public record UserPasswordUpdateRequest(string oldPassword, string newPassord);
 public record UserLoginRequest(string Reference, string Password);
@@ -41,5 +42,5 @@ public record UserLoginRequest(string Reference, string Password);
 
 public class UserSearch : DtoSearchBase
 {
-
+    public string? UserTag { get; set; }
 }

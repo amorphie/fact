@@ -25,6 +25,7 @@ public class UserDBContext : DbContext
     public DbSet<SecurityImage>? SecurityImages { get; set; }
     public DbSet<UserSecurityImage>? UserSecurityImages { get; set; }
     public DbSet<UserPassword>? UserPasswords { get; set; }
+    public DbSet<DeactiveDefinition>? DeactiveDefinitions { get; set; }
     public DbSet<Client>? Clients { get; set; }
     public DbSet<ClientToken>? ClientTokens { get; set; }
     public DbSet<ClientGrantType>? ClientGrantTypes { get; set; }
@@ -81,6 +82,10 @@ public class UserDBContext : DbContext
 
         modelBuilder.Entity<User>().HasIndex(item => item.SearchVector).HasMethod("GIN");
         modelBuilder.Entity<User>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "Reference", "EMail", "FirstName", "LastName", "Number" }), true); //We have to manually specify the generated SQL since we are using columns spanning the split table.
+
+        modelBuilder.Entity<Client>().HasIndex(item => item.SearchVector).HasMethod("GIN");
+        modelBuilder.Entity<Client>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "ReturnUrl", "LoginUrl", "LogoutUrl" }), true);
+
 
         var UserId = Guid.NewGuid();
 
