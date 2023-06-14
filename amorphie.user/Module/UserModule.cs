@@ -212,15 +212,15 @@ public class UserModule : BaseRoute
                 record.CreatedAt = DateTime.UtcNow;
                 record.State = "new";
                 record.Salt = Convert.ToBase64String(salt);
-                if(record.Id==null)
+                if (record.Id == null)
                 {
-                    record.Id=new Guid();
+                    record.Id = new Guid();
                 }
-              
-                
+
+
                 context!.Users!.Add(record);
                 context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
-            
+
                 context.SaveChanges();
                 transaction.Commit();
 
@@ -253,44 +253,47 @@ public class UserModule : BaseRoute
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
 
                 }
-                if (data.tags != null&&data.tags.Count>0)
+                if (data.tags != null && data.tags.Count > 0)
                 {
-                    if(user.UserTags==null||(user.UserTags!=null&&user.UserTags.Count==0))
+                    if (user.UserTags == null || (user.UserTags != null && user.UserTags.Count == 0))
                     {
-                      user.UserTags=  data.tags.Select(s=>new UserTag(){
-                            Tag=s,
-                            UserId=user.Id
-                            
+                        user.UserTags = data.tags.Select(s => new UserTag()
+                        {
+                            Tag = s,
+                            UserId = user.Id
+
                         }).ToList();
-                         hasChanges=true;
+                        hasChanges = true;
                     }
-                    else{
-                        foreach(var tag in data.tags)
+                    else
                     {
-                        //User Tag if not exist add
-                        if(!user.UserTags.Any(w=>w.Tag==tag))
+                        foreach (var tag in data.tags)
                         {
-                            context.UserTags.Add(new UserTag(){
-                                Tag=tag,
-                                UserId=user.Id
-                            });
-                             hasChanges=true;
+                            //User Tag if not exist add
+                            if (!user.UserTags.Any(w => w.Tag == tag))
+                            {
+                                context.UserTags.Add(new UserTag()
+                                {
+                                    Tag = tag,
+                                    UserId = user.Id
+                                });
+                                hasChanges = true;
+                            }
+
                         }
-                        
-                    }
-                    //
-                    foreach(var tag in user.UserTags)
-                    {
-                        //User Tag delete
-                        if(!data.tags.Any(w=>w==tag.Tag))
+                        //
+                        foreach (var tag in user.UserTags)
                         {
-                            context.UserTags.Remove(tag);
+                            //User Tag delete
+                            if (!data.tags.Any(w => w == tag.Tag))
+                            {
+                                context.UserTags.Remove(tag);
+                            }
+                            hasChanges = true;
                         }
-                        hasChanges=true;
                     }
-                    }
-                    
-                    
+
+
                 }
                 if (data.Reference != null && data.Reference != user.Reference) { user.Reference = data.Reference; hasChanges = true; }
                 if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; }
@@ -303,12 +306,13 @@ public class UserModule : BaseRoute
                 {
                     context!.SaveChanges();
                     transaction.Commit();
-                  return Results.Ok(user);
+                    return Results.Ok(user);
                 }
-                else{
-                         return Results.NoContent();
+                else
+                {
+                    return Results.NoContent();
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -325,42 +329,68 @@ public class UserModule : BaseRoute
             )
 
     {
-        if(workflowData!=null&&workflowData.workflowName=="user")
+        if (workflowData != null && workflowData.workflowName == "user")
         {
             var serializeEntityData = JsonSerializer.Serialize(workflowData.entityData);
             var serializeWorkflowData = JsonSerializer.Serialize(workflowData);
             PostUserRequest requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<PostUserRequest>(serializeEntityData)!;
             PostWorkflowDtoUser request = Newtonsoft.Json.JsonConvert.DeserializeObject<PostWorkflowDtoUser>(serializeWorkflowData)!;
-            request.data=requestEntity;
+            request.data = requestEntity;
             var userWithId = context!.Users!
          .FirstOrDefault(x => x.Id == workflowData!.recordId);
-        try
-        {
-            // Check any ID is exists ?
-            if (userWithId == null)
+            try
             {
-    var userWithReferenceId = context!.Users!
-             .FirstOrDefault(x => x.Reference == requestEntity.Reference);
-                if (userWithReferenceId != null)
+                // Check any ID is exists ?
+                if (userWithId == null)
                 {
-                    return Results.Problem("Reference already exist but workflow recordid is not:" + workflowData.recordId);
+                    var userWithReferenceId = context!.Users!
+                             .FirstOrDefault(x => x.Reference == requestEntity.Reference);
+                    if (userWithReferenceId != null)
+                    {
+                        return Results.Problem("Reference already exist but workflow recordid is not:" + workflowData.recordId);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.ToString());
+            }
+            return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, configuration).Result;
         }
-        catch (Exception ex)
+        else if (workflowData != null && workflowData.workflowName == "user-reset-password")
         {
-            return Results.Problem(ex.ToString());
-        }
-        return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, configuration).Result;
-        }
-        else if(workflowData!=null&&workflowData.workflowName=="user-reset-password")
-        {
-                //Reset Password
-                //entity data değeri => PostWorkflowUserReset
-                //class PostWorkflowUserReset{ public string  newPassword {get;set;}}
+            var serializeWorkflowData = JsonSerializer.Serialize(workflowData.entityData);
+            var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<PostWorkflowUserReset>(serializeWorkflowData)!;
+
+            return resetUserPassword(workflowData.recordId, requestEntity, context).Result;
         }
         return Results.Ok();
     }
+
+    async ValueTask<IResult> resetUserPassword(
+         Guid userId,
+         PostWorkflowUserReset request,
+         UserDBContext context
+          )
+    {
+        var user = await context!.Users!
+        .Include(x => x.UserPasswords)
+        .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user != null)
+        {
+            var salt = Convert.FromBase64String(user.Salt);
+            var password = ArgonPasswordHelper.HashPassword(request.NewPassword, salt);
+
+            context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = Convert.ToBase64String(password), CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = userId, ModifiedAt = DateTime.UtcNow });
+            context!.SaveChanges();
+
+            return Results.Ok("Change password");
+        }
+
+        return Results.Problem("User is not found");
+    }
+
     async ValueTask<IResult> deleteUser(
       [FromRoute(Name = "id")] Guid id,
       [FromServices] UserDBContext context)
