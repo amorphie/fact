@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
+//using System.Text.Json;
+using Newtonsoft.Json;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
@@ -224,7 +225,7 @@ public class UserModule : BaseRoute
                 context.SaveChanges();
                 transaction.Commit();
 
-                return Results.Ok(record);
+                return Results.Ok();
             }
             catch (Exception ex)
             {
@@ -255,22 +256,25 @@ public class UserModule : BaseRoute
                 }
                 if (data.tags != null && data.tags.Count > 0)
                 {
-                    if (user.UserTags == null || (user.UserTags != null && user.UserTags.Count == 0))
+                    List<UserTag> userTagList=context.UserTags.Where(w=>w.UserId==user.Id).ToList();
+                    if (userTagList == null || (userTagList != null && userTagList.Count == 0))
                     {
-                        user.UserTags = data.tags.Select(s => new UserTag()
+                         foreach (var tag in data.tags)
                         {
-                            Tag = s,
-                            UserId = user.Id
-
-                        }).ToList();
-                        hasChanges = true;
+                        context.UserTags.Add(new UserTag()
+                                {
+                                    Tag = tag,
+                                    UserId = user.Id
+                                });
+                                hasChanges = true;
+                        }
                     }
                     else
                     {
                         foreach (var tag in data.tags)
                         {
                             //User Tag if not exist add
-                            if (!user.UserTags.Any(w => w.Tag == tag))
+                            if (!userTagList.Any(w => w.Tag == tag))
                             {
                                 context.UserTags.Add(new UserTag()
                                 {
@@ -282,14 +286,15 @@ public class UserModule : BaseRoute
 
                         }
                         //
-                        foreach (var tag in user.UserTags)
+                        foreach (var tag in userTagList)
                         {
                             //User Tag delete
                             if (!data.tags.Any(w => w == tag.Tag))
                             {
                                 context.UserTags.Remove(tag);
+                                hasChanges = true;
                             }
-                            hasChanges = true;
+                            
                         }
                     }
 
@@ -306,7 +311,7 @@ public class UserModule : BaseRoute
                 {
                     context!.SaveChanges();
                     transaction.Commit();
-                    return Results.Ok(user);
+                    return Results.Ok();
                 }
                 else
                 {
@@ -331,8 +336,8 @@ public class UserModule : BaseRoute
     {
         if (workflowData != null && workflowData.workflowName == "user")
         {
-            var serializeEntityData = JsonSerializer.Serialize(workflowData.entityData);
-            var serializeWorkflowData = JsonSerializer.Serialize(workflowData);
+            var serializeEntityData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData);
             PostUserRequest requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<PostUserRequest>(serializeEntityData)!;
             PostWorkflowDtoUser request = Newtonsoft.Json.JsonConvert.DeserializeObject<PostWorkflowDtoUser>(serializeWorkflowData)!;
             request.data = requestEntity;
@@ -359,7 +364,7 @@ public class UserModule : BaseRoute
         }
         else if (workflowData != null && workflowData.workflowName == "user-reset-password")
         {
-            var serializeWorkflowData = JsonSerializer.Serialize(workflowData.entityData);
+            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
             var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<PostWorkflowUserReset>(serializeWorkflowData)!;
 
             return resetUserPassword(workflowData.recordId, requestEntity, context).Result;
