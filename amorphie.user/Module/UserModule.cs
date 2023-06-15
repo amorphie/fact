@@ -221,7 +221,14 @@ public class UserModule : BaseRoute
 
                 context!.Users!.Add(record);
                 context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
-
+                if(data.tags!=null&&data.tags.Count>0)
+                {
+                        foreach(var tag in data.tags)
+                        {
+                            context.UserTags!.Add(new UserTag {Id=new Guid(),UserId=record.Id,Tag=tag});
+                        }
+                }
+                
                 context.SaveChanges();
                 transaction.Commit();
 
