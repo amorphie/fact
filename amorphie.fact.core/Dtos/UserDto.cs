@@ -32,7 +32,7 @@ DateTime? ModifiedAt,
 Guid? CreatedByBehalfOf,
 Guid? ModifiedByBehalof,
 string Salt,
-bool IsArgonHash, Guid? Id, List<string>? tags);
+bool IsArgonHash, Guid? Id, List<string>? tags,string reason,string explanation);
 
 
 public record UserCheckPasswordRequest(string Password, Guid UserId);

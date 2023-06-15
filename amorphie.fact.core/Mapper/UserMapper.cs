@@ -11,7 +11,7 @@ public class UserMapper : Profile
         CreateMap<PostWorkflowDtoUser, PostUserRequest>()
          .ConstructUsing(x=> new PostUserRequest(x.data.FirstName,x.data.LastName,x.data.Reference,x.data.Password,x.data.EMail,
          x.data.Phone,x.data.State,x.data.CreatedBy,x.data.CreatedAt,x.data.ModifiedBy,x.data.ModifiedAt,
-         x.data.CreatedByBehalfOf,x.data.ModifiedByBehalof,x.data.Salt,x.data.IsArgonHash,x.recordId,x.data.tags))
+         x.data.CreatedByBehalfOf,x.data.ModifiedByBehalof,x.data.Salt,x.data.IsArgonHash,x.recordId,x.data.tags,x.data.reason,x.data.explanation))
          .ReverseMap();
     }
 }
