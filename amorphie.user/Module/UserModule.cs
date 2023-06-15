@@ -110,6 +110,13 @@ public class UserModule : BaseRoute
        .WithDescription("Gets registered user by id.")
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
+
+       
+        routeGroupBuilder.MapGet("/", GetAll)
+       .WithOpenApi()
+       .WithSummary("Gets all registered users.")
+       .Produces<GetUserResponse[]>(StatusCodes.Status200OK)
+       .Produces(StatusCodes.Status204NoContent);
     }
 
     async ValueTask<IResult> getAllUserWithFullTextSearch(
@@ -668,6 +675,27 @@ public class UserModule : BaseRoute
         }
 
         return TypedResults.NotFound();
+    }
+
+    async ValueTask<IResult> GetAll([FromServices] UserDBContext context,
+            [FromQuery][Range(0, 100)] int page,
+            [FromQuery][Range(5, 100)] int pageSize)
+    {
+        var resultList = await context!.Users!
+           .Include(d => d.UserTags)
+           .Include(x => x.UserPasswords)
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        if (resultList != null && resultList.Count() > 0)
+        {
+            var response = resultList.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
+
+            return Results.Ok(response);
+        }
+
+        return Results.NoContent();
     }
 
 }
