@@ -13,8 +13,10 @@ namespace amorphie.client;
 public class ClientModule
     : BaseClientModule<ClientDto, Client, ClientValidator>
 {
-    public ClientModule(WebApplication app) : base(app)
+    private readonly IConfiguration _configuration;
+    public ClientModule(WebApplication app,IConfiguration configuration) : base(app)
     {
+        _configuration = configuration;
     }
 
     public override string[]? PropertyCheckList => new string[] { "Type", "Validations", "Status" };
@@ -32,8 +34,8 @@ public class ClientModule
 
     protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
     {
-        return Results.Ok(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
-        
+        return Results.Ok(_configuration["mockResponse"]);
+
         var client = repository.DbContext.Clients!
          .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
@@ -80,7 +82,7 @@ public class ClientModule
     async ValueTask<IResult> validateClient([FromBody] ValidateClientRequest data,
          [FromServices] UserDBContext context)
     {
-        return Results.Ok(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
+        return Results.Ok(_configuration["mockResponse"]);
         var hashedSecret = ComputeSha256Hash(data.Secret!);
 
         var client = context!.Clients!
