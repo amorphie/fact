@@ -103,6 +103,13 @@ public class UserModule : BaseRoute
       .WithDescription("User login")
       .Produces(StatusCodes.Status200OK)
       .Produces(StatusCodes.Status201Created);
+
+        routeGroupBuilder.MapGet("/{id}", Get)
+       .WithOpenApi()
+       .WithSummary("Gets registered user by id.")
+       .WithDescription("Gets registered user by id.")
+       .Produces<GetUserResponse>(StatusCodes.Status200OK)
+       .Produces(StatusCodes.Status404NotFound);
     }
 
     async ValueTask<IResult> getAllUserWithFullTextSearch(
@@ -644,6 +651,23 @@ public class UserModule : BaseRoute
         {
             return Results.Problem("User is not found");
         }
+    }
+
+    async ValueTask<IResult> Get(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "id")] Guid id)
+    {
+        var user = context!.Users!
+           .Include(d => d.UserTags)
+           .Include(x => x.UserPasswords)
+           .FirstOrDefault(t => t.Id == id);
+
+        if (user is User)
+        {
+            return TypedResults.Ok(ObjectMapper.Mapper.Map<GetUserResponse>(user));
+        }
+
+        return TypedResults.NotFound();
     }
 
 }
