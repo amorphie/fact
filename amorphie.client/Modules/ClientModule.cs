@@ -32,7 +32,7 @@ public class ClientModule
 
     protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
     {
-        return Results.Ok(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
+        return Results.Json(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
         
         var client = repository.DbContext.Clients!
          .Include(t => t.HeaderConfig)
@@ -80,7 +80,7 @@ public class ClientModule
     async ValueTask<IResult> validateClient([FromBody] ValidateClientRequest data,
          [FromServices] UserDBContext context)
     {
-        return Results.Ok(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
+        return Results.Json(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
         var hashedSecret = ComputeSha256Hash(data.Secret!);
 
         var client = context!.Clients!
