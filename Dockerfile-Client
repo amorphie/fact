@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
-RUN adduser -u 5561 --disabled-password --gecos "" amorphie-fact-clientuser && chown -R amorphie-fact-clientuser:amorphie-fact-clientuser /app
+RUN adduser -u 5679 --disabled-password --gecos "" amorphie-fact-clientuser && chown -R amorphie-fact-clientuser:amorphie-fact-clientuser /app
 USER amorphie-fact-clientuser
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
