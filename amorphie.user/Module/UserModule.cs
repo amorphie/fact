@@ -631,6 +631,7 @@ public class UserModule : BaseRoute
             [FromServices] UserDBContext context
    )
     {
+        return Results.Ok(new{FirstName="Sercan",LastName="Yüksel",Reference=9812312,Email="test@example.com",Phone=new{CountryCode=90,Prefix=999,Number=123123}});
         var user = await context!.Users!
         .Include(x => x.UserPasswords)
         .FirstOrDefaultAsync(x => x.Reference == loginRequest.Reference);
