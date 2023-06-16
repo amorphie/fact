@@ -30,28 +30,28 @@ public class ClientModule
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
     }
 
-    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
+    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository)
     {
         dynamic obj = JsonSerializer.Deserialize<dynamic>(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
         return Results.Ok(obj);
         
-        var client = repository.DbContext.Clients!
-         .Include(t => t.HeaderConfig)
-         .Include(t => t.Jws)
-         .Include(t => t.Idempotency)
-         .Include(t => t.Names)
-         .Include(t => t.Tokens)
-         .Include(t => t.AllowedGrantTypes)
-         .FirstOrDefault(t => t.Id == id);
+        // var client = repository.DbContext.Clients!
+        //  .Include(t => t.HeaderConfig)
+        //  .Include(t => t.Jws)
+        //  .Include(t => t.Idempotency)
+        //  .Include(t => t.Names)
+        //  .Include(t => t.Tokens)
+        //  .Include(t => t.AllowedGrantTypes)
+        //  .FirstOrDefault(t => t.Id == id);
 
-        var model = await repository.GetById(id);
+        // var model = await repository.GetById(id);
 
-        if (model is Client)
-        {
-            return TypedResults.Ok(model);
-        }
+        // if (model is Client)
+        // {
+        //     return TypedResults.Ok(model);
+        // }
 
-        return TypedResults.NotFound();
+        // return TypedResults.NotFound();
     }
 
 
