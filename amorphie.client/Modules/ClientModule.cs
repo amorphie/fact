@@ -30,7 +30,7 @@ public class ClientModule
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
     }
 
-    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository)
+    protected async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository)
     {
         dynamic obj = JsonSerializer.Deserialize<dynamic>(System.IO.File.ReadAllText(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"response.json")));
         return Results.Ok(obj);
