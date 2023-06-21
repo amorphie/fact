@@ -29,7 +29,10 @@ public class ClientModule
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
     }
 
-    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository, [FromRoute(Name = "id")] Guid id)
+    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository,
+    [FromRoute(Name = "id")] Guid id
+    // ,[FromHeader(Name = "Language")] string? language = "en-EN"
+    )
     {
         var client = repository.DbContext.Clients!
          .Include(t => t.HeaderConfig)
@@ -38,13 +41,15 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Flows)
+         .Include(t => t.Names.Where(t => t.Language == "en-EN"))
          .FirstOrDefault(t => t.Id == id);
 
         var model = await repository.GetById(id);
 
         if (model is Client)
         {
-            return TypedResults.Ok(model);
+            return TypedResults.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(model));
         }
 
         return TypedResults.NotFound();
@@ -57,18 +62,22 @@ public class ClientModule
     {
         var resultList = await repository.DbContext!.Clients!
         .Include(t => t.HeaderConfig)
-       .Include(t => t.Jws)
-       .Include(t => t.Idempotency)
-       .Include(t => t.Names)
-       .Include(t => t.Tokens)
-       .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Jws)
+         .Include(t => t.Idempotency)
+         .Include(t => t.Names)
+         .Include(t => t.Tokens)
+         .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Flows)
+         .Include(t => t.Names.Where(t => t.Language == "en-EN"))
        .Skip(page * pageSize)
        .Take(pageSize)
        .ToListAsync();
 
         if (resultList != null && resultList.Count() > 0)
         {
-            return Results.Ok(resultList);
+            var response = resultList.Select(x => ObjectMapper.Mapper.Map<ClientGetDto>(x)).ToList();
+
+            return Results.Ok(response);
         }
 
         return Results.NoContent();
