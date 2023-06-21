@@ -89,20 +89,23 @@ public class ClientModule
         var hashedSecret = ComputeSha256Hash(data.Secret!);
 
         var client = context!.Clients!
-            .Include(t => t.HeaderConfig)
-            .Include(t => t.Jws)
-            .Include(t => t.Idempotency)
-            .Include(t => t.Names)
-            .Include(t => t.Tokens)
-            .FirstOrDefault(t => t.Id == data.ClientId
-                && t.Secret == hashedSecret);
+         .Include(t => t.HeaderConfig)
+         .Include(t => t.Jws)
+         .Include(t => t.Idempotency)
+         .Include(t => t.Names)
+         .Include(t => t.Tokens)
+         .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Flows)
+         .Include(t => t.Names.Where(t => t.Language == "en-EN"))
+          .FirstOrDefault(t => t.Id == data.ClientId
+                && t.Secret == hashedSecret);     
 
         if (client == null)
         {
             return Results.NotFound();
         }
 
-        return Results.Ok(client);
+       return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
     }
 
     protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
