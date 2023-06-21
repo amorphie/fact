@@ -631,7 +631,6 @@ public class UserModule : BaseRoute
             [FromServices] UserDBContext context
    )
     {
-        return Results.Ok(new{FirstName="Sercan",LastName="Yüksel",Reference="9812312",Email="test@example.com",Phone=new{CountryCode="90",Prefix="999",Number="123123"}});
         var user = await context!.Users!
         .Include(x => x.UserPasswords)
         .FirstOrDefaultAsync(x => x.Reference == loginRequest.Reference);
@@ -647,7 +646,7 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result == Results.Ok("Password match"))
                 {
-                    return Results.Ok("Login is successful");
+                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
                 }
 
                 return Results.Problem("Invalid reference or password");
@@ -660,7 +659,7 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok("Login is successful");
+                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
                 }
 
                 return Results.Problem("Invalid reference or password");
