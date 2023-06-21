@@ -4,6 +4,7 @@ public class ClientFlowMapper : Profile
 {
     public ClientFlowMapper()
     {
-        CreateMap<ClientFlow, ClientFlowDto>().ReverseMap(); 
+        CreateMap<ClientFlow, ClientFlowDto>().ReverseMap();
+        CreateMap<ClientFlow, ClientFlowGetDto>();
     }
 }

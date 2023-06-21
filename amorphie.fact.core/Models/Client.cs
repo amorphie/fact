@@ -19,6 +19,7 @@ public class Client : EntityBase
     public Idempotency? Idempotency { get; set; }
     public ICollection<ClientToken> Tokens { get; set; } = default!;
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
+    public ICollection<ClientFlow> Flows { get; set; } = default!;
 
     [NotMapped]
     public virtual NpgsqlTsVector SearchVector { get; set; }

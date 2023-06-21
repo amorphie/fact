@@ -14,6 +14,13 @@ public class ObjectMapper
         cfg.AddProfile<UserSecurityImageMapper>();
         cfg.AddProfile<UserSecurityQuestionMapper>();
         cfg.AddProfile<UserTagMapper>();
+        cfg.AddProfile<ClientMapper>();
+        cfg.AddProfile<ClientFlowMapper>();
+        cfg.AddProfile<ClientGrantTypeMapper>();
+        cfg.AddProfile<ClientGrantTypeMapper>();
+        cfg.AddProfile<JwsMapper>();
+        cfg.AddProfile<IdempotencyMapper>();
+        cfg.AddProfile<ClientTokenMapper>();
     });
 
     return config.CreateMapper();
