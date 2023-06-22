@@ -487,7 +487,7 @@ public class UserModule : BaseRoute
         return Results.Problem("User is not found");
     }
 
-    async ValueTask<IResult> checkUserPassword(
+    async ValueTask<IResponse> checkUserPassword(
    [FromBody] UserCheckPasswordRequest checkPasswordRequest,
    [FromServices] UserDBContext context
    )
@@ -509,19 +509,33 @@ public class UserModule : BaseRoute
                     Console.WriteLine("check password status:"+checkPassword);
                     if (checkPassword)
                     {
-                        return Results.Ok("Password match");
+                        return new NoDataResponse
+                        {
+                            Result = new Result(Status.Success, "Password match")
+                        };
                     }
 
-                    return Results.Problem("Passwords do not match");
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Success, "Passwords do not match")
+                    };
                 }
 
-                return Results.Problem("User password is null");
+                return new NoDataResponse
+                {
+                    Result = new Result(Status.Success, "User password is null")
+                };
             }
-
-            return Results.Problem("User password is null");
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Success, "User password is null")
+            };
         }
 
-        return Results.Problem("User is not found");
+        return new NoDataResponse
+        {
+            Result = new Result(Status.Success, "User is not found")
+        };
     }
 
     async ValueTask<IResponse> checkUserPbkdfPassword(
@@ -645,7 +659,7 @@ public class UserModule : BaseRoute
                 Console.WriteLine("Argon Hash");
                 var responsePassword = await checkUserPassword(passwordRequest, context);
                 Console.WriteLine("responsePassword :"+ responsePassword.ToString());
-                if (responsePassword == Results.Ok())
+                if (responsePassword.Result.Status == Status.Success.ToString())
                 {
                     return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
                 }
