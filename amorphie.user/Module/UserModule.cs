@@ -506,7 +506,7 @@ public class UserModule : BaseRoute
                     var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
                     var salt = Convert.FromBase64String(user.Salt);
                     var checkPassword = ArgonPasswordHelper.VerifyHash(checkPasswordRequest.Password, salt, bytePassword);
-
+                    Console.WriteLine("check password status:"+checkPassword);
                     if (checkPassword)
                     {
                         return Results.Ok("Password match");
@@ -643,9 +643,9 @@ public class UserModule : BaseRoute
             {
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
                 Console.WriteLine("Argon Hash");
-                var responsePassword = checkUserPassword(passwordRequest, context);
-                Console.WriteLine("responsePassword :" + System.Text.Json.JsonSerializer.Serialize(responsePassword.Result));
-                if (responsePassword.Result == Results.Ok())
+                var responsePassword = await checkUserPassword(passwordRequest, context);
+                Console.WriteLine("responsePassword :"+ responsePassword.ToString());
+                if (responsePassword == Results.Ok())
                 {
                     return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
                 }
