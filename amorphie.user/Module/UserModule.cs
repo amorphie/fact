@@ -655,7 +655,7 @@ public class UserModule : BaseRoute
             {
 
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
-
+                Console.WriteLine("Pbkdf Hash");
                 var responsePassword = await checkUserPbkdfPassword(passwordRequest, context);
                 Console.WriteLine("responsePassword :" + System.Text.Json.JsonSerializer.Serialize(responsePassword.Result));
                 if (responsePassword.Result.Status == Status.Success.ToString())
