@@ -644,7 +644,7 @@ public class UserModule : BaseRoute
 
                 var responsePassword = checkUserPassword(passwordRequest, context);
 
-                if (responsePassword.Result == Results.Ok("Password match"))
+                if (responsePassword.Result == Results.Ok())
                 {
                     return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
                 }
@@ -653,10 +653,11 @@ public class UserModule : BaseRoute
             }
             else
             {
+
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
 
                 var responsePassword = await checkUserPbkdfPassword(passwordRequest, context);
-
+                Console.WriteLine("responsePassword :" + System.Text.Json.JsonSerializer.Serialize(responsePassword.Result));
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
                     return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
