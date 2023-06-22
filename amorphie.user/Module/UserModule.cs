@@ -638,12 +638,13 @@ public class UserModule : BaseRoute
         if (user != null)
         {
             var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+            Console.WriteLine("User Argon Status :"+userPassword.IsArgonHash);
             if (userPassword.IsArgonHash == true)
             {
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
-
+                Console.WriteLine("Argon Hash");
                 var responsePassword = checkUserPassword(passwordRequest, context);
-
+                Console.WriteLine("responsePassword :" + System.Text.Json.JsonSerializer.Serialize(responsePassword.Result));
                 if (responsePassword.Result == Results.Ok())
                 {
                     return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail});
