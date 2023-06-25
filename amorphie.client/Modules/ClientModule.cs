@@ -6,6 +6,7 @@ using amorphie.fact.data;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using amorphie.core.Base;
 
 namespace amorphie.client;
 
@@ -27,6 +28,7 @@ public class ClientModule
 
         routeGroupBuilder.MapPost("validate", validateClient);
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
+         routeGroupBuilder.MapPost("workflowClient", workflowClient);
     }
 
     protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository,
@@ -106,6 +108,55 @@ public class ClientModule
         }
 
        return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
+    }
+    async ValueTask<IResult> workflowClient([FromServices] IMapper mapper,
+    [FromServices] ClientValidator validator, [FromServices] IBBTRepository<Client, UserDBContext> repository,[FromBody] PostWorkflow workflowData)
+    {
+
+        var serializeEntityData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+        ClientWorkflowStatusRequest requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ClientWorkflowStatusRequest>(serializeEntityData)!;
+        ClientDto dto=new ClientDto(){
+        Id=workflowData.recordId,
+         Tags=requestEntity.tags,
+         Names=new List<MultilanguageText>(){new MultilanguageText(){
+            Label=requestEntity.name,
+            Language="en-EN"
+         }},
+        Status=workflowData.newStatus=="client-approve"?"New"
+        :workflowData.newStatus=="client-reject"||workflowData.newStatus=="client-deactive"?"Deactive"
+        :workflowData.newStatus=="client-active-fd"||workflowData.newStatus=="client-update-approve"?"Active"
+        :workflowData.newStatus,
+        Secret=requestEntity.secret,
+        ReturnUrl=requestEntity.returnUrl,
+        LoginUrl=requestEntity.loginUrl,
+        LogoutUrl=requestEntity.logoutUrl,
+        Pkce=requestEntity.pkce,
+        Tokens=requestEntity.tokens!.Select(tok=>new ClientToken{
+            Type=Enum.Parse<ClientTokenType>(tok!.type!),
+            DefaultDuration=tok.tokenDuration,
+            PublicClaims=tok.publicClaims
+            
+
+        }).ToList(),
+        Flows=requestEntity.flows!.Select(tok=>new ClientFlowDto{
+            Type=tok!.type,
+            Workflow=tok.workflow,
+            TokenDuration=tok.tokenDuration
+            
+
+        }).ToList(),
+        AllowedGrantTypes=requestEntity.allowedGrantTypes!.Select(s=>new ClientGrantType(){
+            GrantType=s,
+            ClientId=workflowData.recordId
+
+        }).ToList(),
+        Idempotency=new Idempotency(){
+            Mode=requestEntity.idempotencyMode
+        }
+        };
+
+       
+       return await Upsert(mapper,validator,repository,dto);
     }
 
     protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
