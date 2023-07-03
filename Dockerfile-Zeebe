@@ -16,4 +16,4 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 EXPOSE 5000
 ENV ASPNETCORE_URLS=http://+:5000
-ENTRYPOINT ["dotnet", "amorphie.useramorphie.user.zeebe.workers.dll"]
+ENTRYPOINT ["dotnet", "amorphie.user.zeebe.workers.dll"]
