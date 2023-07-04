@@ -656,7 +656,7 @@ public class UserModule : BaseRoute
             {
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
 
-                var responsePassword = checkUserPassword(passwordRequest, context);
+                var responsePassword = await checkUserPassword(passwordRequest, context);
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
