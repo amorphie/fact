@@ -487,7 +487,7 @@ public class UserModule : BaseRoute
         return Results.Problem("User is not found");
     }
 
-    async ValueTask<IResult> checkUserPassword(
+    async ValueTask<IResponse> checkUserPassword(
    [FromBody] UserCheckPasswordRequest checkPasswordRequest,
    [FromServices] UserDBContext context
    )
@@ -509,19 +509,33 @@ public class UserModule : BaseRoute
 
                     if (checkPassword)
                     {
-                        return Results.Ok("Password match");
+                        return new NoDataResponse
+                        {
+                            Result = new Result(Status.Success, "Password match")
+                        };
                     }
 
-                    return Results.Problem("Passwords do not match");
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Error, "Passwords do not match")
+                    };
                 }
 
-                return Results.Problem("User password is null");
+                return new NoDataResponse
+                {
+                    Result = new Result(Status.Error, "User password is null")
+                };
             }
-
-            return Results.Problem("User password is null");
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Error, "User password is null")
+            };
         }
 
-        return Results.Problem("User is not found");
+        return new NoDataResponse
+        {
+            Result = new Result(Status.Error, "User is not found")
+        };
     }
 
     async ValueTask<IResponse> checkUserPbkdfPassword(
@@ -644,9 +658,9 @@ public class UserModule : BaseRoute
 
                 var responsePassword = checkUserPassword(passwordRequest, context);
 
-                if (responsePassword.Result == Results.Ok("Password match"))
+                if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok("Login is successful");
+                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail,State = user.State});
                 }
 
                 return Results.Problem("Invalid reference or password");
@@ -659,7 +673,7 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok("Login is successful");
+                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail,State = user.State});
                 }
 
                 return Results.Problem("Invalid reference or password");
