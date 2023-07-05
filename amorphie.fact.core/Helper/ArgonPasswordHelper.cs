@@ -18,9 +18,9 @@ public class ArgonPasswordHelper
     {
         var argon2id = new Argon2id(Encoding.UTF8.GetBytes(password));
         argon2id.Salt = salt;
-        argon2id.DegreeOfParallelism = 8;
+        argon2id.DegreeOfParallelism = 1;
         argon2id.Iterations = 4;
-        argon2id.MemorySize = 1024 * 1024;
+        argon2id.MemorySize = 1024 * 16;
         return argon2id.GetBytes(16);
     }
 
