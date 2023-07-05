@@ -112,7 +112,7 @@ public class UserModule : BaseRoute
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-
+       
         routeGroupBuilder.MapGet("/", GetAll)
        .WithOpenApi()
        .WithSummary("Gets all registered users.")
@@ -235,14 +235,14 @@ public class UserModule : BaseRoute
 
                 context!.Users!.Add(record);
                 context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
-                if (data.tags != null && data.tags.Count > 0)
+                if(data.tags!=null&&data.tags.Count>0)
                 {
-                    foreach (var tag in data.tags)
-                    {
-                        context.UserTags!.Add(new UserTag { Id = new Guid(), UserId = record.Id, Tag = tag });
-                    }
+                        foreach(var tag in data.tags)
+                        {
+                            context.UserTags!.Add(new UserTag {Id=new Guid(),UserId=record.Id,Tag=tag});
+                        }
                 }
-
+                
                 context.SaveChanges();
                 transaction.Commit();
 
@@ -277,17 +277,17 @@ public class UserModule : BaseRoute
                 }
                 if (data.tags != null && data.tags.Count > 0)
                 {
-                    List<UserTag> userTagList = context.UserTags.Where(w => w.UserId == user.Id).ToList();
+                    List<UserTag> userTagList=context.UserTags.Where(w=>w.UserId==user.Id).ToList();
                     if (userTagList == null || (userTagList != null && userTagList.Count == 0))
                     {
-                        foreach (var tag in data.tags)
+                         foreach (var tag in data.tags)
                         {
-                            context.UserTags.Add(new UserTag()
-                            {
-                                Tag = tag,
-                                UserId = user.Id
-                            });
-                            hasChanges = true;
+                        context.UserTags.Add(new UserTag()
+                                {
+                                    Tag = tag,
+                                    UserId = user.Id
+                                });
+                                hasChanges = true;
                         }
                     }
                     else
@@ -315,7 +315,7 @@ public class UserModule : BaseRoute
                                 context.UserTags.Remove(tag);
                                 hasChanges = true;
                             }
-
+                            
                         }
                     }
 
@@ -487,29 +487,14 @@ public class UserModule : BaseRoute
         return Results.Problem("User is not found");
     }
 
-    async ValueTask<IResult> checkUserPassword(
+    async ValueTask<IResponse> checkUserPassword(
    [FromBody] UserCheckPasswordRequest checkPasswordRequest,
    [FromServices] UserDBContext context
    )
     {
-        var result = checkUserPasswordResult(checkPasswordRequest, context);
-
-        if (result == "Password match")
-        {
-            return Results.Ok(result);
-        }
-
-        return Results.Problem(result);
-    }
-
-    string checkUserPasswordResult(
- UserCheckPasswordRequest checkPasswordRequest,
- UserDBContext context
- )
-    {
-        var user = context!.Users!
+        var user = await context!.Users!
         .Include(x => x.UserPasswords)
-        .FirstOrDefault(x => x.Id == checkPasswordRequest.UserId);
+        .FirstOrDefaultAsync(x => x.Id == checkPasswordRequest.UserId);
 
         if (user != null)
         {
@@ -524,19 +509,33 @@ public class UserModule : BaseRoute
 
                     if (checkPassword)
                     {
-                        return "Password match";
+                        return new NoDataResponse
+                        {
+                            Result = new Result(Status.Success, "Password match")
+                        };
                     }
 
-                    return "Passwords do not match";
+                    return new NoDataResponse
+                    {
+                        Result = new Result(Status.Error, "Passwords do not match")
+                    };
                 }
 
-                return "User password is null";
+                return new NoDataResponse
+                {
+                    Result = new Result(Status.Error, "User password is null")
+                };
             }
-
-            return "User password is null";
+            return new NoDataResponse
+            {
+                Result = new Result(Status.Error, "User password is null")
+            };
         }
 
-        return "User is not found";
+        return new NoDataResponse
+        {
+            Result = new Result(Status.Error, "User is not found")
+        };
     }
 
     async ValueTask<IResponse> checkUserPbkdfPassword(
@@ -653,16 +652,15 @@ public class UserModule : BaseRoute
         if (user != null)
         {
             var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-            
             if (userPassword.IsArgonHash == true)
             {
                 var passwordRequest = new UserCheckPasswordRequest(loginRequest.Password, user.Id);
 
-                var responsePassword = checkUserPasswordResult(passwordRequest, context);
+                var responsePassword = await checkUserPassword(passwordRequest, context);
 
-                if (responsePassword == "Password match")
+                if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok("Login is successful");
+                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail,State = user.State});
                 }
 
                 return Results.Problem("Invalid reference or password");
@@ -675,7 +673,7 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok("Login is successful");
+                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail,State = user.State});
                 }
 
                 return Results.Problem("Invalid reference or password");
