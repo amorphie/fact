@@ -1,9 +1,11 @@
+using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public class UserTagModule : BaseUserTagModule<UserTagDto, UserTag, UserTagValidator>
+public class UserTagModule 
+: BaseBBTRoute<UserTagDto, UserTag, UserDBContext>
 {
 
     public UserTagModule(WebApplication app) : base(app)

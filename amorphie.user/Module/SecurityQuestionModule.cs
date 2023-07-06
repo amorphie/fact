@@ -1,9 +1,11 @@
+using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public class SecurityQuestionModule : BaseSecurityQuestionModule<SecurityQuestionDto, SecurityQuestion, SecurityQuestionValidator>
+public class SecurityQuestionModule
+: BaseBBTRoute<SecurityQuestionDto, SecurityQuestion, UserDBContext>
 {
     public SecurityQuestionModule(WebApplication app) : base(app)
     {

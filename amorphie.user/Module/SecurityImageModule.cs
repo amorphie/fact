@@ -1,6 +1,9 @@
+using amorphie.core.Module.minimal_api;
+using amorphie.fact.data;
 using amorphie.user;
 
-public class SecurityImageModule : BaseSecurityImageModule<SecurityImageDto, SecurityImage, SecurityImageValidator>
+public class SecurityImageModule 
+: BaseBBTRoute<SecurityImageDto, SecurityImage, UserDBContext>
 {
     public SecurityImageModule(WebApplication app) : base(app)
     {
