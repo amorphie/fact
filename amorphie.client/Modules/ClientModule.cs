@@ -9,6 +9,8 @@ using amorphie.core.Base;
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Identity;
 using FluentValidation;
+using amorphie.core.Swagger;
+using Microsoft.OpenApi.Models;
 
 namespace amorphie.client;
 
@@ -33,13 +35,14 @@ public class ClientModule
         routeGroupBuilder.MapPost("workflowClient", workflowClient);
     }
 
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
     protected override async ValueTask<IResult> GetMethod(
-    [FromServices] UserDBContext context,
-    [FromServices] IMapper mapper,
-    [FromRoute(Name = "id")] Guid id,
-    HttpContext httpContext,
-    CancellationToken token
-    )
+        [FromServices] UserDBContext context,
+        [FromServices] IMapper mapper,
+        [FromRoute(Name = "id")] Guid id,
+        HttpContext httpContext,
+        CancellationToken token
+        )
     {
         var client = await context.Clients!.AsNoTracking()
          .Include(t => t.HeaderConfig)
@@ -60,14 +63,15 @@ public class ClientModule
         return TypedResults.NotFound();
     }
 
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
     protected override async ValueTask<IResult> GetAllMethod(
-            [FromServices] UserDBContext context,
-            [FromServices] IMapper mapper,
-            [FromQuery][Range(0, 100)] int page,
-            [FromQuery][Range(5, 100)] int pageSize,
-            HttpContext httpContext,
-            CancellationToken token
-            )
+                [FromServices] UserDBContext context,
+                [FromServices] IMapper mapper,
+                [FromQuery][Range(0, 100)] int page,
+                [FromQuery][Range(5, 100)] int pageSize,
+                HttpContext httpContext,
+                CancellationToken token
+                )
     {
         var resultList = await context!.Clients!.AsNoTracking()
         .Include(t => t.HeaderConfig)
@@ -77,7 +81,7 @@ public class ClientModule
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
-         .Include(t => t.Names.Where(t => t.Language ==  httpContext.GetHeaderLanguage()))
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
        .Skip(page * pageSize)
        .Take(pageSize)
        .ToListAsync(token);
