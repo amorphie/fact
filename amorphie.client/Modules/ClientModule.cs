@@ -1,4 +1,3 @@
-using amorphie.core.Repository;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
@@ -7,11 +6,14 @@ using System.Text;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using amorphie.core.Base;
+using amorphie.core.Module.minimal_api;
+using amorphie.core.Identity;
+using FluentValidation;
 
 namespace amorphie.client;
 
 public class ClientModule
-    : BaseClientModule<ClientDto, Client, ClientValidator>
+    : BaseBBTRoute<ClientDto, Client, UserDBContext>
 {
     public ClientModule(WebApplication app) : base(app)
     {
@@ -28,15 +30,18 @@ public class ClientModule
 
         routeGroupBuilder.MapPost("validate", validateClient);
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
-         routeGroupBuilder.MapPost("workflowClient", workflowClient);
+        routeGroupBuilder.MapPost("workflowClient", workflowClient);
     }
 
-    protected override async ValueTask<IResult> Get([FromServices] IBBTRepository<Client, UserDBContext> repository,
-    [FromRoute(Name = "id")] Guid id
-    // ,[FromHeader(Name = "Language")] string? language = "en-EN"
+    protected override async ValueTask<IResult> GetMethod(
+    [FromServices] UserDBContext context,
+    [FromServices] IMapper mapper,
+    [FromRoute(Name = "id")] Guid id,
+    HttpContext httpContext,
+    CancellationToken token
     )
     {
-        var client = repository.DbContext.Clients!
+        var client = await context.Clients!.AsNoTracking()
          .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
@@ -44,25 +49,27 @@ public class ClientModule
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
-         .Include(t => t.Names.Where(t => t.Language == "en-EN"))
-         .FirstOrDefault(t => t.Id == id);
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+         .FirstOrDefaultAsync(t => t.Id == id, token);
 
-        var model = await repository.GetById(id);
-
-        if (model is Client)
+        if (client is Client)
         {
-            return TypedResults.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(model));
+            return TypedResults.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
         }
 
         return TypedResults.NotFound();
     }
 
-
-    protected override async ValueTask<IResult> GetAll([FromServices] IBBTRepository<Client, UserDBContext> repository,
+    protected override async ValueTask<IResult> GetAllMethod(
+            [FromServices] UserDBContext context,
+            [FromServices] IMapper mapper,
             [FromQuery][Range(0, 100)] int page,
-            [FromQuery][Range(5, 100)] int pageSize)
+            [FromQuery][Range(5, 100)] int pageSize,
+            HttpContext httpContext,
+            CancellationToken token
+            )
     {
-        var resultList = await repository.DbContext!.Clients!
+        var resultList = await context!.Clients!.AsNoTracking()
         .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
@@ -70,10 +77,10 @@ public class ClientModule
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
-         .Include(t => t.Names.Where(t => t.Language == "en-EN"))
+         .Include(t => t.Names.Where(t => t.Language ==  httpContext.GetHeaderLanguage()))
        .Skip(page * pageSize)
        .Take(pageSize)
-       .ToListAsync();
+       .ToListAsync(token);
 
         if (resultList != null && resultList.Count() > 0)
         {
@@ -85,12 +92,15 @@ public class ClientModule
         return Results.NoContent();
     }
 
-    async ValueTask<IResult> validateClient([FromBody] ValidateClientRequest data,
-         [FromServices] UserDBContext context)
+    async ValueTask<IResult> validateClient(
+        [FromBody] ValidateClientRequest data,
+        [FromServices] UserDBContext context,
+        CancellationToken token
+        )
     {
         var hashedSecret = ComputeSha256Hash(data.Secret!);
 
-        var client = context!.Clients!
+        var client = await context!.Clients!.AsNoTracking()
          .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
@@ -99,68 +109,86 @@ public class ClientModule
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == "en-EN"))
-          .FirstOrDefault(t => t.Id == data.ClientId
-                && t.Secret == hashedSecret);     
+          .FirstOrDefaultAsync(t => t.Id == data.ClientId
+                && t.Secret == hashedSecret, token);
 
         if (client == null)
         {
             return Results.NotFound();
         }
 
-       return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
+        return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
     }
-    async ValueTask<IResult> workflowClient([FromServices] IMapper mapper,
-    [FromServices] ClientValidator validator, [FromServices] IBBTRepository<Client, UserDBContext> repository,[FromBody] PostWorkflow workflowData)
+    async ValueTask<IResult> workflowClient(
+    [FromServices] IMapper mapper,
+    [FromServices] ClientValidator validator,
+    [FromServices] UserDBContext context,
+    [FromServices] IBBTIdentity bbtIdentity,
+    [FromBody] PostWorkflow workflowData,
+    HttpContext httpContext,
+    CancellationToken token
+    )
     {
-
         var serializeEntityData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
         ClientWorkflowStatusRequest requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ClientWorkflowStatusRequest>(serializeEntityData)!;
-        ClientDto dto=new ClientDto(){
-        Id=workflowData.recordId,
-         Tags=requestEntity.tags,
-         Names=new List<MultilanguageText>(){new MultilanguageText(){
+        ClientDto dto = new ClientDto()
+        {
+            Id = workflowData.recordId,
+            Tags = requestEntity.tags,
+            Names = new List<MultilanguageText>(){new MultilanguageText(){
             Label=requestEntity.name,
             Language="en-EN"
          }},
-        Status=workflowData.newStatus=="client-approve"?"New"
-        :workflowData.newStatus=="client-reject"||workflowData.newStatus=="client-deactive"?"Deactive"
-        :workflowData.newStatus=="client-active-fd"||workflowData.newStatus=="client-update-approve"?"Active"
-        :workflowData.newStatus,
-        Secret=requestEntity.secret,
-        ReturnUrl=requestEntity.returnUrl,
-        LoginUrl=requestEntity.loginUrl,
-        LogoutUrl=requestEntity.logoutUrl,
-        Pkce=requestEntity.pkce,
-        Tokens=requestEntity.tokens!.Select(tok=>new ClientToken{
-            Type=Enum.Parse<ClientTokenType>(tok!.type!),
-            DefaultDuration=tok.tokenDuration,
-            PublicClaims=tok.publicClaims
-            
+            Status = workflowData.newStatus == "client-approve" ? "New"
+        : workflowData.newStatus == "client-reject" || workflowData.newStatus == "client-deactive" ? "Deactive"
+        : workflowData.newStatus == "client-active-fd" || workflowData.newStatus == "client-update-approve" ? "Active"
+        : workflowData.newStatus,
+            Secret = requestEntity.secret,
+            ReturnUrl = requestEntity.returnUrl,
+            LoginUrl = requestEntity.loginUrl,
+            LogoutUrl = requestEntity.logoutUrl,
+            Pkce = requestEntity.pkce,
+            Tokens = requestEntity.tokens!.Select(tok => new ClientToken
+            {
+                Type = tok!.type!,
+                DefaultDuration = tok.tokenDuration,
+                PublicClaims = tok.publicClaims
 
-        }).ToList(),
-        Flows=requestEntity.flows!.Select(tok=>new ClientFlowDto{
-            Type=tok!.type,
-            Workflow=tok.workflow,
-            TokenDuration=tok.tokenDuration
-            
 
-        }).ToList(),
-        AllowedGrantTypes=requestEntity.allowedGrantTypes!.Select(s=>new ClientGrantType(){
-            GrantType=s,
-            ClientId=workflowData.recordId
+            }).ToList(),
+            Flows = requestEntity.flows!.Select(tok => new ClientFlow
+            {
+                Type = tok!.type,
+                Workflow = tok.workflow,
+                TokenDuration = tok.tokenDuration
 
-        }).ToList(),
-        Idempotency=new Idempotency(){
-            Mode=requestEntity.idempotencyMode
-        }
+
+            }).ToList(),
+            AllowedGrantTypes = requestEntity.allowedGrantTypes!.Select(s => new ClientGrantType()
+            {
+                GrantType = s,
+                ClientId = workflowData.recordId
+
+            }).ToList(),
+            Idempotency = new Idempotency()
+            {
+                Mode = requestEntity.idempotencyMode
+            }
         };
 
-       
-       return await Upsert(mapper,validator,repository,dto);
+
+        return await UpsertMethod(mapper, validator, context, bbtIdentity, dto, httpContext, token);
     }
 
-    protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
-    [FromServices] ClientValidator validator, [FromServices] IBBTRepository<Client, UserDBContext> repository, [FromBody] ClientDto data)
+    protected override async ValueTask<IResult> UpsertMethod(
+    [FromServices] IMapper mapper,
+    [FromServices] IValidator<Client> validator,
+    [FromServices] UserDBContext context,
+    [FromServices] IBBTIdentity bbtIdentity,
+    [FromBody] ClientDto data,
+    HttpContext httpContext,
+    CancellationToken token
+    )
     {
         var dbModelData = mapper.Map<Client>(data);
 
@@ -171,8 +199,10 @@ public class ClientModule
             return Results.ValidationProblem(validationResult.ToDictionary());
         }
 
+        DbSet<Client> dbSet = context.Set<Client>();
+
         bool IsChange = false;
-        Client? dataFromDB = await repository.GetById(dbModelData.Id);
+        Client? dataFromDB = await dbSet.FirstOrDefaultAsync(x => x.Id == dbModelData.Id, token);
 
         if (dataFromDB != null)
         {
@@ -195,20 +225,39 @@ public class ClientModule
             }
 
             if (IsChange)
-                await repository.SaveChangesAsync();
+            {
+                dataFromDB.ModifiedAt = DateTime.UtcNow;
+                dataFromDB.ModifiedBy = bbtIdentity.UserId.Value;
+                dataFromDB.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
 
-            return Results.NoContent();
+                await context.SaveChangesAsync(token);
+                return Results.Ok(mapper.Map<Client>(dataFromDB));
+            }
+            else
+            {
+                return Results.NoContent();
+            }
         }
         else
         {
+            dbModelData.CreatedAt = DateTime.UtcNow;
+            dbModelData.CreatedBy = bbtIdentity.UserId.Value;
+            dbModelData.CreatedByBehalfOf = bbtIdentity.BehalfOfId.Value;
+
+            dbModelData.ModifiedAt = dbModelData.CreatedAt;
+            dbModelData.ModifiedBy = dbModelData.CreatedBy;
+            dbModelData.ModifiedByBehalfOf = dbModelData.CreatedByBehalfOf;
+
+
             string secret = Guid.NewGuid().ToString();
             dbModelData.Secret = ComputeSha256Hash(secret);
 
-            await repository.Insert(dbModelData);
+            await dbSet.AddAsync(dbModelData);
+            await context.SaveChangesAsync(token);
 
             dbModelData.Secret = secret;
 
-            return Results.Created($"/{dbModelData.Id}", dbModelData);
+            return Results.Created($"/{dbModelData.Id}", mapper.Map<ClientGetDto>(dbModelData));
         }
     }
 

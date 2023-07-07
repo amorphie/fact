@@ -8,7 +8,7 @@ public class ClientDto : DtoBase
     public ICollection<MultilanguageText> Names { get; set; } = default!;
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
-    public ClientType Type { get; set; }
+    public string? Type { get; set; }
     public string? Validations { get; set; }
     public string? Secret { get; set; }
     public string? ReturnUrl { get; set; }
@@ -20,11 +20,13 @@ public class ClientDto : DtoBase
     public Idempotency? Idempotency { get; set; }
     public ICollection<ClientToken> Tokens { get; set; } = default!;
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
-    public ICollection<ClientFlowDto> Flows { get; set; } = default!;
+    public ICollection<ClientFlow> Flows { get; set; } = default!;
 }
 
 public class ClientGetDto
 {
+    public Guid Id { get; set; }
+
     [JsonIgnore]
     public List<MultilanguageText> Names { get; set; } = default!;
 
@@ -119,7 +121,7 @@ public class ClientGetDto
     public string? Status { get; set; }
 
     [JsonIgnore]
-    public ClientType Type { get; set; }
+    public string? Type { get; set; }
 
 }
 

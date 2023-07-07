@@ -1,7 +1,10 @@
+using amorphie.core.Module.minimal_api;
+using amorphie.fact.data;
+
 namespace amorphie.client;
 
 public class ClientFlowModule
-    : BaseClientFlowModule<ClientFlowDto, ClientFlow, ClientFlowValidator>
+    : BaseBBTRoute<ClientDto, Client, UserDBContext>
 {
     public ClientFlowModule(WebApplication app) : base(app)
     {

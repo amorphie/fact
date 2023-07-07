@@ -1,7 +1,10 @@
+using amorphie.core.Module.minimal_api;
+using amorphie.fact.data;
+
 namespace amorphie.client;
 
 public class ClientTokenModule
-    : BaseClientTokenModule<ClientTokenDto, ClientToken, ClientTokenValidator>
+    : BaseBBTRoute<ClientTokenDto, ClientToken, UserDBContext>
 {
     public ClientTokenModule(WebApplication app) : base(app)
     {
