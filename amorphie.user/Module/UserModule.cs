@@ -112,7 +112,7 @@ public class UserModule : BaseRoute
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-       
+
         routeGroupBuilder.MapGet("/", GetAll)
        .WithOpenApi()
        .WithSummary("Gets all registered users.")
@@ -235,14 +235,14 @@ public class UserModule : BaseRoute
 
                 context!.Users!.Add(record);
                 context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
-                if(data.tags!=null&&data.tags.Count>0)
+                if (data.tags != null && data.tags.Count > 0)
                 {
-                        foreach(var tag in data.tags)
-                        {
-                            context.UserTags!.Add(new UserTag {Id=new Guid(),UserId=record.Id,Tag=tag});
-                        }
+                    foreach (var tag in data.tags)
+                    {
+                        context.UserTags!.Add(new UserTag { Id = new Guid(), UserId = record.Id, Tag = tag });
+                    }
                 }
-                
+
                 context.SaveChanges();
                 transaction.Commit();
 
@@ -277,17 +277,17 @@ public class UserModule : BaseRoute
                 }
                 if (data.tags != null && data.tags.Count > 0)
                 {
-                    List<UserTag> userTagList=context.UserTags.Where(w=>w.UserId==user.Id).ToList();
+                    List<UserTag> userTagList = context.UserTags.Where(w => w.UserId == user.Id).ToList();
                     if (userTagList == null || (userTagList != null && userTagList.Count == 0))
                     {
-                         foreach (var tag in data.tags)
+                        foreach (var tag in data.tags)
                         {
-                        context.UserTags.Add(new UserTag()
-                                {
-                                    Tag = tag,
-                                    UserId = user.Id
-                                });
-                                hasChanges = true;
+                            context.UserTags.Add(new UserTag()
+                            {
+                                Tag = tag,
+                                UserId = user.Id
+                            });
+                            hasChanges = true;
                         }
                     }
                     else
@@ -315,7 +315,7 @@ public class UserModule : BaseRoute
                                 context.UserTags.Remove(tag);
                                 hasChanges = true;
                             }
-                            
+
                         }
                     }
 
@@ -660,7 +660,17 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail,State = user.State});
+                    return Results.Ok(
+                        new
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Reference = user.Reference,
+                            EMail = user.EMail,
+                            State = user.State,
+                            Id = user.Id
+                        }
+                        );
                 }
 
                 return Results.Problem("Invalid reference or password");
@@ -673,7 +683,16 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok(new{FirstName = user.FirstName,LastName = user.LastName,Reference = user.Reference,EMail = user.EMail,State = user.State});
+                    return Results.Ok(
+                        new
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Reference = user.Reference,
+                            EMail = user.EMail,
+                            State = user.State,
+                            Id = user.Id
+                        });
                 }
 
                 return Results.Problem("Invalid reference or password");
