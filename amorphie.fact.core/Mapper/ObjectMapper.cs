@@ -1,6 +1,7 @@
 using System;
 using AutoMapper;
 
+/*
 public class ObjectMapper
 {
     private static readonly Lazy<IMapper> lazy = new Lazy<IMapper>(() =>
@@ -28,3 +29,4 @@ public class ObjectMapper
 
     public static IMapper Mapper => lazy.Value;
 }
+*/

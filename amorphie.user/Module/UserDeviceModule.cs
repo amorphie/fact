@@ -23,7 +23,7 @@ public class UserDeviceModule
 
     async ValueTask<IResult> getAllUserDeviceFullTextSearch(
      [FromServices] UserDBContext context,
-   [AsParameters] SecurityQuestionSearch dataSearch
+     [AsParameters] SecurityQuestionSearch dataSearch
     )
     {
         var query = context!.UserDevices!

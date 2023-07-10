@@ -44,7 +44,7 @@ public class ClientModule
         CancellationToken token
         )
     {
-        var client = await context.Clients!.AsNoTracking()
+        return await context.Clients!.AsNoTracking()
          .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
@@ -53,14 +53,11 @@ public class ClientModule
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-         .FirstOrDefaultAsync(t => t.Id == id, token);
+         .FirstOrDefaultAsync(t => t.Id == id, token) is Client model
+                ? TypedResults.Ok(mapper.Map<ClientGetDto>(model))
+                : TypedResults.NotFound();
 
-        if (client is Client)
-        {
-            return TypedResults.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
-        }
 
-        return TypedResults.NotFound();
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -86,25 +83,23 @@ public class ClientModule
        .Take(pageSize)
        .ToListAsync(token);
 
-        if (resultList != null && resultList.Count() > 0)
-        {
-            var response = resultList.Select(x => ObjectMapper.Mapper.Map<ClientGetDto>(x)).ToList();
+        return (resultList != null && resultList.Count > 0)
+    ? Results.Ok(mapper.Map<IList<ClientGetDto>>(resultList))
+    : Results.NoContent();
 
-            return Results.Ok(response);
-        }
 
-        return Results.NoContent();
     }
 
     async ValueTask<IResult> validateClient(
         [FromBody] ValidateClientRequest data,
         [FromServices] UserDBContext context,
+        [FromServices] IMapper mapper,
         CancellationToken token
         )
     {
         var hashedSecret = ComputeSha256Hash(data.Secret!);
 
-        var client = await context!.Clients!.AsNoTracking()
+        return await context!.Clients!.AsNoTracking()
          .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
@@ -114,14 +109,11 @@ public class ClientModule
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == "en-EN"))
           .FirstOrDefaultAsync(t => t.Id == data.ClientId
-                && t.Secret == hashedSecret, token);
+                && t.Secret == hashedSecret, token)
+                 is Client model
+                ? TypedResults.Ok(mapper.Map<ClientGetDto>(model))
+                : TypedResults.NotFound();
 
-        if (client == null)
-        {
-            return Results.NotFound();
-        }
-
-        return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
     }
     async ValueTask<IResult> workflowClient(
     [FromServices] IMapper mapper,
@@ -135,6 +127,7 @@ public class ClientModule
     {
         var serializeEntityData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
         ClientWorkflowStatusRequest requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ClientWorkflowStatusRequest>(serializeEntityData)!;
+        // TODO : Please change status values with enum
         ClientDto dto = new ClientDto()
         {
             Id = workflowData.recordId,
@@ -299,15 +292,11 @@ public class ClientModule
            .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
-        var clients = query.ToList();
+        IList<Client> resultList = await query.ToListAsync();
 
-        if (clients.Count() > 0)
-        {
-            var response = clients.Select(x => mapper.Map<ClientDto>(x)).ToList();
-            return Results.Ok(response);
-        }
-
-        return Results.NoContent();
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<ClientDto>>(resultList))
+            : Results.NoContent();
     }
 
 }

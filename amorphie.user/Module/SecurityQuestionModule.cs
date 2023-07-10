@@ -1,6 +1,7 @@
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +25,9 @@ public class SecurityQuestionModule
 
     async ValueTask<IResult> getAllSecurityQuestionFullTextSearch(
         [FromServices] UserDBContext context,
-       [AsParameters] SecurityQuestionSearch dataSearch
+        [AsParameters] SecurityQuestionSearch dataSearch,
+        [FromServices] IMapper mapper,
+        CancellationToken token
    )
     {
         var query = context!.SecurityQuestions!
@@ -37,14 +40,10 @@ public class SecurityQuestionModule
           .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
-        var securityQuestions = query.ToList();
+        IList<SecurityQuestion> resultList = await query.ToListAsync(token);
 
-        if (securityQuestions.Count() > 0)
-        {
-            var response = securityQuestions.Select(x => ObjectMapper.Mapper.Map<SecurityQuestionDto>(x)).ToList();
-            return Results.Ok(response);            
-        }
-
-         return Results.NoContent();        
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<SecurityQuestionDto>>(resultList))
+            : Results.NoContent();
     }
 }

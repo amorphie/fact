@@ -25,7 +25,7 @@ var assemblies = new Assembly[]
                 };
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
-builder.Services.AddAutoMapper(assemblies);
+builder.Services.AddAutoMapper(typeof(ClientMapper).Assembly);
 
 builder.Services.AddDbContext<UserDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
