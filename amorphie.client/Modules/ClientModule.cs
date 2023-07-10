@@ -279,7 +279,8 @@ public class ClientModule
     async ValueTask<IResult> getAllClientFullTextSearch(
       [FromServices] UserDBContext context,
       [AsParameters] ClientSearch dataSearch,
-      [FromServices] IMapper mapper
+      [FromServices] IMapper mapper,
+      CancellationToken cancellationToken
     )
     {
         var query = context!.Clients!
@@ -292,7 +293,7 @@ public class ClientModule
            .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
-        IList<Client> resultList = await query.ToListAsync();
+        IList<Client> resultList = await query.ToListAsync(cancellationToken);
 
         return (resultList != null && resultList.Count > 0)
             ? Results.Ok(mapper.Map<IList<ClientDto>>(resultList))
