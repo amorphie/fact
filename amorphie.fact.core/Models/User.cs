@@ -24,6 +24,7 @@ public class User : EntityBase
     public ICollection<UserSecurityImage>? UserSecurityImages { get; set; } = new List<UserSecurityImage>();
 
     public ICollection<UserPassword>? UserPasswords { get; set; } = new List<UserPassword>();
+    public ICollection<UserSmsKey>? UserSmsKeys { get; set; } = new List<UserSmsKey>();
 }
 
 public record Phone

@@ -59,6 +59,13 @@ public class UserModule : BaseRoute
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
+          routeGroupBuilder.MapPost("/postOpenBankingStatus", postOpenBankingStatus)
+        .WithOpenApi()
+        .WithSummary("Get Workflow Status")
+        .WithDescription("It is update or creates new user.")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict);
 
         routeGroupBuilder.MapDelete("/{id}", deleteUser)
         .WithOpenApi()
@@ -220,12 +227,16 @@ public class UserModule : BaseRoute
         {
             try
             {
+
                 var salt = ArgonPasswordHelper.CreateSalt();
-                var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
-                var result = Convert.ToBase64String(password);
                 var record = ObjectMapper.Mapper.Map<User>(data);
                 record.CreatedAt = DateTime.UtcNow;
-                record.State = "new";
+                if (!string.IsNullOrEmpty(data.State))
+                    record.State = "new";
+                else
+                {
+                    record.State = data.State;
+                }
                 record.Salt = Convert.ToBase64String(salt);
                 if (record.Id == null)
                 {
@@ -234,7 +245,14 @@ public class UserModule : BaseRoute
 
 
                 context!.Users!.Add(record);
-                context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
+                if (!string.IsNullOrEmpty(data.Password))
+                {
+
+                    var password = ArgonPasswordHelper.HashPassword(data.Password, salt);
+                    var result = Convert.ToBase64String(password);
+                    context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = result, CreatedBy = data.CreatedBy, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = record.Id });
+                }
+
                 if (data.tags != null && data.tags.Count > 0)
                 {
                     foreach (var tag in data.tags)
@@ -242,6 +260,7 @@ public class UserModule : BaseRoute
                         context.UserTags!.Add(new UserTag { Id = new Guid(), UserId = record.Id, Tag = tag });
                     }
                 }
+
 
                 context.SaveChanges();
                 transaction.Commit();
@@ -389,6 +408,88 @@ public class UserModule : BaseRoute
             var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<PostWorkflowUserReset>(serializeWorkflowData)!;
 
             return resetUserPassword(workflowData.recordId, requestEntity, context).Result;
+        }
+        return Results.Ok();
+    }
+    async Task<IResult> postOpenBankingStatus(
+                [FromBody] PostWorkflow? workflowData,
+                [FromServices] UserDBContext context,
+                  IConfiguration configuration
+                )
+
+    {
+        if (workflowData != null && workflowData.workflowName == "OpenBanking-Register")
+        {
+            User? user;
+            bool hasChanges=false;
+            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+            var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<OpenBankingUser>(serializeWorkflowData)!;
+            if (workflowData.newStatus == "openbanking-register-resend-sms" || workflowData.newStatus == "openbanking-register-send-sms")
+            {
+                user = new User()
+                {
+                    Id = workflowData.recordId,
+                    State = "DeActive",
+                    Reference = requestEntity.reference,
+                    Phone = requestEntity.phone
+                };
+                context!.Users!.Add(user);
+                hasChanges=true;
+            }
+            else
+            {
+                user = context.Users!.FirstOrDefault(f => f.Id == workflowData.recordId);
+            }
+            if (workflowData.newStatus == "ob-send-personal-information")
+            {
+                 
+                user!.FirstName = requestEntity.firstName;
+                user.LastName = requestEntity.LastName;
+                user.EMail = requestEntity.eMail;
+                 hasChanges=true;
+            }
+            if (workflowData.newStatus == "ob-openbanking-send-password")
+            {
+                var passwordSalt = Convert.FromBase64String("HhAGHAs1K");
+                var password = ArgonPasswordHelper.HashPassword(requestEntity.Password, passwordSalt);
+                var resultPassword = Convert.ToBase64String(password);
+
+                context.UserPasswords!.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = workflowData.user.GetValueOrDefault(), ModifiedAt = DateTime.UtcNow });
+                hasChanges=true;
+            }
+            if (workflowData.newStatus == "ob-send-sequrity-question")
+            {
+                UserSecurityQuestion question=new UserSecurityQuestion();
+                question.UserId=user!.Id;
+                question.SecurityQuestionId=requestEntity.question;
+                question.SecurityAnswer=requestEntity.answer;
+                question.Id=new Guid();
+                question.CreatedAt = DateTime.UtcNow;
+                question.CreatedBy = workflowData.user.GetValueOrDefault();
+                context.UserSecurityQuestions!.Add(question);
+                 hasChanges=true;
+            }
+            if (workflowData.newStatus == "ob-send-sequrity-image")
+            {
+                UserSecurityImage image=new UserSecurityImage();
+                image.UserId=user!.Id;
+                image.SecurityImage=requestEntity.imageId;
+                image.Id=new Guid();
+                image.CreatedAt = DateTime.UtcNow;
+                image.CreatedBy = workflowData.user.GetValueOrDefault();
+                context.UserSecurityImages!.Add(image);
+                hasChanges=true;
+            }
+            if (workflowData.newStatus == "ob-send-contract-1")
+            {
+
+            }
+            if (workflowData.newStatus == "ob-send-contract-2")
+            {
+
+            }
+            if(hasChanges)
+            context.SaveChanges();
         }
         return Results.Ok();
     }
@@ -660,6 +761,7 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
+
                     return Results.Ok(
                         new
                         {
@@ -671,6 +773,7 @@ public class UserModule : BaseRoute
                             Id = user.Id
                         }
                         );
+
                 }
 
                 return Results.Problem("Invalid reference or password");
@@ -683,6 +786,7 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
+
                     return Results.Ok(
                         new
                         {
@@ -693,6 +797,7 @@ public class UserModule : BaseRoute
                             State = user.State,
                             Id = user.Id
                         });
+
                 }
 
                 return Results.Problem("Invalid reference or password");
