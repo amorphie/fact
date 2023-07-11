@@ -1,11 +1,14 @@
-using amorphie.core.Repository;
+using amorphie.core.Identity;
+using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public class UserSecurityImageModule : BaseUserSecurityImageModule<UserSecurityImageDto, UserSecurityImage, UserSecurityImageValidator>
+public class UserSecurityImageModule
+: BaseBBTRoute<UserSecurityImageDto, UserSecurityImage, UserDBContext>
 {
     public UserSecurityImageModule(WebApplication app) : base(app)
     {
@@ -22,17 +25,21 @@ public class UserSecurityImageModule : BaseUserSecurityImageModule<UserSecurityI
         routeGroupBuilder.MapGet("/user/{userId}/image/{imageId}/userCheckImage", userCheckImage);
     }
 
-    protected override async ValueTask<IResult> Upsert([FromServices] IMapper mapper,
-      [FromServices] UserSecurityImageValidator validator,
-      [FromServices] IBBTRepository<UserSecurityImage, UserDBContext> repository,
-      [FromBody] UserSecurityImageDto data)
+    protected override async ValueTask<IResult> UpsertMethod(
+    [FromServices] IMapper mapper,
+    [FromServices] IValidator<UserSecurityImage> validator,
+    [FromServices] UserDBContext context,
+    [FromServices] IBBTIdentity bbtIdentity,
+    [FromBody] UserSecurityImageDto data,
+    HttpContext httpContext,
+    CancellationToken token)
     {
 
-        var userSecurityImage = repository.DbContext.UserSecurityImages!
+        var userSecurityImage = context.UserSecurityImages!
           .FirstOrDefault(x => x.UserId == data.UserId);
 
-        var user = repository.DbContext!.Users.FirstOrDefault(x => x.Id == data.UserId);
-        var securityImage = repository.DbContext!.SecurityImages!.FirstOrDefault(x => x.Id == data.Id);
+        var user = context!.Users.FirstOrDefault(x => x.Id == data.UserId);
+        var securityImage = context!.SecurityImages!.FirstOrDefault(x => x.Id == data.Id);
 
         if (userSecurityImage == null)
         {
@@ -46,8 +53,8 @@ public class UserSecurityImageModule : BaseUserSecurityImageModule<UserSecurityI
                 newRecord.CreatedAt = DateTime.UtcNow;
                 newRecord.SecurityImage = result;
 
-                repository.DbContext!.UserSecurityImages!.Add(newRecord);
-                repository.DbContext.SaveChanges();
+                context!.UserSecurityImages!.Add(newRecord);
+                context!.SaveChanges();
 
                 return Results.Ok(newRecord);
             }
@@ -74,14 +81,14 @@ public class UserSecurityImageModule : BaseUserSecurityImageModule<UserSecurityI
                         hasChanges = true;
                     }
 
-                    if (data.ModifiedByBehalfOf != null && data.ModifiedByBehalfOf != userSecurityImage.ModifiedByBehalfOf) { userSecurityImage.ModifiedByBehalfOf = data.ModifiedByBehalfOf; hasChanges = true; }
-                    if (data.ModifiedBy != null && data.ModifiedBy != userSecurityImage.ModifiedBy) { userSecurityImage.ModifiedBy = data.ModifiedBy; hasChanges = true; }
-                    userSecurityImage.ModifiedAt = DateTime.Now;
+                    userSecurityImage.ModifiedAt = DateTime.UtcNow;
+                    userSecurityImage.ModifiedBy = bbtIdentity.UserId.Value;
+                    userSecurityImage.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
                 }
 
                 if (hasChanges)
                 {
-                    repository.DbContext!.SaveChanges();
+                    context!.SaveChanges();
                 }
 
                 return Results.NoContent();

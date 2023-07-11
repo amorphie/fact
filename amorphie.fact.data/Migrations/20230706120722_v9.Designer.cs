@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -12,9 +13,11 @@ using amorphie.fact.data;
 namespace amorphie.fact.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    partial class UserDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230706120722_v9")]
+    partial class v9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -430,7 +433,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("e344331f-f40c-4577-a323-79a07aa8baf7"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6818),
                             CreatedBy = new Guid("136c6e42-af78-4013-ad65-1b0816cee380"),
@@ -482,7 +484,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("3b1ddd0d-4d84-469e-9a02-34d3437b95f3"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6859),
                             CreatedBy = new Guid("cfa4203b-4603-45ad-a48e-aa7de1b62510"),
@@ -490,7 +491,6 @@ namespace amorphie.fact.data.Migrations
                             ModifiedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6860),
                             ModifiedBy = new Guid("789677d0-920d-459b-8e4e-4104d26a8d3a"),
                             ModifiedByBehalfOf = new Guid("527520b5-d416-4c07-b82f-52e0cc32e61a"),
-
                             Question = "ilk öğretmenin adı"
                         });
                 });
@@ -563,7 +563,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("b9571314-7cd5-4229-ad47-785c34383513"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6558),
                             CreatedBy = new Guid("604e2805-aa3a-43f4-b93d-8a395be5c7db"),
@@ -633,7 +632,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("895c945c-835e-41c2-8944-cf7beb24a24e"),
                             ClientId = new Guid("a606aa9a-3bab-49f4-a329-7c58751d7c5a"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6800),
@@ -698,7 +696,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("6e81c1d2-edaa-4a54-8663-00cf64413849"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6914),
                             CreatedBy = new Guid("abc7cb3a-1059-41e2-ae57-40bf7e1fef5e"),
@@ -752,7 +749,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("4d36ea01-3fb9-4dc6-b457-ff8ad603ec99"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6839),
                             CreatedBy = new Guid("4d491d57-5491-4cf0-a603-ed3d6f574b83"),
@@ -817,7 +813,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("b6a51269-d929-4cfe-abc5-761738f79386"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6884),
                             CreatedBy = new Guid("82d69750-6d23-4368-b82e-fed2cff18926"),
@@ -828,51 +823,7 @@ namespace amorphie.fact.data.Migrations
                             SecurityAnswer = "test",
                             SecurityQuestionId = new Guid("3b1ddd0d-4d84-469e-9a02-34d3437b95f3"),
                             UserId = new Guid("b9571314-7cd5-4229-ad47-785c34383513")
-
                         });
-                });
-
-            modelBuilder.Entity("UserSmsKey", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ModifiedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SmsKey")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("Id", "UserId", "SmsKey")
-                        .HasAnnotation("Npgsql:TsVectorConfig", "english");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Id", "UserId", "SmsKey"), "GIN");
-
-                    b.ToTable("UserSmsKeys");
                 });
 
             modelBuilder.Entity("UserTag", b =>
@@ -920,7 +871,6 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-
                             Id = new Guid("0b3dac1f-35b7-44e9-92e0-d289b46e0752"),
                             CreatedAt = new DateTime(2023, 7, 6, 12, 7, 22, 727, DateTimeKind.Utc).AddTicks(6775),
                             CreatedBy = new Guid("7431fdd0-f88b-4c03-a9c6-31432310785d"),
@@ -930,7 +880,6 @@ namespace amorphie.fact.data.Migrations
                             ModifiedByBehalfOf = new Guid("46d85409-34b8-4fac-b258-d253ffe73ea6"),
                             Tag = "user-list-get",
                             UserId = new Guid("b9571314-7cd5-4229-ad47-785c34383513")
-
                         });
                 });
 
@@ -1054,7 +1003,6 @@ namespace amorphie.fact.data.Migrations
                             b1.HasData(
                                 new
                                 {
-
                                     UserId = new Guid("b9571314-7cd5-4229-ad47-785c34383513"),
                                     CountryCode = 90,
                                     Number = "1234564",
@@ -1117,17 +1065,6 @@ namespace amorphie.fact.data.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("UserSmsKey", b =>
-                {
-                    b.HasOne("User", "User")
-                        .WithMany("UserSmsKeys")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("UserTag", b =>
                 {
                     b.HasOne("User", "User")
@@ -1169,8 +1106,6 @@ namespace amorphie.fact.data.Migrations
                     b.Navigation("UserSecurityImages");
 
                     b.Navigation("UserSecurityQuestion");
-
-                    b.Navigation("UserSmsKeys");
 
                     b.Navigation("UserTags");
                 });

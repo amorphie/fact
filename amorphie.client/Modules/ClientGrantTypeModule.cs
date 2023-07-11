@@ -1,7 +1,10 @@
+using amorphie.core.Module.minimal_api;
+using amorphie.fact.data;
+
 namespace amorphie.client;
 
 public class ClientGrantTypeModule
-    : BaseClientGrantTypeModule<ClientGrantTypeDto, ClientGrantType, ClientGrantTypeValidator>
+    : BaseBBTRoute<ClientGrantTypeDto, ClientGrantType, UserDBContext>
 {
     public ClientGrantTypeModule(WebApplication app) : base(app)
     {

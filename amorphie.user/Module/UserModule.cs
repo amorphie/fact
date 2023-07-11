@@ -261,6 +261,7 @@ public class UserModule : BaseRoute
                     }
                 }
 
+
                 context.SaveChanges();
                 transaction.Commit();
 
@@ -760,7 +761,19 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok(new { FirstName = user.FirstName, LastName = user.LastName, Reference = user.Reference, EMail = user.EMail, State = user.State });
+
+                    return Results.Ok(
+                        new
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Reference = user.Reference,
+                            EMail = user.EMail,
+                            State = user.State,
+                            Id = user.Id
+                        }
+                        );
+
                 }
 
                 return Results.Problem("Invalid reference or password");
@@ -773,7 +786,18 @@ public class UserModule : BaseRoute
 
                 if (responsePassword.Result.Status == Status.Success.ToString())
                 {
-                    return Results.Ok(new { FirstName = user.FirstName, LastName = user.LastName, Reference = user.Reference, EMail = user.EMail, State = user.State });
+
+                    return Results.Ok(
+                        new
+                        {
+                            FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Reference = user.Reference,
+                            EMail = user.EMail,
+                            State = user.State,
+                            Id = user.Id
+                        });
+
                 }
 
                 return Results.Problem("Invalid reference or password");

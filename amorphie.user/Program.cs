@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using amorphie.core.security.Extensions;
 using amorphie.fact.data;
 using amorphie.core.Identity;
-using amorphie.core.Repository;
 using System.Reflection;
 using FluentValidation;
 using amorphie.core.Extension;
@@ -19,7 +18,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
-builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
 
 var assemblies = new Assembly[]
                 {

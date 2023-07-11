@@ -1,8 +1,10 @@
+using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-public class UserDeviceModule : BaseUserDeviceModule<UserDeviceDto, UserDevice, UserDeviceValidator>
+public class UserDeviceModule 
+: BaseBBTRoute<UserDeviceDto, UserDevice, UserDBContext>
 {
     public UserDeviceModule(WebApplication app) : base(app)
     {

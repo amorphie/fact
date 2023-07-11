@@ -1,7 +1,10 @@
+using amorphie.core.Module.minimal_api;
+using amorphie.fact.data;
+
 namespace amorphie.user;
 
 public class DeactiveDefinitionModule
-    : BaseDeactiveDefinitionModule<DeactiveDefinitionDto, DeactiveDefinition, DeactiveDefinitionValidator>
+: BaseBBTRoute<DeactiveDefinitionDto, DeactiveDefinition, UserDBContext>
 {
     public DeactiveDefinitionModule(WebApplication app) : base(app)
     {
