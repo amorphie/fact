@@ -8,6 +8,7 @@ using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 public class UserModule : BaseRoute
 {
@@ -122,7 +123,9 @@ public class UserModule : BaseRoute
 
     async ValueTask<IResult> getAllUserWithFullTextSearch(
        [FromServices] UserDBContext context,
-       [AsParameters] UserSearch userSearch
+       [AsParameters] UserSearch userSearch,
+       [FromServices] IMapper mapper,
+       CancellationToken cancellationToken
        )
     {
         var query = context!.Users!
@@ -141,16 +144,12 @@ public class UserModule : BaseRoute
             query = query.AsNoTracking().Where(p => p.UserTags.Any(t => t.Tag == userSearch.UserTag));
         }
 
-        var users = query.ToList();
+        IList<User> resultList = await query.ToListAsync(cancellationToken);
 
-        if (users.Count() > 0)
-        {
-            var response = query.Select(x => ObjectMapper.Mapper.Map<GetUserResponse>(x)).ToList();
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<GetUserResponse>>(resultList))
+            : Results.NoContent();
 
-            return Results.Ok(response);
-        }
-
-        return Results.NoContent();
     }
 
     async ValueTask<IResult> getPhoneUser(

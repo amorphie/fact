@@ -1,6 +1,7 @@
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 public class UserDeviceModule 
@@ -23,7 +24,9 @@ public class UserDeviceModule
 
     async ValueTask<IResult> getAllUserDeviceFullTextSearch(
      [FromServices] UserDBContext context,
-     [AsParameters] SecurityQuestionSearch dataSearch
+     [AsParameters] SecurityQuestionSearch dataSearch,
+     [FromServices] IMapper mapper,
+     CancellationToken cancellationToken
     )
     {
         var query = context!.UserDevices!
@@ -36,14 +39,11 @@ public class UserDeviceModule
            .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
-        var userDevices = query.ToList();
 
-        if (userDevices.Count() > 0)
-        {
-            var response = userDevices.Select(x => ObjectMapper.Mapper.Map<UserDeviceDto>(x)).ToList();
-            return Results.Ok(response);
-        }
+        IList<UserDevice> resultList = await query.ToListAsync(cancellationToken);
 
-        return Results.NoContent();
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<UserDeviceDto>>(resultList))
+            : Results.NoContent();
     }
 }

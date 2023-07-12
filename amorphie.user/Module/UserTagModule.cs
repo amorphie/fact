@@ -1,6 +1,7 @@
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +26,9 @@ public class UserTagModule
 
     async ValueTask<IResult> getAllUserTagFullTextSearch(
        [FromServices] UserDBContext context,
-       [AsParameters] UserTagSearch dataSearch
+       [AsParameters] UserTagSearch dataSearch,
+       [FromServices] IMapper mapper,
+       CancellationToken cancellationToken
      )
     {
         var query = context!.UserTags!
@@ -38,14 +41,10 @@ public class UserTagModule
            .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
-        var userTags = query.ToList();
+        IList<UserTag> resultList = await query.ToListAsync(cancellationToken);
 
-        if (userTags.Count() > 0)
-        {
-            var response = userTags.Select(x => ObjectMapper.Mapper.Map<UserTagDto>(x)).ToList();
-            return Results.Ok(response);
-        }
-
-        return Results.NoContent();
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<UserTagDto>>(resultList))
+            : Results.NoContent();
     }    
 }
