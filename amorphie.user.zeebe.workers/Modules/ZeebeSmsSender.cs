@@ -146,6 +146,7 @@ public static class ZeebeSmsSender
         }
         try
         {
+            Console.WriteLine(Environment.NewLine+"Try log"+Environment.NewLine);
             User? user = dbContext.Users!.FirstOrDefault(f => f.Id == recordId);
             if (user == null)
             {
@@ -157,6 +158,7 @@ public static class ZeebeSmsSender
                 string number = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("phone")
                .GetProperty("number").ToString();
                  string reference = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("reference").ToString();
+                  Console.WriteLine(Environment.NewLine+reference+" :log"+Environment.NewLine);
                user = new User()
                 {
                     Id = recordId,
@@ -168,8 +170,10 @@ public static class ZeebeSmsSender
                         Number=number
                     }
                 };
+                Console.WriteLine(Environment.NewLine+"user create :log"+Environment.NewLine);
                 dbContext.Users!.Add(user);
                 dbContext.SaveChanges();
+                 Console.WriteLine(Environment.NewLine+"context save:log"+Environment.NewLine);
             }
              Random rnd = new Random();
                 int num = rnd.Next(9999);
@@ -188,17 +192,20 @@ public static class ZeebeSmsSender
                         CreatedByBehalfOf=triggeredByBehalfOf
                         
                     });
+                    Console.WriteLine(Environment.NewLine+"user sms key log"+Environment.NewLine);
                     dbContext!.SaveChanges();
                     return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, true));
                 }
                 else
                 {
+                     Console.WriteLine(Environment.NewLine+"user sms gönderilemedi"+Environment.NewLine);
                     transitionName = "openbanking-register-sms-fail";
                     return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false));
                 }
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.ToString());
             transitionName = "openbanking-register-sms-fail";
             return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false));
         }
