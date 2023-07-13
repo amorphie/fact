@@ -56,7 +56,7 @@ db.Database.Migrate();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-
+app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
 
