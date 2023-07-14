@@ -440,7 +440,7 @@ public class UserModule : BaseRoute
             {
                 user = context.Users!.FirstOrDefault(f => f.Id == workflowData.recordId);
             }
-            if (workflowData.newStatus == "ob-send-personal-information")
+            if (workflowData.newStatus == "openbanking-personel-password-waiting")
             {
                  
                 user!.FirstName = requestEntity.firstName;
@@ -448,7 +448,7 @@ public class UserModule : BaseRoute
                 user.EMail = requestEntity.eMail;
                  hasChanges=true;
             }
-            if (workflowData.newStatus == "ob-openbanking-send-password")
+            if (workflowData.newStatus == "openbanking-security-question-waiting")
             {
                 var passwordSalt = Convert.FromBase64String("HhAGHAs1K");
                 var password = ArgonPasswordHelper.HashPassword(requestEntity.Password, passwordSalt);
@@ -457,7 +457,7 @@ public class UserModule : BaseRoute
                 context.UserPasswords!.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = workflowData.user.GetValueOrDefault(), ModifiedAt = DateTime.UtcNow });
                 hasChanges=true;
             }
-            if (workflowData.newStatus == "ob-send-sequrity-question")
+            if (workflowData.newStatus == "openbanking-security-image-waiting")
             {
                 UserSecurityQuestion question=new UserSecurityQuestion();
                 question.UserId=user!.Id;
@@ -469,7 +469,7 @@ public class UserModule : BaseRoute
                 context.UserSecurityQuestions!.Add(question);
                  hasChanges=true;
             }
-            if (workflowData.newStatus == "ob-send-sequrity-image")
+            if (workflowData.newStatus == "openbanking-conract1-confirm-waiting")
             {
                 UserSecurityImage image=new UserSecurityImage();
                 image.UserId=user!.Id;
@@ -480,11 +480,11 @@ public class UserModule : BaseRoute
                 context.UserSecurityImages!.Add(image);
                 hasChanges=true;
             }
-            if (workflowData.newStatus == "ob-send-contract-1")
+            if (workflowData.newStatus == "openbanking-conract2-confirm-waiting")
             {
 
             }
-            if (workflowData.newStatus == "ob-send-contract-2")
+            if (workflowData.newStatus == "")
             {
 
             }
