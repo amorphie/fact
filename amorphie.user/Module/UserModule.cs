@@ -450,19 +450,13 @@ public class UserModule : BaseRoute
             }
             if (workflowData.newStatus == "openbanking-security-question-waiting")
             {
-                try
-                {
                     var passwordSalt = Convert.FromBase64String(user!.Salt);
                 var password = ArgonPasswordHelper.HashPassword(requestEntity.password, passwordSalt);
                 var resultPassword = Convert.ToBase64String(password);
 
                 context.UserPasswords!.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = workflowData.user.GetValueOrDefault(), ModifiedAt = DateTime.UtcNow });
                 hasChanges=true;
-                }
-                catch(Exception ex)
-                {
 
-                }
                 
                 
             }
@@ -499,15 +493,9 @@ UserSecurityImage image=new UserSecurityImage();
             {
 
             }
-            try
-            {
                 if(hasChanges)
                 context.SaveChanges();
-            }
-            catch(Exception ex)
-            {
 
-            }
             
         }
         return Results.Ok();
