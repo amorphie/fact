@@ -444,18 +444,27 @@ public class UserModule : BaseRoute
             {
                  
                 user!.FirstName = requestEntity.firstName;
-                user.LastName = requestEntity.LastName;
+                user.LastName = requestEntity.lastName;
                 user.EMail = requestEntity.eMail;
                  hasChanges=true;
             }
             if (workflowData.newStatus == "openbanking-security-question-waiting")
             {
-                var passwordSalt = Convert.FromBase64String("HhAGHAs1K");
-                var password = ArgonPasswordHelper.HashPassword(requestEntity.Password, passwordSalt);
+                try
+                {
+                    var passwordSalt = Convert.FromBase64String(user!.Salt);
+                var password = ArgonPasswordHelper.HashPassword(requestEntity.password, passwordSalt);
                 var resultPassword = Convert.ToBase64String(password);
 
                 context.UserPasswords!.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = workflowData.user.GetValueOrDefault(), ModifiedAt = DateTime.UtcNow });
                 hasChanges=true;
+                }
+                catch(Exception ex)
+                {
+
+                }
+                
+                
             }
             if (workflowData.newStatus == "openbanking-security-image-waiting")
             {
@@ -471,14 +480,16 @@ public class UserModule : BaseRoute
             }
             if (workflowData.newStatus == "openbanking-conract1-confirm-waiting")
             {
-                UserSecurityImage image=new UserSecurityImage();
+UserSecurityImage image=new UserSecurityImage();
                 image.UserId=user!.Id;
-                image.SecurityImage=requestEntity.imageId;
+                image.SecurityImage=requestEntity.imageId.ToString();
                 image.Id=new Guid();
                 image.CreatedAt = DateTime.UtcNow;
                 image.CreatedBy = workflowData.user.GetValueOrDefault();
                 context.UserSecurityImages!.Add(image);
                 hasChanges=true;
+
+
             }
             if (workflowData.newStatus == "openbanking-conract2-confirm-waiting")
             {
@@ -488,8 +499,16 @@ public class UserModule : BaseRoute
             {
 
             }
-            if(hasChanges)
-            context.SaveChanges();
+            try
+            {
+                if(hasChanges)
+                context.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+
+            }
+            
         }
         return Results.Ok();
     }
