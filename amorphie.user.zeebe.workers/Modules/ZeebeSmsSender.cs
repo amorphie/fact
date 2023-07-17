@@ -45,6 +45,7 @@ public static class ZeebeSmsSender
           HttpRequest request,
           HttpContext httpContext,
           [FromServices] DaprClient client
+          ,IConfiguration configuration
       )
     {
         var transitionName = body.GetProperty("LastTransition").ToString();
@@ -70,7 +71,7 @@ public static class ZeebeSmsSender
             {
                 string password = Guid.NewGuid().ToString().Substring(0, 6);
                 string content = "Yeni şifreniz:" + password;
-                bool smsSend = SendSms(content, user);
+                bool smsSend = SendSms(content, user,configuration,triggeredByBehalfOf);
                 if (smsSend)
                 {
                     var salt = Convert.FromBase64String(user.Salt);
@@ -116,6 +117,7 @@ public static class ZeebeSmsSender
            HttpRequest request,
            HttpContext httpContext,
            [FromServices] DaprClient client
+           ,IConfiguration configuration
        )
     {
         var transitionName = body.GetProperty("LastTransition").ToString();
@@ -178,7 +180,7 @@ public static class ZeebeSmsSender
              Random rnd = new Random();
                 int num = rnd.Next(9999);
                 string smsKey = num.ToString("0000");
-                bool smsSend = SendSms("Test:BurganBank:"+ smsKey,user);
+                bool smsSend = SendSms("Test:"+ smsKey,user,configuration,triggeredByBehalfOfAsString);
                 if (smsSend)
                 {
 
@@ -218,6 +220,7 @@ public static class ZeebeSmsSender
            HttpRequest request,
            HttpContext httpContext,
            [FromServices] DaprClient client
+            ,IConfiguration configuration
        )
     {
         var transitionName = body.GetProperty("LastTransition").ToString();
@@ -286,7 +289,7 @@ public static class ZeebeSmsSender
         variables.Add($"TRX-{_transitionName}", targetObject);
         return variables;
     }
-    private static bool SendSms(string contentFromMethod, User user)
+    private static bool SendSms(string contentFromMethod, User user ,IConfiguration configuration,string triggeredBy)
     {
         amorphie.fact.core.Dtos.Phone phone = new amorphie.fact.core.Dtos.Phone();
         phone.countryCode = user!.Phone!.CountryCode;
@@ -302,7 +305,7 @@ public static class ZeebeSmsSender
             {
                 action = null,
                 name = "userzeebe",
-                identity = "u05645",
+                identity =triggeredBy,
                 itemId = null
             },
             tags = null,
@@ -312,8 +315,8 @@ public static class ZeebeSmsSender
         };
         string bodyParams = Newtonsoft.Json.JsonConvert.SerializeObject(requestSmsModel);
         HttpClient clientHttp = new HttpClient();
-
-        var response = clientHttp.PostAsync("https://test-messaginggateway.burgan.com.tr/api/v2/Messaging/sms/message", new StringContent(bodyParams, System.Text.Encoding.UTF8, "application/json")).Result;
+        string messaginggatewayUrl=configuration["messagingGatewayUrl"]!.ToString();
+        var response = clientHttp.PostAsync(messaginggatewayUrl, new StringContent(bodyParams, System.Text.Encoding.UTF8, "application/json")).Result;
         var SendSmsOtpResponse = response.Content.ReadFromJsonAsync<amorphie.fact.core.Dtos.SendSmsOtpResponse>();
         if (response.StatusCode == System.Net.HttpStatusCode.OK)
         {
