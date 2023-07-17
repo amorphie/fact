@@ -489,9 +489,10 @@ UserSecurityImage image=new UserSecurityImage();
             {
 
             }
-            if (workflowData.newStatus == "")
+            if (workflowData.newStatus == "user-active")
             {
-
+                    user!.State="Active";
+                    hasChanges=true;
             }
                 if(hasChanges)
                 context.SaveChanges();
