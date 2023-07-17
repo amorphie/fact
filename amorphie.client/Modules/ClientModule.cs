@@ -59,6 +59,10 @@ public class ClientModule
         {
             return TypedResults.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
         }
+        else
+        {
+            return Results.Problem(detail:"Client Not Found",title:"Flow Exception",statusCode:460);
+        }
 
         return TypedResults.NotFound();
     }
@@ -118,7 +122,7 @@ public class ClientModule
 
         if (client == null)
         {
-            return Results.NotFound();
+            return Results.Problem(detail:"Invalid Client ID Or Client Secret",title:"Flow Exception",statusCode:461);
         }
 
         return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));

@@ -783,7 +783,7 @@ UserSecurityImage image=new UserSecurityImage();
 
                 }
 
-                return Results.Problem("Invalid reference or password");
+                return Results.Problem(detail:"Invalid Reference or Password",title:"Flow Exception",statusCode:461);
             }
             else
             {
@@ -807,13 +807,13 @@ UserSecurityImage image=new UserSecurityImage();
 
                 }
 
-                return Results.Problem("Invalid reference or password");
+                return Results.Problem(detail:"Invalid Reference or Password",title:"Flow Exception",statusCode:461);
 
             }
         }
         else
         {
-            return Results.Problem("User is not found");
+            return Results.Problem(detail:"User Not Found",title:"Flow Exception",statusCode:460);
         }
     }
 
