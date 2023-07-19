@@ -307,7 +307,7 @@ public class ClientModule
 
         if (clients.Count() > 0)
         {
-            var response = clients.Select(x => mapper.Map<ClientDto>(x)).ToList();
+            var response = clients.Select(x => mapper.Map<ClientGetDto>(x)).ToList();
             return Results.Ok(response);
         }
 
