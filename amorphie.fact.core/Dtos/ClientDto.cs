@@ -45,22 +45,22 @@ public class ClientGetDto
 
     public ICollection<ClientFlowGetDto> Flows { get; set; } = default!;
 
-    [JsonPropertyName("allowed-grant-types")]
+    [JsonPropertyName("allowedGrantTypes")]
     public ICollection<ClientGrantTypeGetDto> AllowedGrantTypes { get; set; } = default!;
 
-    [JsonPropertyName("allowed-scope-tags")]
+    [JsonPropertyName("allowedScopeTags")]
     public string[]? Tags { get; set; }
 
-    [JsonPropertyName("login-url")]
+    [JsonPropertyName("loginUrl")]
     public string? LoginUrl { get; set; }
 
-    [JsonPropertyName("return-url")]
+    [JsonPropertyName("returnUrl")]
     public string? ReturnUrl { get; set; }
 
-    [JsonPropertyName("logout-url")]
+    [JsonPropertyName("logoutUrl")]
     public string? LogoutUrl { get; set; }
 
-    [JsonPropertyName("client-secret")]
+    [JsonPropertyName("clientSecret")]
     public string? Secret { get; set; }
 
     public string? Pkce { get; set; }
