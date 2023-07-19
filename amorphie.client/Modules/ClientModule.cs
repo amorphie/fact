@@ -103,6 +103,7 @@ public class ClientModule
     async ValueTask<IResult> validateClient(
         [FromBody] ValidateClientRequest data,
         [FromServices] UserDBContext context,
+        HttpContext httpContext,
         CancellationToken token
         )
     {
@@ -116,7 +117,7 @@ public class ClientModule
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
-         .Include(t => t.Names.Where(t => t.Language == "en-EN"))
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
           .FirstOrDefaultAsync(t => t.Id == data.ClientId
                 && t.Secret == hashedSecret, token);
 
@@ -290,7 +291,8 @@ public class ClientModule
     async ValueTask<IResult> getAllClientFullTextSearch(
       [FromServices] UserDBContext context,
       [AsParameters] ClientSearch dataSearch,
-      [FromServices] IMapper mapper
+      [FromServices] IMapper mapper,
+      HttpContext httpContext
     )
     {
         var query = context!.Clients!
@@ -300,7 +302,15 @@ public class ClientModule
         if (!string.IsNullOrEmpty(dataSearch.Keyword))
         {
             query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.ReturnUrl, x.LoginUrl, x.LogoutUrl))
-           .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
+           .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)))
+           .Include(t => t.HeaderConfig)
+         .Include(t => t.Jws)
+         .Include(t => t.Idempotency)
+         .Include(t => t.Names)
+         .Include(t => t.Tokens)
+         .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Flows)
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()));
         }
 
         var clients = query.ToList();
