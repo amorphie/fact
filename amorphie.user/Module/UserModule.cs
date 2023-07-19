@@ -13,12 +13,8 @@ using Dapr.Client;
 public class UserModule : BaseRoute
 {
 
-    private DaprClient _daprClient;
-    private IConfiguration _configuration;
-    public UserModule(WebApplication app,DaprClient daprClient,IConfiguration configuration) : base(app)
+    public UserModule(WebApplication app) : base(app)
     {
-        _daprClient = daprClient;
-        _configuration = configuration;
     }
 
     const string STATE_STORE = "amorphie-cache";
@@ -218,6 +214,7 @@ public class UserModule : BaseRoute
     async ValueTask<IResult> postUser(
           [FromBody] PostUserRequest data,
           [FromServices] UserDBContext context,
+          [FromServices] DaprClient daprClient,
             IConfiguration configuration
           )
     {
@@ -360,7 +357,7 @@ public class UserModule : BaseRoute
                     {
                         if(hasStatusChanged && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
                         {
-                            await _daprClient.InvokeMethodAsync(HttpMethod.Put,_configuration["TokenServiceAppName"],_configuration["TokenServiceRevokeMethod"]+user.Reference);
+                            await daprClient.InvokeMethodAsync(HttpMethod.Put,configuration["TokenServiceAppName"],configuration["TokenServiceRevokeMethod"]+user.Reference);
                         }
                     }
                     return Results.Ok();
