@@ -360,7 +360,7 @@ public class UserModule : BaseRoute
                     {
                         if(hasStatusChanged && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
                         {
-                            await _daprClient.InvokeMethodAsync(HttpMethod.Put,_configuration["TokenServiceAppName"],_configuration["TokenServiceRevokeMethod"]);
+                            await _daprClient.InvokeMethodAsync(HttpMethod.Put,_configuration["TokenServiceAppName"],_configuration["TokenServiceRevokeMethod"]+user.Reference);
                         }
                     }
                     return Results.Ok();
