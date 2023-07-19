@@ -288,6 +288,7 @@ public class ClientModule
         }
     }
 
+[AddSwaggerParameter("Language", ParameterLocation.Header, false)]
     async ValueTask<IResult> getAllClientFullTextSearch(
       [FromServices] UserDBContext context,
       [AsParameters] ClientSearch dataSearch,
@@ -296,21 +297,21 @@ public class ClientModule
     )
     {
         var query = context!.Clients!
-            .Skip(dataSearch.Page * dataSearch.PageSize)
-            .Take(dataSearch.PageSize);
-
-        if (!string.IsNullOrEmpty(dataSearch.Keyword))
-        {
-            query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.ReturnUrl, x.LoginUrl, x.LogoutUrl))
-           .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)))
-           .Include(t => t.HeaderConfig)
+         .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
-         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()));
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+            .Skip(dataSearch.Page * dataSearch.PageSize)
+            .Take(dataSearch.PageSize);
+
+        if (!string.IsNullOrEmpty(dataSearch.Keyword))
+        {
+            query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.ReturnUrl, x.LoginUrl, x.LogoutUrl))
+           .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
         var clients = query.ToList();
