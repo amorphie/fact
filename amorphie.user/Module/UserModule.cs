@@ -214,7 +214,7 @@ public class UserModule : BaseRoute
     async ValueTask<IResult> postUser(
           [FromBody] PostUserRequest data,
           [FromServices] UserDBContext context,
-          [FromServices] DaprClient daprClient,
+          DaprClient daprClient,
             IConfiguration configuration
           )
     {
@@ -379,7 +379,8 @@ public class UserModule : BaseRoute
     async Task<IResult> postWorkflowStatus(
             [FromBody] PostWorkflow? workflowData,
             [FromServices] UserDBContext context,
-              IConfiguration configuration
+              IConfiguration configuration,
+              [FromServices] DaprClient daprClient
             )
 
     {
@@ -409,7 +410,7 @@ public class UserModule : BaseRoute
             {
                 return Results.Problem(ex.ToString());
             }
-            return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, configuration).Result;
+            return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, daprClient,configuration).Result;
         }
         else if (workflowData != null && workflowData.workflowName == "user-reset-password")
         {
