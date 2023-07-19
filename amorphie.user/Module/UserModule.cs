@@ -8,13 +8,17 @@ using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Dapr.Client;
 
 public class UserModule : BaseRoute
 {
 
-    public UserModule(WebApplication app) : base(app)
+    private DaprClient _daprClient;
+    private IConfiguration _configuration;
+    public UserModule(WebApplication app,DaprClient daprClient,IConfiguration configuration) : base(app)
     {
-
+        _daprClient = daprClient;
+        _configuration = configuration;
     }
 
     const string STATE_STORE = "amorphie-cache";
@@ -281,6 +285,7 @@ public class UserModule : BaseRoute
             try
             {
                 var hasChanges = false;
+                var hasStatusChanged = false;
                 // Apply update to only changed fields.
                 if (data.FirstName != null && data.FirstName != user.FirstName) { user.FirstName = data.FirstName; hasChanges = true; }
                 if (data.LastName != null && data.LastName != user.LastName) { user.LastName = data.LastName; hasChanges = true; }
@@ -341,7 +346,7 @@ public class UserModule : BaseRoute
 
                 }
                 if (data.Reference != null && data.Reference != user.Reference) { user.Reference = data.Reference; hasChanges = true; }
-                if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; }
+                if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; hasStatusChanged = true;}
                 if (data.EMail != null && data.EMail != user.EMail) { user.EMail = data.EMail; hasChanges = true; }
                 if (data.Phone != null && data.Phone != user.Phone) { user.Phone = data.Phone; hasChanges = true; }
                 if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != user.ModifiedByBehalfOf) { user.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
@@ -351,6 +356,13 @@ public class UserModule : BaseRoute
                 {
                     context!.SaveChanges();
                     transaction.Commit();
+                    if(data.State != null)
+                    {
+                        if(hasStatusChanged && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
+                        {
+                            await _daprClient.InvokeMethodAsync(HttpMethod.Put,_configuration["TokenServiceAppName"],_configuration["TokenServiceRevokeMethod"]);
+                        }
+                    }
                     return Results.Ok();
                 }
                 else
