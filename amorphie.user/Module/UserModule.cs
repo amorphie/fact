@@ -8,13 +8,17 @@ using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Dapr.Client;
 
 public class UserModule : BaseRoute
 {
 
-    public UserModule(WebApplication app) : base(app)
+    private DaprClient _daprClient;
+    private IConfiguration _configuration;
+    public UserModule(WebApplication app,DaprClient daprClient,IConfiguration configuration) : base(app)
     {
-
+        _daprClient = daprClient;
+        _configuration = configuration;
     }
 
     const string STATE_STORE = "amorphie-cache";
@@ -351,6 +355,15 @@ public class UserModule : BaseRoute
                 {
                     context!.SaveChanges();
                     transaction.Commit();
+                    if(data.State != null)
+                    {
+                        if(
+                            (user.State.ToLower().Equals("active") || user.State.ToLower().Equals("new"))
+                             && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
+                        {
+                            await _daprClient.InvokeMethodAsync(HttpMethod.Put,_configuration["TokenServiceAppName"],_configuration["TokenServiceRevokeMethod"]);
+                        }
+                    }
                     return Results.Ok();
                 }
                 else
