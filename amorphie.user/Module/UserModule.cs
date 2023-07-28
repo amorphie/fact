@@ -502,6 +502,8 @@ UserSecurityImage image=new UserSecurityImage();
             if (workflowData.newStatus == "user-active")
             {
                     user!.State="Active";
+                    UserTag userTag=new UserTag(){ Id = new Guid(), UserId = user.Id, Tag = "openbanking-customer" };
+                    context.UserTags!.Add(userTag);
                     hasChanges=true;
             }
                 if(hasChanges)

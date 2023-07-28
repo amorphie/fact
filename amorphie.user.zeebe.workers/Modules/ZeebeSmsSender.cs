@@ -90,26 +90,27 @@ public static class ZeebeSmsSender
                         ModifiedAt = DateTime.UtcNow
                     });
                     dbContext!.SaveChanges();
-                    return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, true));
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, true,"Success"));
                 }
                 else
                 {
                     transitionName = "user-reset-password-sms-fail";
-                    return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false));
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Sms Can not Send"));
                 }
             }
             else
             {
-                return Results.BadRequest("User Not Found");
+                 transitionName = "user-reset-password-sms-fail";
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"User Not Found"));
             }
         }
         catch (Exception ex)
         {
             transitionName = "user-reset-password-sms-fail";
-            return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false));
+            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexcepted Error While Sendind Sms"));
         }
         transitionName = "user-reset-password-sms-fail";
-        return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false));
+        return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexcepted Error While Sendind Sms"));
     }
     static IResult postSmsKeySender(
            [FromBody] dynamic body,
@@ -148,7 +149,6 @@ public static class ZeebeSmsSender
         }
         try
         {
-            Console.WriteLine(Environment.NewLine+"Try log"+Environment.NewLine);
             User? user = dbContext.Users!.FirstOrDefault(f => f.Id == recordId);
             if (user == null)
             {
@@ -160,7 +160,6 @@ public static class ZeebeSmsSender
                 string number = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("phone")
                .GetProperty("number").ToString();
                  string reference = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("reference").ToString();
-                  Console.WriteLine(Environment.NewLine+reference+" :log"+Environment.NewLine);
                user = new User()
                 {
                     Id = recordId,
@@ -172,10 +171,8 @@ public static class ZeebeSmsSender
                         Number=number
                     }
                 };
-                Console.WriteLine(Environment.NewLine+"user create :log"+Environment.NewLine);
                 dbContext.Users!.Add(user);
                 dbContext.SaveChanges();
-                 Console.WriteLine(Environment.NewLine+"context save:log"+Environment.NewLine);
             }
              Random rnd = new Random();
                 int num = rnd.Next(9999);
@@ -194,25 +191,23 @@ public static class ZeebeSmsSender
                         CreatedByBehalfOf=triggeredByBehalfOf
                         
                     });
-                    Console.WriteLine(Environment.NewLine+"user sms key log"+Environment.NewLine);
                     dbContext!.SaveChanges();
-                    return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, true));
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, true,"Success"));
                 }
                 else
                 {
-                     Console.WriteLine(Environment.NewLine+"user sms gönderilemedi"+Environment.NewLine);
                     transitionName = "openbanking-register-sms-fail";
-                    return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false));
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false,"Sms Can not Send"));
                 }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
             transitionName = "openbanking-register-sms-fail";
-            return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false));
+            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false,"Unexcepted Error While Sendind Sms"));
         }
         transitionName = "openbanking-register-sms-fail";
-        return Results.Ok(createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false));
+        return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false,"Unexcepted Error While Sendind Sms"));
     }
    static IResult postSmsKeyControl(
            [FromBody] dynamic body,
@@ -248,47 +243,24 @@ public static class ZeebeSmsSender
             if (userSmsKey!=null&&userSmsKey.SmsKey==smsKey)
             {
                
-                    return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, true));
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, true,"Success"));
             }
             else
             {
                    transitionName = "openbanking-register-sms-confirm-fail";
-                return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false));
+                return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Sms Key Not Found"));
             }
         }
         catch (Exception ex)
         {
             transitionName = "openbanking-register-sms-confirm-fail";
-            return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false));
+            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexpected error while searching sms key"));
         }
         transitionName = "openbanking-register-sms-confirm-fail";
-        return Results.Ok(createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false));
+        return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexpected error while searching sms key"));
     }
 
 
-    private static dynamic createMessageVariables(dynamic body, string _transitionName, string TriggeredBy, string TriggeredByBehalfOf, dynamic _data, bool success)
-    {
-        dynamic variables = new Dictionary<string, dynamic>();
-
-        variables.Add("EntityName", body.GetProperty("EntityName").ToString());
-        variables.Add("RecordId", body.GetProperty("RecordId").ToString());
-        variables.Add("InstanceId", body.GetProperty("InstanceId").ToString());
-        variables.Add("LastTransition", _transitionName);
-        if (success)
-            variables.Add("Status", "OK");
-        else
-        {
-            variables.Add("Status", "NOTOK");
-        }
-        dynamic targetObject = new System.Dynamic.ExpandoObject();
-        targetObject.Data = _data;
-        targetObject.TriggeredBy = TriggeredBy;
-        targetObject.TriggeredByBehalfOf = TriggeredByBehalfOf;
-
-
-        variables.Add($"TRX-{_transitionName}", targetObject);
-        return variables;
-    }
     private static bool SendSms(string contentFromMethod, User user ,IConfiguration configuration,string triggeredBy)
     {
         amorphie.fact.core.Dtos.Phone phone = new amorphie.fact.core.Dtos.Phone();
