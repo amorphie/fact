@@ -61,7 +61,7 @@ jobs:
 
       - name: Replace vault token
         run: |
-          sed -i -e "s/amorphie-vaulttoken/${{ secrets.VAULT_TOKEN }}/g" ./manifest/Dapr/vault-component.yaml
+          sed -i -e "s/amorphie-fact-vaulttoken/${{ secrets.VAULT_TOKEN }}/g" ./manifest/Dapr/vault-component.yaml
 
       # Deploy app to AKS
       - uses: azure/k8s-deploy@v1
