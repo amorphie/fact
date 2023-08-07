@@ -2,7 +2,7 @@ apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
   name: amorphie-cache
-  namespace: ortam-appns
+  namespace: amorphie-fact-user
 spec:
   type: state.redis
   version: v1
@@ -11,7 +11,7 @@ spec:
     value: redis-cluster-headless.amorphie-redis.svc.cluster.local:6379
   - name: redisPassword
     secretKeyRef:
-      name: test-redis-secret
+      name: redis-secret
       key: redis-password
   - name: actorStateStore
     value: "true"
