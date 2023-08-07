@@ -2,7 +2,7 @@ apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
   name: user-secretstore
-  namespace: ortam-appns
+  namespace: amorphie-fact-user
 spec:
   type: secretstores.hashicorp.vault
   version: v1
