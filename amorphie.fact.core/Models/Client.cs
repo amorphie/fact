@@ -23,4 +23,6 @@ public class Client : EntityBase
 
     [NotMapped]
     public virtual NpgsqlTsVector SearchVector { get; set; }
+
+    public string? JwtSecretSalt { get; set; }
 }

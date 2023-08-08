@@ -63,8 +63,6 @@ public class ClientModule
         {
             return Results.Problem(detail:"Client Not Found",title:"Flow Exception",statusCode:460);
         }
-
-        return TypedResults.NotFound();
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -256,7 +254,6 @@ public class ClientModule
             dbModelData.ModifiedAt = dbModelData.CreatedAt;
             dbModelData.ModifiedBy = dbModelData.CreatedBy;
             dbModelData.ModifiedByBehalfOf = dbModelData.CreatedByBehalfOf;
-
 
             string secret = Guid.NewGuid().ToString();
             dbModelData.Secret = ComputeSha256Hash(secret);

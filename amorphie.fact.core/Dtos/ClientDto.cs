@@ -21,6 +21,7 @@ public class ClientDto : DtoBase
     public ICollection<ClientToken> Tokens { get; set; } = default!;
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
+    public string? JwtSecretSalt { get; set; }
 }
 
 public class ClientGetDto
@@ -123,6 +124,8 @@ public class ClientGetDto
     [JsonIgnore]
     public string? Type { get; set; }
 
+    [JsonPropertyName("jwtSecretSalt")]
+    public string? JwtSecretSalt { get; set; }
 }
 
 public class ValidateClientRequest
