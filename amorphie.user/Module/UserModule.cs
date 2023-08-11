@@ -791,7 +791,7 @@ UserSecurityImage image=new UserSecurityImage();
                             EMail = user.EMail,
                             State = user.State,
                             Id = user.Id,
-                            Phone = user.Phone
+                            MobilePhone = user.Phone
                         }
                         );
 
@@ -817,7 +817,7 @@ UserSecurityImage image=new UserSecurityImage();
                             EMail = user.EMail,
                             State = user.State,
                             Id = user.Id,
-                            Phone = user.Phone
+                            MobilePhone = user.Phone
                         });
 
                 }
