@@ -14,7 +14,7 @@ public static class ZeebeSmsSender
 {
     public static void MapZeebeSmsSenderEndpoints(this WebApplication app)
     {
-        app.MapPost("/amorphie-user-send-password-sms", postSmsSender)
+        app.MapPost("/amorphie-user-send-password-sms", postSmsSenderAks)
             .Produces(StatusCodes.Status200OK)
             .WithOpenApi(operation =>
             {
@@ -22,7 +22,7 @@ public static class ZeebeSmsSender
                 operation.Tags = new List<OpenApiTag> { new() { Name = "Zeebe" } };
                 return operation;
             });
-            app.MapPost("/amorphie-user-send-sms-key", postSmsKeySender)
+            app.MapPost("/amorphie-user-send-sms-key", postSmsKeySenderAks)
             .Produces(StatusCodes.Status200OK)
             .WithOpenApi(operation =>
             {
@@ -112,6 +112,74 @@ public static class ZeebeSmsSender
         transitionName = "user-reset-password-sms-fail";
         return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexcepted Error While Sendind Sms"));
     }
+    static IResult postSmsSenderAks(
+          [FromBody] dynamic body,
+         [FromServices] UserDBContext dbContext,
+          HttpRequest request,
+          HttpContext httpContext,
+          [FromServices] DaprClient client
+          ,IConfiguration configuration
+      )
+    {
+        var transitionName = body.GetProperty("LastTransition").ToString();
+        var instanceIdAsString = body.GetProperty("InstanceId").ToString();
+        var data = body.GetProperty($"TRX-{transitionName}").GetProperty("Data");
+        var recordIdAsString = body.GetProperty("RecordId").ToString();
+        var triggeredBy = body.GetProperty($"TRX-{transitionName}").GetProperty("TriggeredBy").ToString();
+        var triggeredByBehalfOf = body.GetProperty($"TRX-{transitionName}").GetProperty("TriggeredByBehalfOf").ToString();
+        Guid instanceId;
+        if (!Guid.TryParse(instanceIdAsString, out instanceId))
+        {
+            return Results.BadRequest("InstanceId not provided or not as a GUID");
+        }
+        Guid recordId;
+        if (!Guid.TryParse(recordIdAsString, out recordId))
+        {
+            return Results.BadRequest("RecordId not provided or not as a GUID");
+        }
+        try
+        {
+            User? user = dbContext.Users!.FirstOrDefault(f => f.Id == recordId);
+            if (user != null)
+            {
+                string password ="123456";
+                string content = "Yeni şifreniz:" + password;
+                //bool smsSend = SendSms(content, user,configuration,triggeredByBehalfOf);
+
+                    var salt = Convert.FromBase64String(user.Salt);
+                    var passwordHash = ArgonPasswordHelper.HashPassword(password, salt);
+
+                    dbContext.UserPasswords!.Add(new UserPassword
+                    {
+                        Id = new Guid(),
+                        HashedPassword = Convert.ToBase64String(passwordHash),
+                        CreatedAt = DateTime.UtcNow,
+                        MustResetPassword = true,
+                        AccessFailedCount = 0,
+                        IsArgonHash = true,
+                        UserId = user.Id,
+                        ModifiedBy = user.Id,
+                        ModifiedAt = DateTime.UtcNow
+                    });
+                    dbContext!.SaveChanges();
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, true,"Success"));
+
+            }
+            else
+            {
+                 transitionName = "user-reset-password-sms-fail";
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"User Not Found"));
+            }
+        }
+        catch (Exception ex)
+        {
+            transitionName = "user-reset-password-sms-fail";
+            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexcepted Error While Sendind Sms"));
+        }
+        transitionName = "user-reset-password-sms-fail";
+        return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredBy, triggeredByBehalfOf, data, false,"Unexcepted Error While Sendind Sms"));
+    }
+  
     static IResult postSmsKeySender(
            [FromBody] dynamic body,
           [FromServices] UserDBContext dbContext,
@@ -209,6 +277,96 @@ public static class ZeebeSmsSender
         transitionName = "openbanking-register-sms-fail";
         return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false,"Unexcepted Error While Sendind Sms"));
     }
+     static IResult postSmsKeySenderAks(
+           [FromBody] dynamic body,
+          [FromServices] UserDBContext dbContext,
+           HttpRequest request,
+           HttpContext httpContext,
+           [FromServices] DaprClient client
+           ,IConfiguration configuration
+       )
+    {
+        var transitionName = body.GetProperty("LastTransition").ToString();
+        var instanceIdAsString = body.GetProperty("InstanceId").ToString();
+        var data = body.GetProperty($"TRX-{transitionName}").GetProperty("Data");
+        var recordIdAsString = body.GetProperty("RecordId").ToString();
+        string triggeredByAsString = body.GetProperty($"TRX-{transitionName}").GetProperty("TriggeredBy").ToString();
+        string triggeredByBehalfOfAsString = body.GetProperty($"TRX-{transitionName}").GetProperty("TriggeredByBehalfOf").ToString();
+        Guid instanceId;
+        if (!Guid.TryParse(instanceIdAsString, out instanceId))
+        {
+            return Results.BadRequest("InstanceId not provided or not as a GUID");
+        }
+        Guid recordId;
+        if (!Guid.TryParse(recordIdAsString, out recordId))
+        {
+            return Results.BadRequest("RecordId not provided or not as a GUID");
+        }
+           Guid triggeredBy;
+        if (!Guid.TryParse(triggeredByAsString, out triggeredBy))
+        {
+            return Results.BadRequest("triggeredBy not provided or not as a GUID");
+        }
+            Guid triggeredByBehalfOf;
+        if (!Guid.TryParse(triggeredByBehalfOfAsString, out triggeredByBehalfOf))
+        {
+            return Results.BadRequest("triggeredBy not provided or not as a GUID");
+        }
+        try
+        {
+            User? user = dbContext.Users!.FirstOrDefault(f => f.Id == recordId);
+            if (user == null)
+            {
+                dynamic? entityData=body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData");
+               string countryCode = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("phone")
+               .GetProperty("countryCode").ToString();
+                string prefix = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("phone")
+               .GetProperty("prefix").ToString();
+                string number = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("phone")
+               .GetProperty("number").ToString();
+                 string reference = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("reference").ToString();
+               user = new User()
+                {
+                    Id = recordId,
+                    State = "DeActive",
+                    Reference =reference,
+                    Phone =new Phone(){
+                        CountryCode=Convert.ToInt32(countryCode),
+                        Prefix=Convert.ToInt32(prefix),
+                        Number=number
+                    }
+                };
+                dbContext.Users!.Add(user);
+                dbContext.SaveChanges();
+            }
+             Random rnd = new Random();
+                int num = rnd.Next(9999);
+                string smsKey = "1234";
+                //bool smsSend = SendSms("Test:"+ smsKey,user,configuration,triggeredByBehalfOfAsString);
+                    dbContext.UserSmsKeys!.Add(new UserSmsKey
+                    {
+                        Id = new Guid(),
+                        SmsKey = smsKey,
+                        UserId = user.Id,
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = triggeredBy,
+                        CreatedByBehalfOf=triggeredByBehalfOf
+                        
+                    });
+                    dbContext!.SaveChanges();
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, true,"Success"));
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            transitionName = "openbanking-register-sms-fail";
+            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false,"Unexcepted Error While Sendind Sms"));
+        }
+        transitionName = "openbanking-register-sms-fail";
+        return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false,"Unexcepted Error While Sendind Sms"));
+    }
+ 
    static IResult postSmsKeyControl(
            [FromBody] dynamic body,
           [FromServices] UserDBContext dbContext,
