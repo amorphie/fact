@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amorphie-fact-client
+  namespace: amorphie-fact-client
+spec:
+  selector:
+    matchLabels:
+      app: amorphie-fact-client
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: amorphie-fact-client
+      annotations:
+        dapr.io/app-id: amorphie-fact-client
+        dapr.io/enabled: 'true'
+        dapr.io/app-port: '5000'
+    spec:
+      serviceAccountName: amorphie-fact-clientuser
+      containers:
+        - name: amorphie-fact-client
+          image: burganbank/amorphie.fact-client:latest
+          ports:
+            - containerPort: 5000
+          env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Test"
+          - name: EnableApm
+            value: "true"
+          - name: TZ
+            value: Europe/Istanbul
+          resources:
+            limits:
+              cpu: "1"
+              memory: "4096Mi"
+            requests:
+              cpu: "0.1"
+              memory: "64Mi"
