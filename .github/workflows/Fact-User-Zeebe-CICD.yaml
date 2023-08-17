@@ -81,6 +81,7 @@ jobs:
             ${{ github.workspace }}/manifest-user-zeebe/dapr/vault-component.yaml
             ${{ github.workspace }}/manifest-user-zeebe/dapr/amorphie-zeebe-user-amorphie-sms-control.yaml
             ${{ github.workspace }}/manifest-user-zeebe/dapr/amorphie-zeebe-user-send-sms-key.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/dapr/zeebe-amorphie-user-send-password-sms.yaml
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
           imagepullsecrets: |
