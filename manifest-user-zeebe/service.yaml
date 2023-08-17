@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: amorphie-fact-user-zeebe
+  namespace: amorphie-fact-user-zeebe
+spec:
+  selector:
+    app: amorphie-fact-user-zeebe
+  ports:
+    - port: 5000
+      targetPort: 5000

@@ -1,22 +1,22 @@
-name: FACT-CLIENT-CI-CD
+name: FACT-USER-CI-CD
 on:
   push:
     branches:
       - 'main'
     paths:
-      - './amorphie.client'
+      - './amorphie.user'
   pull_request:
     types:
       - closed
     branches:
       - 'main'
     paths:
-      - './amorphie.client'
+      - './amorphie.user'
   workflow_dispatch:
 
 env:
-  APP_NAME: amorphie.fact-client
-  NAMESPACE: amorphie-fact-client
+  APP_NAME: amorphie.fact-user
+  NAMESPACE: amorphie-fact-user
   CLUSTER_NAME: BurganAKS
   CLUSTER_RESOURCE_GROUP: BurganTech
   SECRET: docker-hub
@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile-Client
+          file: ./Dockerfile-User
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
@@ -65,20 +65,20 @@ jobs:
           
       - name: Replace vault address
         run: |
-          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest-client/dapr/vault-component.yaml
+          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest/dapr/vault-component.yaml
 
       - name: Replace vault token
         run: |
-          sed -i -e "s,amorphie-fact-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest-client/dapr/vault-component.yaml
+          sed -i -e "s,amorphie-fact-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest/dapr/vault-component.yaml
 
       # Deploy app to AKS
       - uses: azure/k8s-deploy@v1
         with:
           manifests: |
-            ${{ github.workspace }}/manifest-client/deployment.yaml
-            ${{ github.workspace }}/manifest-client/service.yaml
-            ${{ github.workspace }}/manifest-client/dapr/cache-redis-component.yaml
-            ${{ github.workspace }}/manifest-client/dapr/vault-component.yaml
+            ${{ github.workspace }}/manifest/deployment.yaml
+            ${{ github.workspace }}/manifest/service.yaml
+            ${{ github.workspace }}/manifest/dapr/cache-redis-component.yaml
+            ${{ github.workspace }}/manifest/dapr/vault-component.yaml
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
           imagepullsecrets: |

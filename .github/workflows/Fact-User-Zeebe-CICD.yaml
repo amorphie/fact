@@ -1,14 +1,22 @@
-name: FACT-USER-CI-CD
+name: FACT-USER-ZEEBE-CI-CD
 on:
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
+    paths:
+      - './amorphie.user.zeebe.workers'
   pull_request:
-    branches: [ main ]
+    types:
+      - closed
+    branches:
+      - 'main'
+    paths:
+      - './amorphie.user.zeebe.workers'
   workflow_dispatch:
 
 env:
-  APP_NAME: amorphie.fact-user
-  NAMESPACE: amorphie-fact-user
+  APP_NAME: amorphie.fact-user-zeebe
+  NAMESPACE: amorphie-fact-user-zeebe
   CLUSTER_NAME: BurganAKS
   CLUSTER_RESOURCE_GROUP: BurganTech
   SECRET: docker-hub
@@ -29,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile-User
+          file: ./Dockerfile-Zebee
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
@@ -57,20 +65,22 @@ jobs:
           
       - name: Replace vault address
         run: |
-          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest/dapr/vault-component.yaml
+          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest-user-zeebe/dapr/vault-component.yaml
 
       - name: Replace vault token
         run: |
-          sed -i -e "s,amorphie-fact-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest/dapr/vault-component.yaml
+          sed -i -e "s,amorphie-fact-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest-user-zeebe/dapr/vault-component.yaml
 
       # Deploy app to AKS
       - uses: azure/k8s-deploy@v1
         with:
           manifests: |
-            ${{ github.workspace }}/manifest/deployment.yaml
-            ${{ github.workspace }}/manifest/service.yaml
-            ${{ github.workspace }}/manifest/dapr/cache-redis-component.yaml
-            ${{ github.workspace }}/manifest/dapr/vault-component.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/deployment.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/service.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/dapr/cache-redis-component.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/dapr/vault-component.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/dapr/amorphie-zeebe-user-amorphie-sms-control.yaml
+            ${{ github.workspace }}/manifest-user-zeebe/dapr/amorphie-zeebe-user-send-sms-key.yaml
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
           imagepullsecrets: |
