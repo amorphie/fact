@@ -11,7 +11,7 @@ spec:
     value: redis-cluster-headless.amorphie-redis.svc.cluster.local:6379
   - name: redisPassword
     secretKeyRef:
-      name: test-redis-secret
+      name: redis-secret
       key: redis-password
   - name: actorStateStore
     value: "true"
