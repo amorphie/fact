@@ -44,6 +44,6 @@ public class UserDeviceModule
             return Results.Ok(response);
         }
 
-        return Results.NoContent();
+        return Results.NotFound();
     }
 }
