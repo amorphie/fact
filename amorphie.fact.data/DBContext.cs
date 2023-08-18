@@ -64,7 +64,7 @@ public class UserDBContext : DbContext
 
 
         modelBuilder.Entity<UserDevice>()
-       .HasIndex(b => new { b.Id, b.DeviceId, b.UserId })
+       .HasIndex(b => new { b.Id, b.DeviceId, b.UserId ,b.ClientId})
         .HasMethod("GIN")
        .IsTsVectorExpressionIndex("english");
 
