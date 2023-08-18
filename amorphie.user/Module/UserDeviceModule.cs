@@ -32,7 +32,7 @@ public class UserDeviceModule
 
         if (!string.IsNullOrEmpty(dataSearch.Keyword))
         {
-            query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.DeviceId, x.UserId, x.Id))
+            query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.DeviceId, x.UserId, x.Id, x.ClientId))
            .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
 
