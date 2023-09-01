@@ -32,7 +32,7 @@ DateTime? ModifiedAt,
 Guid? CreatedByBehalfOf,
 Guid? ModifiedByBehalof,
 string Salt,
-bool IsArgonHash, Guid? Id, List<string>? tags,string reason,string explanation);
+bool IsArgonHash, Guid? Id, List<string>? tags, string reason, string explanation);
 
 
 public record UserCheckPasswordRequest(string Password, Guid UserId);
@@ -43,7 +43,7 @@ public record UserLoginRequest(string Reference, string Password);
 public class UserSearch : DtoSearchBase
 {
     public string? UserTag { get; set; }
-}   
+}
 
 public class PostWorkflowUserReset
 {

@@ -42,9 +42,9 @@ public class SecurityQuestionModule
         if (securityQuestions.Count() > 0)
         {
             var response = securityQuestions.Select(x => ObjectMapper.Mapper.Map<SecurityQuestionDto>(x)).ToList();
-            return Results.Ok(response);            
+            return Results.Ok(response);
         }
 
-         return Results.NoContent();        
+        return Results.NoContent();
     }
 }

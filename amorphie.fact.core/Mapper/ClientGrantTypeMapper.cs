@@ -4,7 +4,7 @@ public class ClientGrantTypeMapper : Profile
 {
     public ClientGrantTypeMapper()
     {
-        CreateMap<ClientGrantType, ClientGrantTypeDto>().ReverseMap(); 
-        CreateMap<ClientGrantType, ClientGrantTypeGetDto>(); 
+        CreateMap<ClientGrantType, ClientGrantTypeDto>().ReverseMap();
+        CreateMap<ClientGrantType, ClientGrantTypeGetDto>();
     }
 }

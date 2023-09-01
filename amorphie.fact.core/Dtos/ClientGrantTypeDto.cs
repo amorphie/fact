@@ -7,7 +7,7 @@ public class ClientGrantTypeDto : DtoBase
     public string GrantType { get; set; } = default!;
 }
 
-public class ClientGrantTypeGetDto 
+public class ClientGrantTypeGetDto
 {
     public string GrantType { get; set; } = default!;
 }

@@ -7,7 +7,7 @@ public class ClientToken : EntityBase
     public Guid ClientId { get; set; }
     public string? Type { get; set; }
     public string? DefaultDuration { get; set; }
-    public bool? OverrideDuration{get;set;}
+    public bool? OverrideDuration { get; set; }
     public string[]? PublicClaims { get; set; }
     public string[]? PrivateClaims { get; set; }
 }

@@ -2,7 +2,7 @@ public static class Helper
 {
     public static string GetHeaderLanguage(this HttpContext httpContext)
     {
-         var language = "en-EN";
+        var language = "en-EN";
 
         if (httpContext.Request.Headers.ContainsKey("Language"))
         {

@@ -61,7 +61,7 @@ public class ClientModule
         }
         else
         {
-            return Results.Problem(detail:"Client Not Found",title:"Flow Exception",statusCode:460);
+            return Results.Problem(detail: "Client Not Found", title: "Flow Exception", statusCode: 460);
         }
     }
 
@@ -121,7 +121,7 @@ public class ClientModule
 
         if (client == null)
         {
-            return Results.Problem(detail:"Invalid Client ID Or Client Secret",title:"Flow Exception",statusCode:461);
+            return Results.Problem(detail: "Invalid Client ID Or Client Secret", title: "Flow Exception", statusCode: 461);
         }
 
         return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
@@ -285,13 +285,13 @@ public class ClientModule
         }
     }
 
-[AddSwaggerParameter("Language", ParameterLocation.Header, false)]
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
     async ValueTask<IResult> getAllClientFullTextSearch(
-      [FromServices] UserDBContext context,
-      [AsParameters] ClientSearch dataSearch,
-      [FromServices] IMapper mapper,
-      HttpContext httpContext
-    )
+          [FromServices] UserDBContext context,
+          [AsParameters] ClientSearch dataSearch,
+          [FromServices] IMapper mapper,
+          HttpContext httpContext
+        )
     {
         var query = context!.Clients!
          .Include(t => t.HeaderConfig)
