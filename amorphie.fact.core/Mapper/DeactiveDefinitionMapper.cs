@@ -4,6 +4,6 @@ public class DeactiveDefinitionMapper : Profile
 {
     public DeactiveDefinitionMapper()
     {
-        CreateMap<DeactiveDefinition, DeactiveDefinitionDto>().ReverseMap(); 
+        CreateMap<DeactiveDefinition, DeactiveDefinitionDto>().ReverseMap();
     }
 }

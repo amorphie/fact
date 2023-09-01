@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace amorphie.fact.core.Dtos
 {
-   public enum SendSmsResponseStatus 
+    public enum SendSmsResponseStatus
     {
-        Success = 200,        
+        Success = 200,
         HasBlacklistRecord = 460,
         SimChange = 461,
         OperatorChange = 462,
@@ -17,7 +17,7 @@ namespace amorphie.fact.core.Dtos
         ServerError = 466,
         MaximumCharactersCountExceed = 467,
     }
-  public class SendSmsOtpResponse
+    public class SendSmsOtpResponse
     {
         public Guid TxnId { get; set; }
         public SendSmsResponseStatus Status { get; set; }

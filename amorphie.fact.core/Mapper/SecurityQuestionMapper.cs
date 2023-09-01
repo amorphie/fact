@@ -3,6 +3,6 @@ public class SecurityQuestionMapper : Profile
 {
     public SecurityQuestionMapper()
     {
-       CreateMap<SecurityQuestion, SecurityQuestionDto>().ReverseMap();
+        CreateMap<SecurityQuestion, SecurityQuestionDto>().ReverseMap();
     }
 }

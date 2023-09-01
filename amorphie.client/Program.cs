@@ -19,7 +19,7 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(options=>
+builder.Services.AddSwaggerGen(options =>
 {
     options.OperationFilter<AddSwaggerParameterFilter>();
 });

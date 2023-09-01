@@ -11,13 +11,13 @@ public class ClientTokenDto : DtoBase
     public string[]? PrivateClaims { get; set; }
 }
 
-public class ClientTokenGetDto 
+public class ClientTokenGetDto
 {
     public string? Type { get; set; }
 
     [JsonPropertyName("duration")]
     public string? DefaultDuration { get; set; }
-    
+
     [JsonPropertyName("claims")]
     public string[]? PublicClaims { get; set; }
 }

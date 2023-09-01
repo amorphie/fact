@@ -64,51 +64,52 @@ public static class ZeebePasswordControl
             string password = body.GetProperty($"TRX-{transitionName}").GetProperty("Data").GetProperty("entityData").GetProperty("password").ToString();
             User? user = dbContext.Users!.Include(i => i.UserPasswords).FirstOrDefault(f => f.Reference == reference);
 
-        if (user != null)
-        {
-            if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
+            if (user != null)
             {
-                var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id && x.IsArgonHash == true).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-                if (userPassword != null)
+                if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
                 {
-                    var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
-                    var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = ArgonPasswordHelper.VerifyHash(password, salt, bytePassword);
-
-                    if (checkPassword)
+                    var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id && x.IsArgonHash == true).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+                    if (userPassword != null)
                     {
-                         return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, true, "Success"));
-                    }
+                        var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
+                        var salt = Convert.FromBase64String(user.Salt);
+                        var checkPassword = ArgonPasswordHelper.VerifyHash(password, salt, bytePassword);
 
-                   else{
-                     transitionName = "user-password-control-fail";
-                     return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User Password does not match"));
-                   }
+                        if (checkPassword)
+                        {
+                            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, true, "Success"));
+                        }
+
+                        else
+                        {
+                            transitionName = "user-password-control-fail";
+                            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User Password does not match"));
+                        }
+                    }
+                    else
+                    {
+                        transitionName = "user-password-control-fail";
+                        return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User password is null"));
+                    }
                 }
                 else
                 {
-                     transitionName = "user-password-control-fail";
-                      return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User password is null"));
+                    transitionName = "user-password-control-fail";
+                    return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User password is null"));
                 }
             }
             else
             {
-                 transitionName = "user-password-control-fail";
-                 return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User password is null"));
+                transitionName = "user-password-control-fail";
+                return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User is not found"));
             }
-        }
-        else
-        {
-             transitionName = "user-password-control-fail";
-            return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "User is not found"));
-        }
         }
         catch (Exception ex)
         {
-             transitionName = "user-password-control-fail";
+            transitionName = "user-password-control-fail";
             return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "Unexcepted error while User Password checking"));
         }
-         transitionName = "user-password-control-fail";
+        transitionName = "user-password-control-fail";
         return Results.Ok(ZeebeMessageHelper.createMessageVariables(body, transitionName, triggeredByAsString, triggeredByBehalfOfAsString, data, false, "Unexcepted error while User Password checking"));
     }
 }

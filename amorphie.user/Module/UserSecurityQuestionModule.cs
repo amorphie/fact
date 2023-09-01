@@ -18,7 +18,7 @@ public class UserSecurityQuestionModule : BaseRoute
         routeGroupBuilder.MapGet("/usersecurityquestion", getAllUserSecurityQuestionFullTextSearch)
         .WithOpenApi()
        .WithSummary("Returns saved usersecurityquestion records.")
-       .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")       
+       .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")
        .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
