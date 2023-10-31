@@ -66,6 +66,22 @@ public class UserModule : BaseRoute
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
+        routeGroupBuilder.MapPost("/postControlPasswordWithFlow", postControlPasswordWithFlow)
+        .WithOpenApi()
+        .WithSummary("Control Password With Flow")
+        .WithDescription("It is update or creates new user.")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict);
+
+        routeGroupBuilder.MapPost("/postChangePasswordWithFlow", postChangePasswordWithFlow)
+        .WithOpenApi()
+        .WithSummary("Change Password With Flow")
+        .WithDescription("It is update or creates new user.")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status409Conflict);
+
 
         routeGroupBuilder.MapDelete("/{id}", deleteUser)
         .WithOpenApi()
@@ -513,6 +529,57 @@ UserSecurityImage image=new UserSecurityImage();
         }
         return Results.Ok();
     }
+ async Task<IResult> postChangePasswordWithFlow(
+                [FromBody] PostWorkflow? workflowData,
+                [FromServices] UserDBContext context,
+                  IConfiguration configuration
+                )
+
+    {
+            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+            var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ChangePasswordDto>(serializeWorkflowData)!;
+            PostWorkflowUserReset postWorkflowUserReset=new PostWorkflowUserReset()
+            {NewPassword=requestEntity.NewPassword};
+             return resetUserPassword(workflowData.recordId, postWorkflowUserReset, context).Result;
+    }
+     async Task<IResult> postControlPasswordWithFlow(
+                [FromBody] PostWorkflow? workflowData,
+                [FromServices] UserDBContext context,
+                  IConfiguration configuration
+                )
+
+    {
+            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+            var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ChangePasswordDto>(serializeWorkflowData)!;
+             var user = await context!.Users!
+        .Include(x => x.UserPasswords)
+        .FirstOrDefaultAsync(x => x.Id == workflowData.recordId);
+
+        if (user != null)
+        {
+            if (user.UserPasswords != null && user.UserPasswords.Count() > 0)
+            {
+                var userPassword = user.UserPasswords.Where(x => x.UserId == user.Id && x.IsArgonHash == true).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+                if (userPassword != null)
+                {
+                    var bytePassword = Convert.FromBase64String(userPassword.HashedPassword);
+                    var salt = Convert.FromBase64String(user.Salt);
+                    var checkPassword = ArgonPasswordHelper.VerifyHash(requestEntity.oldPassword, salt, bytePassword);
+
+                    if (checkPassword)
+                    {
+                        return Results.Ok();
+                    }
+                    return Results.Problem("Passwords do not match");
+                }
+                 return Results.Problem("User password is null");
+            }
+              return Results.Problem("User password is null");
+        }
+
+        return Results.Problem("User  is not found");
+    }
+
 
     async ValueTask<IResult> resetUserPassword(
          Guid userId,
