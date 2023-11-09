@@ -10,6 +10,7 @@ using amorphie.core.Swagger;
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
+await builder.SetSecrets();
 
 // var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
 builder.Logging.ClearProviders();
@@ -19,7 +20,7 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(options=>
+builder.Services.AddSwaggerGen(options =>
 {
     options.OperationFilter<AddSwaggerParameterFilter>();
 });

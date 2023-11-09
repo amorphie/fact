@@ -57,11 +57,13 @@ public class ClientModule
 
         if (client is Client)
         {
-            return TypedResults.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
+            var retVal = ObjectMapper.Mapper.Map<ClientGetDto>(client);
+            retVal.Secret = DecryptString(ApplicationSettings.ClientSecretKey, retVal.Secret!);
+            return TypedResults.Ok(retVal);
         }
         else
         {
-            return Results.Problem(detail:"Client Not Found",title:"Flow Exception",statusCode:460);
+            return Results.Problem(detail: "Client Not Found", title: "Flow Exception", statusCode: 460);
         }
     }
 
@@ -105,7 +107,7 @@ public class ClientModule
         CancellationToken token
         )
     {
-        var hashedSecret = ComputeSha256Hash(data.Secret!);
+        var encryptedString = EncryptString(ApplicationSettings.ClientSecretKey, data.Secret!);
 
         var client = await context!.Clients!.AsNoTracking()
          .Include(t => t.HeaderConfig)
@@ -117,12 +119,16 @@ public class ClientModule
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
           .FirstOrDefaultAsync(t => t.Id == data.ClientId
-                && t.Secret == hashedSecret, token);
+                && t.Secret == encryptedString, token);
+
+
 
         if (client == null)
         {
-            return Results.Problem(detail:"Invalid Client ID Or Client Secret",title:"Flow Exception",statusCode:461);
+            return Results.Problem(detail: "Invalid Client ID Or Client Secret", title: "Flow Exception", statusCode: 461);
         }
+
+        client.Secret = data.Secret;
 
         return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
     }
@@ -256,7 +262,7 @@ public class ClientModule
             dbModelData.ModifiedByBehalfOf = dbModelData.CreatedByBehalfOf;
 
             string secret = Guid.NewGuid().ToString();
-            dbModelData.Secret = ComputeSha256Hash(secret);
+            dbModelData.Secret = EncryptString(ApplicationSettings.ClientSecretKey, secret);
 
             await dbSet.AddAsync(dbModelData);
             await context.SaveChangesAsync(token);
@@ -285,13 +291,50 @@ public class ClientModule
         }
     }
 
-[AddSwaggerParameter("Language", ParameterLocation.Header, false)]
+    string EncryptString(string key, string plainText)
+    {
+        byte[] iv = new byte[16]; byte[] array;
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = Encoding.UTF8.GetBytes(key);
+            aes.IV = iv;
+            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
+                {
+                    using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream)) { streamWriter.Write(plainText); }
+                    array = memoryStream.ToArray();
+                }
+            }
+        }
+        return Convert.ToBase64String(array);
+    }
+    string DecryptString(string key, string cipherText)
+    {
+        byte[] iv = new byte[16];
+        byte[] buffer = Convert.FromBase64String(cipherText);
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = Encoding.UTF8.GetBytes(key);
+            aes.IV = iv; ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+            using (MemoryStream memoryStream = new MemoryStream(buffer))
+            {
+                using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))
+                {
+                    using (StreamReader streamReader = new StreamReader((Stream)cryptoStream)) { return streamReader.ReadToEnd(); }
+                }
+            }
+        }
+    }
+
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
     async ValueTask<IResult> getAllClientFullTextSearch(
-      [FromServices] UserDBContext context,
-      [AsParameters] ClientSearch dataSearch,
-      [FromServices] IMapper mapper,
-      HttpContext httpContext
-    )
+          [FromServices] UserDBContext context,
+          [AsParameters] ClientSearch dataSearch,
+          [FromServices] IMapper mapper,
+          HttpContext httpContext
+        )
     {
         var query = context!.Clients!
          .Include(t => t.HeaderConfig)
