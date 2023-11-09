@@ -1,9 +1,9 @@
 using FluentValidation;
 
 public sealed class ClientFlowValidator : AbstractValidator<ClientFlow>
+{
+    public ClientFlowValidator()
     {
-        public ClientFlowValidator()
-        {
-            
-        }
+
     }
+}

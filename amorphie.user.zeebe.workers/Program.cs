@@ -12,7 +12,7 @@ var daprClient = new DaprClientBuilder().Build();
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
 
- //var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
+//var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
 // Add services to the container.
 builder.Services.AddDaprClient();
 builder.Logging.ClearProviders();
@@ -28,7 +28,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
- //db.Database.Migrate();
+//db.Database.Migrate();
 
 
 // Configure the HTTP request pipeline.

@@ -4,7 +4,7 @@ using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public class UserTagModule 
+public class UserTagModule
 : BaseBBTRoute<UserTagDto, UserTag, UserDBContext>
 {
 
@@ -47,5 +47,5 @@ public class UserTagModule
         }
 
         return Results.NoContent();
-    }    
+    }
 }

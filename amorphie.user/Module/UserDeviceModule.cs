@@ -3,7 +3,7 @@ using amorphie.fact.data;
 using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-public class UserDeviceModule 
+public class UserDeviceModule
 : BaseBBTRoute<UserDeviceDto, UserDevice, UserDBContext>
 {
     public UserDeviceModule(WebApplication app) : base(app)

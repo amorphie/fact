@@ -2,7 +2,7 @@ using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
 using amorphie.user;
 
-public class SecurityImageModule 
+public class SecurityImageModule
 : BaseBBTRoute<SecurityImageDto, SecurityImage, UserDBContext>
 {
     public SecurityImageModule(WebApplication app) : base(app)
@@ -15,6 +15,6 @@ public class SecurityImageModule
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
-         base.AddRoutes(routeGroupBuilder);
-    }    
+        base.AddRoutes(routeGroupBuilder);
+    }
 }
