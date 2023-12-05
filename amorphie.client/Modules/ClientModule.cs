@@ -11,6 +11,7 @@ using amorphie.core.Identity;
 using FluentValidation;
 using amorphie.core.Swagger;
 using Microsoft.OpenApi.Models;
+using amorphie.core.Extension;
 
 namespace amorphie.client;
 
@@ -74,11 +75,22 @@ public class ClientModule
                 [FromQuery][Range(0, 100)] int page,
                 [FromQuery][Range(5, 100)] int pageSize,
                 HttpContext httpContext,
-                CancellationToken token
+                CancellationToken token,
+                [FromQuery] string? sortColumn,
+                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-        var resultList = await context!.Clients!.AsNoTracking()
-        .Include(t => t.HeaderConfig)
+        IQueryable<Client> query = context
+            .Set<Client>()
+            .AsNoTracking();
+
+        if (!string.IsNullOrEmpty(sortColumn))
+        {
+            query = await query.Sort(sortColumn, sortDirection);
+        }
+
+        IList<Client> resultList = await query
+         .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
          .Include(t => t.Idempotency)
          .Include(t => t.Names)
@@ -86,18 +98,13 @@ public class ClientModule
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-       .Skip(page * pageSize)
-       .Take(pageSize)
-       .ToListAsync(token);
+         .Skip(page)
+         .Take(pageSize)
+         .ToListAsync(token);
 
-        if (resultList != null && resultList.Count() > 0)
-        {
-            var response = resultList.Select(x => ObjectMapper.Mapper.Map<ClientGetDto>(x)).ToList();
-
-            return Results.Ok(response);
-        }
-
-        return Results.NoContent();
+        return (resultList != null && resultList.Count > 0)
+                ? Results.Ok(mapper.Map<IList<ClientDto>>(resultList))
+                : Results.NoContent();
     }
 
     async ValueTask<IResult> validateClient(
@@ -353,6 +360,8 @@ public class ClientModule
             query = query.AsNoTracking().Where(x => EF.Functions.ToTsVector("english", string.Join(" ", x.ReturnUrl, x.LoginUrl, x.LogoutUrl))
            .Matches(EF.Functions.PlainToTsQuery("english", dataSearch.Keyword)));
         }
+
+        query = await query.Sort<Client>(dataSearch.SortColumn, dataSearch.SortDirection);
 
         var clients = query.ToList();
 
