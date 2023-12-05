@@ -80,15 +80,15 @@ public class ClientModule
                 [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-         IQueryable<Client> query = context
-             .Set<Client>()
-             .AsNoTracking();
+        IQueryable<Client> query = context
+            .Set<Client>()
+            .AsNoTracking();
 
         if (!string.IsNullOrEmpty(sortColumn))
         {
             query = await query.Sort(sortColumn, sortDirection);
         }
-       
+
         IList<Client> resultList = await query
          .Include(t => t.HeaderConfig)
          .Include(t => t.Jws)
