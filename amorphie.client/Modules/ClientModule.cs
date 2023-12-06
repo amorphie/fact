@@ -98,7 +98,7 @@ public class ClientModule
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-         .Skip(page)
+         .Skip(page * pageSize)
          .Take(pageSize)
          .ToListAsync(token);
 
