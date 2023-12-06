@@ -30,7 +30,7 @@ public class UserDeviceModule
     {
         var device = await context!.UserDevices
             .Where(u => u.DeviceId == deviceInfo.DeviceId && u.Status == 1)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
         if(device == null)
         {
