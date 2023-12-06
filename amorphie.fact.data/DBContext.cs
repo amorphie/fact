@@ -133,9 +133,10 @@ modelBuilder.Entity<UserSmsKey>()
         modelBuilder.Entity<UserDevice>().HasData(new
         {
             Id = Guid.NewGuid(),
-            DeviceId = 123,
+            DeviceId = Guid.NewGuid(),
             ClientId = Guid.NewGuid(),
             TokenId = Guid.NewGuid(),
+            InstallationId = Guid.NewGuid(),
             UserId = UserId,
             CreatedBy = Guid.NewGuid(),
             CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
