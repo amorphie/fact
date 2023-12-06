@@ -74,7 +74,7 @@ namespace amorphie.fact.data.Migrations
             migrationBuilder.AlterColumn<Guid>(
                 name: "DeviceId",
                 table: "UserDevices",
-                type: "uuid",
+                type: "uuid using \"DeviceId\"::uuid",
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "integer");
