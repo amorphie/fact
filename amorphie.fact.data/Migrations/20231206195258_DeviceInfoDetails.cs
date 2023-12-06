@@ -70,14 +70,19 @@ namespace amorphie.fact.data.Migrations
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
+            
+            migrationBuilder.DropColumn(
+                name: "DeviceId",
+                table: "UserDevices");
 
-            migrationBuilder.AlterColumn<Guid>(
+            migrationBuilder.AddColumn<Guid>(
                 name: "DeviceId",
                 table: "UserDevices",
-                type: "uuid using \"DeviceId\"::uuid",
+                type: "uuid",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer");
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ClientId",
