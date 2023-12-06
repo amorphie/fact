@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using amorphie.core.security.Extensions;
 using amorphie.fact.data;
 using amorphie.core.Identity;
 using System.Reflection;
