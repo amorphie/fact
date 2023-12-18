@@ -21,6 +21,28 @@ public class UserDeviceModule
 
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         routeGroupBuilder.MapPost("/public/save-device", saveDevice);
+        routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
+    }
+
+    async ValueTask<IResult> saveDeviceClient(
+     [FromServices] UserDBContext context,
+     [FromBody] UserSaveDeviceClientDto deviceInfo
+    )
+    {
+        await context!.UserDevices.AddAsync(new UserDevice()
+            {
+                DeviceId = deviceInfo.DeviceId,
+                InstallationId = deviceInfo.InstallationId,
+                ClientId = deviceInfo.ClientId,
+                UserId = deviceInfo.UserId,
+                TokenId = null,
+                 DeviceModel = null,
+                  DevicePlatform = null,
+                   DeviceToken = null,
+                Status = 1
+            });
+            await context!.SaveChangesAsync();
+            return Results.Ok();
     }
 
     async ValueTask<IResult> saveDevice(
