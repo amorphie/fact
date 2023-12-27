@@ -304,13 +304,13 @@ public class UserModule : BaseRoute
                 if (data.LastName != null && data.LastName != user.LastName) { user.LastName = data.LastName; hasChanges = true; }
                 if (data.Password != null)
                 {
-
+                    Console.WriteLine("Password Guncellenecek");
                     var passwordSalt = Convert.FromBase64String(user.Salt);
                     var password = ArgonPasswordHelper.HashPassword(data.Password, passwordSalt);
                     var resultPassword = Convert.ToBase64String(password);
 
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
-
+                    Console.WriteLine("Password Contexte Eklendi");
                 }
                 if (data.tags != null && data.tags.Count > 0)
                 {
@@ -369,6 +369,7 @@ public class UserModule : BaseRoute
                 {
                     context!.SaveChanges();
                     transaction.Commit();
+                    Console.WriteLine("Context guncellendi");
                     if(data.State != null)
                     {
                         if(hasStatusChanged && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
