@@ -311,6 +311,7 @@ public class UserModule : BaseRoute
 
                     context.UserPasswords.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = data.ModifiedBy, ModifiedAt = DateTime.UtcNow });
                     Console.WriteLine("Password Contexte Eklendi");
+                    hasChanges = true;
                 }
                 if (data.tags != null && data.tags.Count > 0)
                 {
