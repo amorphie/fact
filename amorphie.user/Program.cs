@@ -52,6 +52,9 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 db.Database.Migrate();
 
+app.MapPost("/public/device/save", UserDevicePublic.saveDevice)
+            .Produces(StatusCodes.Status200OK);
+            
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
