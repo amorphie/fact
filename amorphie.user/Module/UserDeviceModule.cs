@@ -99,7 +99,7 @@ public class UserDeviceModule
             return Results.Ok();
         }
 
-        return Results.StatusCode(500);
+        return Results.Ok();
     }       
 
     async ValueTask<IResult> getAllUserDeviceFullTextSearch(
