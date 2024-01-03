@@ -20,8 +20,8 @@ public class UserDeviceModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
-        routeGroupBuilder.MapPost("/public/save-device", saveDevice);
-        //routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
+        //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
+        routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
     }
 
     async ValueTask<IResult> saveDeviceClient(
