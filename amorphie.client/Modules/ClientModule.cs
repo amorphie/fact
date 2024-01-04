@@ -34,6 +34,39 @@ public class ClientModule
         routeGroupBuilder.MapPost("validate", validateClient);
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
         routeGroupBuilder.MapPost("workflowClient", workflowClient);
+        routeGroupBuilder.MapGet("/{code}", GetByCode);
+    }
+
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
+    protected async ValueTask<IResult> GetByCode(
+        [FromServices] UserDBContext context,
+        [FromServices] IMapper mapper,
+        [FromRoute(Name = "code")] string code,
+        HttpContext httpContext,
+        CancellationToken token
+        )
+    {
+        var client = await context.Clients!.AsNoTracking()
+         .Include(t => t.HeaderConfig)
+         .Include(t => t.Jws)
+         .Include(t => t.Idempotency)
+         .Include(t => t.Names)
+         .Include(t => t.Tokens)
+         .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Flows)
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+         .FirstOrDefaultAsync(t => t.Code == code, token);
+
+        if (client is Client)
+        {
+            var retVal = ObjectMapper.Mapper.Map<ClientGetDto>(client);
+            retVal.Secret = DecryptString(ApplicationSettings.ClientSecretKey, retVal.Secret!);
+            return TypedResults.Ok(retVal);
+        }
+        else
+        {
+            return Results.Problem(detail: "Client Not Found", title: "Flow Exception", statusCode: 460);
+        }
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -126,6 +159,39 @@ public class ClientModule
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
           .FirstOrDefaultAsync(t => t.Id == data.ClientId
+                && t.Secret == encryptedString, token);
+
+
+
+        if (client == null)
+        {
+            return Results.Problem(detail: "Invalid Client ID Or Client Secret", title: "Flow Exception", statusCode: 461);
+        }
+
+        client.Secret = data.Secret;
+
+        return Results.Ok(ObjectMapper.Mapper.Map<ClientGetDto>(client));
+    }
+
+    async ValueTask<IResult> validateClientByCode(
+        [FromBody] ValidateClientByCodeRequest data,
+        [FromServices] UserDBContext context,
+        HttpContext httpContext,
+        CancellationToken token
+        )
+    {
+        var encryptedString = EncryptString(ApplicationSettings.ClientSecretKey, data.Secret!);
+
+        var client = await context!.Clients!.AsNoTracking()
+         .Include(t => t.HeaderConfig)
+         .Include(t => t.Jws)
+         .Include(t => t.Idempotency)
+         .Include(t => t.Names)
+         .Include(t => t.Tokens)
+         .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Flows)
+         .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+          .FirstOrDefaultAsync(t => t.Code == data.Code
                 && t.Secret == encryptedString, token);
 
 

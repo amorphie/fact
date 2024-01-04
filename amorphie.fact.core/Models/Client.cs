@@ -5,6 +5,7 @@ using NpgsqlTypes;
 public class Client : EntityBase
 {
     public ICollection<Translation> Names { get; set; } = default!;
+    public string? Code { get; set; }
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
     public string? Type { get; set; }
