@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using amorphie.core.security.Extensions;
 using amorphie.fact.data;
 using amorphie.core.Identity;
 using System.Reflection;
@@ -7,7 +6,7 @@ using FluentValidation;
 using amorphie.core.Extension;
 
 var builder = WebApplication.CreateBuilder(args);
-await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
+await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
 // var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
 builder.Logging.ClearProviders();
@@ -52,6 +51,9 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 db.Database.Migrate();
+
+app.MapPost("/public/device/save", UserDevicePublic.saveDevice)
+            .Produces(StatusCodes.Status200OK);
 
 app.UseCloudEvents();
 app.UseRouting();

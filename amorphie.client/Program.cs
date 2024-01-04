@@ -1,6 +1,5 @@
 using amorphie.fact.data;
 using Microsoft.EntityFrameworkCore;
-using amorphie.core.security.Extensions;
 using amorphie.core.Identity;
 using amorphie.core.Extension;
 using FluentValidation;
