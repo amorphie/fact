@@ -32,6 +32,7 @@ public class ClientModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapPost("validate", validateClient);
+        routeGroupBuilder.MapPost("validateClientByCode", validateClientByCode);
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
         routeGroupBuilder.MapPost("workflowClient", workflowClient);
         routeGroupBuilder.MapGet("/{code}", GetByCode);
