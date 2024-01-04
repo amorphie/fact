@@ -35,7 +35,7 @@ public class ClientModule
         routeGroupBuilder.MapPost("validateClientByCode", validateClientByCode);
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
         routeGroupBuilder.MapPost("workflowClient", workflowClient);
-        routeGroupBuilder.MapGet("/{code}", GetByCode);
+        routeGroupBuilder.MapGet("code/{code}", GetByCode);
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
