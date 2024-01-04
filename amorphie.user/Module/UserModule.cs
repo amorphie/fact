@@ -59,13 +59,13 @@ public class UserModule : BaseRoute
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status409Conflict);
-          routeGroupBuilder.MapPost("/postOpenBankingStatus", postOpenBankingStatus)
-        .WithOpenApi()
-        .WithSummary("Get Workflow Status")
-        .WithDescription("It is update or creates new user.")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status409Conflict);
+        routeGroupBuilder.MapPost("/postOpenBankingStatus", postOpenBankingStatus)
+      .WithOpenApi()
+      .WithSummary("Get Workflow Status")
+      .WithDescription("It is update or creates new user.")
+      .Produces(StatusCodes.Status200OK)
+      .Produces(StatusCodes.Status201Created)
+      .Produces(StatusCodes.Status409Conflict);
         routeGroupBuilder.MapPost("/postControlPasswordWithFlow", postControlPasswordWithFlow)
         .WithOpenApi()
         .WithSummary("Control Password With Flow")
@@ -360,7 +360,7 @@ public class UserModule : BaseRoute
 
                 }
                 if (data.Reference != null && data.Reference != user.Reference) { user.Reference = data.Reference; hasChanges = true; }
-                if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; hasStatusChanged = true;}
+                if (data.State != null && data.State != user.State) { user.State = data.State; hasChanges = true; hasStatusChanged = true; }
                 if (data.EMail != null && data.EMail != user.EMail) { user.EMail = data.EMail; hasChanges = true; }
                 if (data.Phone != null && data.Phone != user.Phone) { user.Phone = data.Phone; hasChanges = true; }
                 if (data.ModifiedByBehalof != null && data.ModifiedByBehalof != user.ModifiedByBehalfOf) { user.ModifiedByBehalfOf = data.ModifiedByBehalof; hasChanges = true; }
@@ -371,11 +371,11 @@ public class UserModule : BaseRoute
                     context!.SaveChanges();
                     transaction.Commit();
                     Console.WriteLine("Context guncellendi");
-                    if(data.State != null)
+                    if (data.State != null)
                     {
-                        if(hasStatusChanged && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
+                        if (hasStatusChanged && (data.State.ToLower().Equals("deactive") || data.State.ToLower().Equals("suspend")))
                         {
-                            await daprClient.InvokeMethodAsync(HttpMethod.Put,configuration["TokenServiceAppName"],configuration["TokenServiceRevokeMethod"]+user.Reference);
+                            await daprClient.InvokeMethodAsync(HttpMethod.Put, configuration["TokenServiceAppName"], configuration["TokenServiceRevokeMethod"] + user.Reference);
                         }
                     }
                     return Results.Ok();
@@ -428,7 +428,7 @@ public class UserModule : BaseRoute
             {
                 return Results.Problem(ex.ToString());
             }
-            return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, daprClient,configuration).Result;
+            return postUser(ObjectMapper.Mapper.Map<PostUserRequest>(request), context, daprClient, configuration).Result;
         }
         else if (workflowData != null && workflowData.workflowName == "user-reset-password")
         {
@@ -449,7 +449,7 @@ public class UserModule : BaseRoute
         if (workflowData != null && workflowData.workflowName == "OpenBanking-Register")
         {
             User? user;
-            bool hasChanges=false;
+            bool hasChanges = false;
             var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
             var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<OpenBankingUser>(serializeWorkflowData)!;
             if (workflowData.newStatus == "openbanking-register-resend-sms" || workflowData.newStatus == "openbanking-register-send-sms")
@@ -462,7 +462,7 @@ public class UserModule : BaseRoute
                     Phone = requestEntity.phone
                 };
                 context!.Users!.Add(user);
-                hasChanges=true;
+                hasChanges = true;
             }
             else
             {
@@ -470,46 +470,46 @@ public class UserModule : BaseRoute
             }
             if (workflowData.newStatus == "openbanking-personel-password-waiting")
             {
-                 
+
                 user!.FirstName = requestEntity.firstName;
                 user.LastName = requestEntity.lastName;
                 user.EMail = requestEntity.eMail;
-                 hasChanges=true;
+                hasChanges = true;
             }
             if (workflowData.newStatus == "openbanking-security-question-waiting")
             {
-                    var passwordSalt = Convert.FromBase64String(user!.Salt);
+                var passwordSalt = Convert.FromBase64String(user!.Salt);
                 var password = ArgonPasswordHelper.HashPassword(requestEntity.password, passwordSalt);
                 var resultPassword = Convert.ToBase64String(password);
 
                 context.UserPasswords!.Add(new UserPassword { Id = new Guid(), HashedPassword = resultPassword, CreatedAt = DateTime.UtcNow, MustResetPassword = true, AccessFailedCount = 0, IsArgonHash = true, UserId = user.Id, ModifiedBy = workflowData.user.GetValueOrDefault(), ModifiedAt = DateTime.UtcNow });
-                hasChanges=true;
+                hasChanges = true;
 
-                
-                
+
+
             }
             if (workflowData.newStatus == "openbanking-security-image-waiting")
             {
-                UserSecurityQuestion question=new UserSecurityQuestion();
-                question.UserId=user!.Id;
-                question.SecurityQuestionId=requestEntity.question;
-                question.SecurityAnswer=requestEntity.answer;
-                question.Id=new Guid();
+                UserSecurityQuestion question = new UserSecurityQuestion();
+                question.UserId = user!.Id;
+                question.SecurityQuestionId = requestEntity.question;
+                question.SecurityAnswer = requestEntity.answer;
+                question.Id = new Guid();
                 question.CreatedAt = DateTime.UtcNow;
                 question.CreatedBy = workflowData.user.GetValueOrDefault();
                 context.UserSecurityQuestions!.Add(question);
-                 hasChanges=true;
+                hasChanges = true;
             }
             if (workflowData.newStatus == "openbanking-conract1-confirm-waiting")
             {
-UserSecurityImage image=new UserSecurityImage();
-                image.UserId=user!.Id;
-                image.SecurityImage=requestEntity.imageId.ToString();
-                image.Id=new Guid();
+                UserSecurityImage image = new UserSecurityImage();
+                image.UserId = user!.Id;
+                image.SecurityImage = requestEntity.imageId.ToString();
+                image.Id = new Guid();
                 image.CreatedAt = DateTime.UtcNow;
                 image.CreatedBy = workflowData.user.GetValueOrDefault();
                 context.UserSecurityImages!.Add(image);
-                hasChanges=true;
+                hasChanges = true;
 
 
             }
@@ -519,43 +519,43 @@ UserSecurityImage image=new UserSecurityImage();
             }
             if (workflowData.newStatus == "user-active")
             {
-                    user!.State="Active";
-                    UserTag userTag=new UserTag(){ Id = new Guid(), UserId = user.Id, Tag = "openbanking-customer" };
-                    context.UserTags!.Add(userTag);
-                    hasChanges=true;
+                user!.State = "Active";
+                UserTag userTag = new UserTag() { Id = new Guid(), UserId = user.Id, Tag = "openbanking-customer" };
+                context.UserTags!.Add(userTag);
+                hasChanges = true;
             }
-                if(hasChanges)
+            if (hasChanges)
                 context.SaveChanges();
 
-            
+
         }
         return Results.Ok();
     }
- async Task<IResult> postChangePasswordWithFlow(
-                [FromBody] PostWorkflow? workflowData,
-                [FromServices] UserDBContext context,
-                  IConfiguration configuration
-                )
+    async Task<IResult> postChangePasswordWithFlow(
+                   [FromBody] PostWorkflow? workflowData,
+                   [FromServices] UserDBContext context,
+                     IConfiguration configuration
+                   )
 
     {
-            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
-            var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ChangePasswordDto>(serializeWorkflowData)!;
-            PostWorkflowUserReset postWorkflowUserReset=new PostWorkflowUserReset()
-            {NewPassword=requestEntity.NewPassword};
-             return resetUserPassword(workflowData.recordId, postWorkflowUserReset, context).Result;
+        var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+        var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ChangePasswordDto>(serializeWorkflowData)!;
+        PostWorkflowUserReset postWorkflowUserReset = new PostWorkflowUserReset()
+        { NewPassword = requestEntity.NewPassword };
+        return resetUserPassword(workflowData.recordId, postWorkflowUserReset, context).Result;
     }
-     async Task<IResult> postControlPasswordWithFlow(
-                [FromBody] PostWorkflow? workflowData,
-                [FromServices] UserDBContext context,
-                  IConfiguration configuration
-                )
+    async Task<IResult> postControlPasswordWithFlow(
+               [FromBody] PostWorkflow? workflowData,
+               [FromServices] UserDBContext context,
+                 IConfiguration configuration
+               )
 
     {
-            var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
-            var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ChangePasswordDto>(serializeWorkflowData)!;
-             var user = await context!.Users!
-        .Include(x => x.UserPasswords)
-        .FirstOrDefaultAsync(x => x.Id == workflowData.recordId);
+        var serializeWorkflowData = System.Text.Json.JsonSerializer.Serialize(workflowData.entityData);
+        var requestEntity = Newtonsoft.Json.JsonConvert.DeserializeObject<ChangePasswordDto>(serializeWorkflowData)!;
+        var user = await context!.Users!
+   .Include(x => x.UserPasswords)
+   .FirstOrDefaultAsync(x => x.Id == workflowData.recordId);
 
         if (user != null)
         {
@@ -574,9 +574,9 @@ UserSecurityImage image=new UserSecurityImage();
                     }
                     return Results.Problem("Passwords do not match");
                 }
-                 return Results.Problem("User password is null");
+                return Results.Problem("User password is null");
             }
-              return Results.Problem("User password is null");
+            return Results.Problem("User password is null");
         }
 
         return Results.Problem("User  is not found");
@@ -866,7 +866,7 @@ UserSecurityImage image=new UserSecurityImage();
 
                 }
 
-                return Results.Problem(detail:"Invalid Reference or Password",title:"Flow Exception",statusCode:461);
+                return Results.Problem(detail: "Invalid Reference or Password", title: "Flow Exception", statusCode: 461);
             }
             else
             {
@@ -891,13 +891,13 @@ UserSecurityImage image=new UserSecurityImage();
 
                 }
 
-                return Results.Problem(detail:"Invalid Reference or Password",title:"Flow Exception",statusCode:461);
+                return Results.Problem(detail: "Invalid Reference or Password", title: "Flow Exception", statusCode: 461);
 
             }
         }
         else
         {
-            return Results.Problem(detail:"User Not Found",title:"Flow Exception",statusCode:460);
+            return Results.Problem(detail: "User Not Found", title: "Flow Exception", statusCode: 460);
         }
     }
 

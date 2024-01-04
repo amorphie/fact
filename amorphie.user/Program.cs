@@ -6,7 +6,7 @@ using FluentValidation;
 using amorphie.core.Extension;
 
 var builder = WebApplication.CreateBuilder(args);
-await builder.Configuration.AddVaultSecrets("user-secretstore",new string[]{"user-secretstore"});
+await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
 // var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
 builder.Logging.ClearProviders();
@@ -54,7 +54,7 @@ db.Database.Migrate();
 
 app.MapPost("/public/device/save", UserDevicePublic.saveDevice)
             .Produces(StatusCodes.Status200OK);
-            
+
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();

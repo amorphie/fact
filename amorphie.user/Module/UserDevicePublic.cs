@@ -4,18 +4,18 @@ using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public static class UserDevicePublic 
+public static class UserDevicePublic
 {
-   public static async Task<IResult> saveDevice(
-        [FromServices] UserDBContext context,
-     [FromBody] UserSaveDeviceDto deviceInfo
-    )
+    public static async Task<IResult> saveDevice(
+         [FromServices] UserDBContext context,
+      [FromBody] UserSaveDeviceDto deviceInfo
+     )
     {
         var device = await context!.UserDevices
             .Where(u => u.DeviceId == deviceInfo.DeviceId && u.Status == 1)
             .FirstOrDefaultAsync();
 
-        if(device == null)
+        if (device == null)
         {
             await context!.UserDevices.AddAsync(new UserDevice()
             {
@@ -33,7 +33,7 @@ public static class UserDevicePublic
             return Results.Ok();
         }
 
-        if(device.InstallationId != deviceInfo.InstallationId)
+        if (device.InstallationId != deviceInfo.InstallationId)
         {
             device.Status = 0;
 
@@ -53,7 +53,7 @@ public static class UserDevicePublic
             return Results.Ok();
         }
 
-        if(!deviceInfo.DeviceToken!.Equals(device.DeviceToken))
+        if (!deviceInfo.DeviceToken!.Equals(device.DeviceToken))
         {
             device.DeviceToken = deviceInfo.DeviceToken;
             await context!.SaveChangesAsync();

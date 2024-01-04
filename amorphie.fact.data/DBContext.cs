@@ -30,7 +30,7 @@ public class UserDBContext : DbContext
     public DbSet<ClientToken>? ClientTokens { get; set; }
     public DbSet<ClientGrantType>? ClientGrantTypes { get; set; }
     public DbSet<ClientFlow>? ClientFlows { get; set; }
-     public DbSet<UserSmsKey>? UserSmsKeys { get; set; }
+    public DbSet<UserSmsKey>? UserSmsKeys { get; set; }
 
     public UserDBContext(DbContextOptions options) : base(options) { }
 
@@ -64,7 +64,7 @@ public class UserDBContext : DbContext
 
 
         modelBuilder.Entity<UserDevice>()
-       .HasIndex(b => new { b.Id, b.DeviceId, b.UserId ,b.ClientId})
+       .HasIndex(b => new { b.Id, b.DeviceId, b.UserId, b.ClientId })
         .HasMethod("GIN")
        .IsTsVectorExpressionIndex("english");
 
@@ -79,10 +79,10 @@ public class UserDBContext : DbContext
 .HasMethod("GIN")
 .IsTsVectorExpressionIndex("english");
 
-modelBuilder.Entity<UserSmsKey>()
-.HasIndex(b => new { b.Id, b.UserId, b.SmsKey })
-.HasMethod("GIN")
-.IsTsVectorExpressionIndex("english");
+        modelBuilder.Entity<UserSmsKey>()
+        .HasIndex(b => new { b.Id, b.UserId, b.SmsKey })
+        .HasMethod("GIN")
+        .IsTsVectorExpressionIndex("english");
 
 
         modelBuilder.Entity<User>().HasIndex(item => item.SearchVector).HasMethod("GIN");
