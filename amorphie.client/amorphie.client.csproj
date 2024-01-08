@@ -20,6 +20,7 @@
     <PackageReference Include="amorphie.core" Version="1.1.14" />
     <PackageReference Include="amorphie.core.security" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.8" />
+    <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.22.0" />
   </ItemGroup>
 
   <ItemGroup>

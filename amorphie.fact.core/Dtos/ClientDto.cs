@@ -25,6 +25,7 @@ public class ClientDto : DtoBase
     public ICollection<ClientToken> Tokens { get; set; } = default!;
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
+    public ICollection<ClientAudience> Audiences { get; set; } = default!;
     public string? JwtSecretSalt { get; set; }
 }
 
@@ -54,6 +55,9 @@ public class ClientGetDto
 
     [JsonPropertyName("allowedGrantTypes")]
     public ICollection<ClientGrantTypeGetDto> AllowedGrantTypes { get; set; } = default!;
+
+    [JsonPropertyName("audience")]
+    public ICollection<ClientAudienceGetDto> Audiences { get; set; } = default!;
 
     [JsonPropertyName("allowedScopeTags")]
     public string[]? Tags { get; set; }
