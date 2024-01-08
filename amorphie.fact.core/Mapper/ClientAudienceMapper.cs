@@ -4,7 +4,7 @@ public class ClientAudienceMapper : Profile
 {
     public ClientAudienceMapper()
     {
-        CreateMap<ClientAudience, ClientAudienceDto>().ReverseMap(); 
-        CreateMap<ClientAudience, ClientAudienceGetDto>(); 
+        CreateMap<ClientAudience, ClientAudienceDto>().ReverseMap();
+        CreateMap<ClientAudience, ClientAudienceGetDto>();
     }
 }

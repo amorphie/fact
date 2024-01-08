@@ -91,7 +91,7 @@ public class UserDBContext : DbContext
 
         modelBuilder.Entity<Client>().HasIndex(item => item.SearchVector).HasMethod("GIN");
         modelBuilder.Entity<Client>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "ReturnUrl", "LoginUrl", "LogoutUrl" }), true);
-       
+
     }
 }
 

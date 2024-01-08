@@ -55,7 +55,7 @@ public class ClientModule
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Audiences)
-         .Include(t => t.Flows)        
+         .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
          .FirstOrDefaultAsync(t => t.Code == code, token);
 
@@ -88,7 +88,7 @@ public class ClientModule
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
          .Include(t => t.Audiences)
-         .Include(t => t.Flows)        
+         .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
          .FirstOrDefaultAsync(t => t.Id == id, token);
 
