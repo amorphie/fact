@@ -21,6 +21,7 @@ public class Client : EntityBase
     public ICollection<ClientToken> Tokens { get; set; } = default!;
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
+    public ICollection<ClientAudience> Audiences { get; set; } = default!;
 
     [NotMapped]
     public virtual NpgsqlTsVector SearchVector { get; set; }

@@ -54,6 +54,7 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Audiences)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
          .FirstOrDefaultAsync(t => t.Code == code, token);
@@ -86,6 +87,7 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Audiences)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
          .FirstOrDefaultAsync(t => t.Id == id, token);
@@ -130,6 +132,7 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Audiences)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
          .Skip(page * pageSize)
@@ -157,6 +160,7 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Audiences)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
           .FirstOrDefaultAsync(t => t.Id == data.ClientId
@@ -190,6 +194,7 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Audiences)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
           .FirstOrDefaultAsync(t => t.Code == data.Code
@@ -417,6 +422,7 @@ public class ClientModule
          .Include(t => t.Names)
          .Include(t => t.Tokens)
          .Include(t => t.AllowedGrantTypes)
+         .Include(t => t.Audiences)
          .Include(t => t.Flows)
          .Include(t => t.Names.Where(t => t.Language == httpContext.GetHeaderLanguage()))
             .Skip(dataSearch.Page * dataSearch.PageSize)
