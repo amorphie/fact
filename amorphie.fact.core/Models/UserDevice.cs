@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using NpgsqlTypes;
 
 [Index(nameof(ClientId), nameof(UserId), nameof(DeviceId), nameof(InstallationId))]
+[Index(nameof(ClientId), nameof(DeviceId), nameof(InstallationId))]
 [Index(nameof(UserId), nameof(DeviceId), nameof(InstallationId))]
 [Index(nameof(DeviceId), nameof(InstallationId))]
 [Index(nameof(ClientId), nameof(UserId))]
+[Index(nameof(ClientId), nameof(DeviceId))]
 [Index(nameof(UserId))]
 [Index(nameof(DeviceId))]
 public class UserDevice : EntityBase

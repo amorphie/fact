@@ -80,18 +80,44 @@ public class UserDeviceModule
         }
         else
         {
-            await context!.UserDevices.AddAsync(new UserDevice(){
-                    DeviceId = deviceInfo.DeviceId,
-                    InstallationId = deviceInfo.InstallationId,
-                    DeviceToken = deviceInfo.DeviceToken,
-                    DevicePlatform = deviceInfo.DevicePlatform,
-                    DeviceModel = deviceInfo.DeviceModel,
-                    UserId = deviceInfo.UserId,
-                    ClientId = deviceInfo.ClientId,
-                    Status = 1
-                });
-                await context!.SaveChangesAsync();
-                return Results.Ok();
+            device = await context!.UserDevices
+            .Where(d => d.ClientId.Equals(deviceInfo.ClientId) && d.DeviceId.Equals(deviceInfo.DeviceId) && d.Status == 1)
+            .FirstOrDefaultAsync();
+            if(device != null)
+            {
+                if(device.InstallationId != deviceInfo.InstallationId)
+                {
+                    device.Status = 0;
+
+                    await context!.UserDevices.AddAsync(new UserDevice(){
+                        DeviceId = deviceInfo.DeviceId,
+                        InstallationId = deviceInfo.InstallationId,
+                        DeviceToken = deviceInfo.DeviceToken,
+                        DevicePlatform = deviceInfo.DevicePlatform,
+                        DeviceModel = deviceInfo.DeviceModel,
+                        UserId = deviceInfo.UserId,
+                        ClientId = deviceInfo.ClientId,
+                        Status = 1
+                    });
+                    await context!.SaveChangesAsync();
+                    return Results.Ok();
+                }
+            }
+            else
+            {
+                await context!.UserDevices.AddAsync(new UserDevice(){
+                        DeviceId = deviceInfo.DeviceId,
+                        InstallationId = deviceInfo.InstallationId,
+                        DeviceToken = deviceInfo.DeviceToken,
+                        DevicePlatform = deviceInfo.DevicePlatform,
+                        DeviceModel = deviceInfo.DeviceModel,
+                        UserId = deviceInfo.UserId,
+                        ClientId = deviceInfo.ClientId,
+                        Status = 1
+                    });
+                    await context!.SaveChangesAsync();
+                    return Results.Ok();
+            }
         }
 
         
