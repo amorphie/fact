@@ -76,7 +76,7 @@ public class UserDeviceModule
                 await context!.SaveChangesAsync();
                 return Results.Ok();
             }
-
+            return Results.Ok();
         }
         else
         {
@@ -102,6 +102,7 @@ public class UserDeviceModule
                     await context!.SaveChangesAsync();
                     return Results.Ok();
                 }
+                return Results.Ok();
             }
             else
             {
@@ -120,11 +121,6 @@ public class UserDeviceModule
             }
         }
 
-        
-
-
-        await context!.SaveChangesAsync();
-        return Results.Ok();
     }
 
     async ValueTask<IResult> checkDevice(
