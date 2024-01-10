@@ -130,23 +130,7 @@ public class UserDBContext : DbContext
 
         });
 
-        modelBuilder.Entity<UserDevice>().HasData(new
-        {
-            Id = Guid.NewGuid(),
-            DeviceId = Guid.NewGuid(),
-            ClientId = Guid.NewGuid(),
-            TokenId = Guid.NewGuid(),
-            InstallationId = Guid.NewGuid(),
-            UserId = UserId,
-            CreatedBy = Guid.NewGuid(),
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedByBehalfOf = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            Status = 1,
-
-        });
+       
         var securityImageId = Guid.NewGuid();
         modelBuilder.Entity<SecurityImage>().HasData(new
         {

@@ -1,5 +1,6 @@
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.data;
+using amorphie.fact.data.Migrations;
 using amorphie.user;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,8 @@ public class UserDeviceModule
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
         routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
+        routeGroupBuilder.MapPost("/save-mobile-device-client", saveMobileDeviceClient);
+        routeGroupBuilder.MapGet("/check-device/{clientId}/{userId}/{deviceId}/{installationId}", checkDevice);
     }
 
     async ValueTask<IResult> saveDeviceClient(
@@ -43,6 +46,77 @@ public class UserDeviceModule
         });
         await context!.SaveChangesAsync();
         return Results.Ok();
+    }
+
+    async ValueTask<IResult> saveMobileDeviceClient(
+     [FromServices] UserDBContext context,
+     [FromBody] UserSaveMobileDeviceDto deviceInfo
+    )
+    {
+        var device = await context!.UserDevices
+        .Where(d => d.ClientId.Equals(deviceInfo.ClientId) && d.DeviceId.Equals(deviceInfo.DeviceId) && d.InstallationId.Equals(deviceInfo.InstallationId) && d.Status == 1)
+        .FirstOrDefaultAsync();
+
+        if(device != null)
+        {
+            if(device.UserId != deviceInfo.UserId)
+            {
+                device.Status = 0;
+
+                await context!.UserDevices.AddAsync(new UserDevice(){
+                    DeviceId = deviceInfo.DeviceId,
+                    InstallationId = deviceInfo.InstallationId,
+                    DeviceToken = deviceInfo.DeviceToken,
+                    DevicePlatform = deviceInfo.DevicePlatform,
+                    DeviceModel = deviceInfo.DeviceModel,
+                    UserId = deviceInfo.UserId,
+                    ClientId = deviceInfo.ClientId,
+                    Status = 1
+                });
+                await context!.SaveChangesAsync();
+                return Results.Ok();
+            }
+
+        }
+        else
+        {
+            await context!.UserDevices.AddAsync(new UserDevice(){
+                    DeviceId = deviceInfo.DeviceId,
+                    InstallationId = deviceInfo.InstallationId,
+                    DeviceToken = deviceInfo.DeviceToken,
+                    DevicePlatform = deviceInfo.DevicePlatform,
+                    DeviceModel = deviceInfo.DeviceModel,
+                    UserId = deviceInfo.UserId,
+                    ClientId = deviceInfo.ClientId,
+                    Status = 1
+                });
+                await context!.SaveChangesAsync();
+                return Results.Ok();
+        }
+
+        
+
+
+        await context!.SaveChangesAsync();
+        return Results.Ok();
+    }
+
+    async ValueTask<IResult> checkDevice(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "clientId")]string clientId,
+     [FromRoute(Name = "userId")]Guid userId,
+     [FromRoute(Name = "deviceId")]string deviceId,
+     [FromRoute(Name = "installationId")]Guid installationId
+    )
+    {
+        var device = await context!.UserDevices
+            .Where(d => d.ClientId == clientId && d.UserId == userId && d.DeviceId == deviceId && d.InstallationId == installationId && d.Status == 1)
+            .FirstOrDefaultAsync();
+
+        if(device != null)
+            return Results.Ok();
+        else
+            return Results.NotFound();
     }
 
     async ValueTask<IResult> saveDevice(
