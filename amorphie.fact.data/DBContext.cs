@@ -30,6 +30,7 @@ public class UserDBContext : DbContext
     public DbSet<ClientToken>? ClientTokens { get; set; }
     public DbSet<ClientGrantType>? ClientGrantTypes { get; set; }
     public DbSet<ClientFlow>? ClientFlows { get; set; }
+    public DbSet<ClientAudience>? ClientAudiences { get; set; }
     public DbSet<UserSmsKey>? UserSmsKeys { get; set; }
 
     public UserDBContext(DbContextOptions options) : base(options) { }
@@ -90,7 +91,6 @@ public class UserDBContext : DbContext
 
         modelBuilder.Entity<Client>().HasIndex(item => item.SearchVector).HasMethod("GIN");
         modelBuilder.Entity<Client>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new string[] { "ReturnUrl", "LoginUrl", "LogoutUrl" }), true);
-
 
         var UserId = Guid.NewGuid();
 
@@ -205,6 +205,7 @@ public class UserDBContext : DbContext
           });
 
        });
+
     }
 }
 

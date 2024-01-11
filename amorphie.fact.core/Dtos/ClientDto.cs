@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using amorphie.core.Base;
@@ -6,6 +7,9 @@ using NpgsqlTypes;
 public class ClientDto : DtoBase
 {
     public ICollection<MultilanguageText> Names { get; set; } = default!;
+
+    [Required]
+    public string? Code { get; set; }
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
     public string? Type { get; set; }
@@ -21,12 +25,15 @@ public class ClientDto : DtoBase
     public ICollection<ClientToken> Tokens { get; set; } = default!;
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
+    public ICollection<ClientAudience> Audiences { get; set; } = default!;
     public string? JwtSecretSalt { get; set; }
 }
 
 public class ClientGetDto
 {
     public Guid Id { get; set; }
+
+    public string? Code { get; set; }
 
     [JsonIgnore]
     public List<MultilanguageText> Names { get; set; } = default!;
@@ -48,6 +55,9 @@ public class ClientGetDto
 
     [JsonPropertyName("allowedGrantTypes")]
     public ICollection<ClientGrantTypeGetDto> AllowedGrantTypes { get; set; } = default!;
+
+    [JsonPropertyName("audience")]
+    public ICollection<ClientAudienceGetDto> Audiences { get; set; } = default!;
 
     [JsonPropertyName("allowedScopeTags")]
     public string[]? Tags { get; set; }
@@ -131,6 +141,14 @@ public class ClientGetDto
 public class ValidateClientRequest
 {
     public Guid ClientId { get; set; }
+
+    public string Secret { get; set; } = default!;
+}
+
+public class ValidateClientByCodeRequest
+{
+    public string Code { get; set; } = default!;
+
     public string Secret { get; set; } = default!;
 }
 

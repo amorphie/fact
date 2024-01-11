@@ -17,7 +17,7 @@ public class ObjectMapper
         cfg.AddProfile<ClientMapper>();
         cfg.AddProfile<ClientFlowMapper>();
         cfg.AddProfile<ClientGrantTypeMapper>();
-        cfg.AddProfile<ClientGrantTypeMapper>();
+        cfg.AddProfile<ClientAudienceMapper>();
         cfg.AddProfile<JwsMapper>();
         cfg.AddProfile<IdempotencyMapper>();
         cfg.AddProfile<ClientTokenMapper>();

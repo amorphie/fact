@@ -5,6 +5,7 @@ using amorphie.core.Extension;
 using FluentValidation;
 using System.Reflection;
 using amorphie.core.Swagger;
+using Elastic.Apm.NetCoreAll;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
@@ -49,6 +50,9 @@ builder.Services.AddDbContext<UserDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
 
 var app = builder.Build();
+
+app.UseAllElasticApm(app.Configuration);
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
