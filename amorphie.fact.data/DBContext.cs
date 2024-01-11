@@ -130,7 +130,7 @@ public class UserDBContext : DbContext
 
         });
 
-       
+
         var securityImageId = Guid.NewGuid();
         modelBuilder.Entity<SecurityImage>().HasData(new
         {

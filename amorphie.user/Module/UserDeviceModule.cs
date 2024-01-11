@@ -57,13 +57,14 @@ public class UserDeviceModule
         .Where(d => d.ClientId.Equals(deviceInfo.ClientId) && d.DeviceId.Equals(deviceInfo.DeviceId) && d.InstallationId.Equals(deviceInfo.InstallationId) && d.Status == 1)
         .FirstOrDefaultAsync();
 
-        if(device != null)
+        if (device != null)
         {
-            if(device.UserId != deviceInfo.UserId)
+            if (device.UserId != deviceInfo.UserId)
             {
                 device.Status = 0;
 
-                await context!.UserDevices.AddAsync(new UserDevice(){
+                await context!.UserDevices.AddAsync(new UserDevice()
+                {
                     DeviceId = deviceInfo.DeviceId,
                     InstallationId = deviceInfo.InstallationId,
                     DeviceToken = deviceInfo.DeviceToken,
@@ -83,13 +84,14 @@ public class UserDeviceModule
             device = await context!.UserDevices
             .Where(d => d.ClientId.Equals(deviceInfo.ClientId) && d.DeviceId.Equals(deviceInfo.DeviceId) && d.Status == 1)
             .FirstOrDefaultAsync();
-            if(device != null)
+            if (device != null)
             {
-                if(device.InstallationId != deviceInfo.InstallationId)
+                if (device.InstallationId != deviceInfo.InstallationId)
                 {
                     device.Status = 0;
 
-                    await context!.UserDevices.AddAsync(new UserDevice(){
+                    await context!.UserDevices.AddAsync(new UserDevice()
+                    {
                         DeviceId = deviceInfo.DeviceId,
                         InstallationId = deviceInfo.InstallationId,
                         DeviceToken = deviceInfo.DeviceToken,
@@ -106,18 +108,19 @@ public class UserDeviceModule
             }
             else
             {
-                await context!.UserDevices.AddAsync(new UserDevice(){
-                        DeviceId = deviceInfo.DeviceId,
-                        InstallationId = deviceInfo.InstallationId,
-                        DeviceToken = deviceInfo.DeviceToken,
-                        DevicePlatform = deviceInfo.DevicePlatform,
-                        DeviceModel = deviceInfo.DeviceModel,
-                        UserId = deviceInfo.UserId,
-                        ClientId = deviceInfo.ClientId,
-                        Status = 1
-                    });
-                    await context!.SaveChangesAsync();
-                    return Results.Ok();
+                await context!.UserDevices.AddAsync(new UserDevice()
+                {
+                    DeviceId = deviceInfo.DeviceId,
+                    InstallationId = deviceInfo.InstallationId,
+                    DeviceToken = deviceInfo.DeviceToken,
+                    DevicePlatform = deviceInfo.DevicePlatform,
+                    DeviceModel = deviceInfo.DeviceModel,
+                    UserId = deviceInfo.UserId,
+                    ClientId = deviceInfo.ClientId,
+                    Status = 1
+                });
+                await context!.SaveChangesAsync();
+                return Results.Ok();
             }
         }
 
@@ -125,17 +128,17 @@ public class UserDeviceModule
 
     async ValueTask<IResult> checkDevice(
      [FromServices] UserDBContext context,
-     [FromRoute(Name = "clientId")]string clientId,
-     [FromRoute(Name = "userId")]Guid userId,
-     [FromRoute(Name = "deviceId")]string deviceId,
-     [FromRoute(Name = "installationId")]Guid installationId
+     [FromRoute(Name = "clientId")] string clientId,
+     [FromRoute(Name = "userId")] Guid userId,
+     [FromRoute(Name = "deviceId")] string deviceId,
+     [FromRoute(Name = "installationId")] Guid installationId
     )
     {
         var device = await context!.UserDevices
             .Where(d => d.ClientId == clientId && d.UserId == userId && d.DeviceId == deviceId && d.InstallationId == installationId && d.Status == 1)
             .FirstOrDefaultAsync();
 
-        if(device != null)
+        if (device != null)
             return Results.Ok();
         else
             return Results.NotFound();
