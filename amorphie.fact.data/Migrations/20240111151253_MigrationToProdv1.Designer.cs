@@ -13,8 +13,8 @@ using amorphie.fact.data;
 namespace amorphie.fact.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    [Migration("20240108194313_v15")]
-    partial class v15
+    [Migration("20240111151253_MigrationToProdv1")]
+    partial class MigrationToProdv1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
