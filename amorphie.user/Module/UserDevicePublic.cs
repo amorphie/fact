@@ -65,14 +65,14 @@ public static class UserDevicePublic
 
     public static async Task<IResult> removeDevice(
          [FromServices] UserDBContext context,
-      [FromQuery(Name = "clientCode")] string ClientCode,
-      [FromQuery(Name = "reference")] string reference
+      [FromRoute(Name = "clientCode")] string ClientCode,
+      [FromRoute(Name = "reference")] string reference
      )
     {
         var user = await context.Users.OrderByDescending(u=> u.CreatedAt).FirstOrDefaultAsync(u => u.Reference.Equals(reference));
         if(user == null)
             return Results.NotFound("User Not Found");
-            
+
         await context.UserDevices.Where(d => d.ClientId.Equals(ClientCode) && d.UserId.Equals(user.Id) && d.Status == 1).ExecuteUpdateAsync(s => s.SetProperty(d=>d.Status,d=>0));
         return Results.Ok();
     }
