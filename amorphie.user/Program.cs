@@ -54,6 +54,8 @@ db.Database.Migrate();
 
 app.MapPost("/public/device/save", UserDevicePublic.saveDevice)
             .Produces(StatusCodes.Status200OK);
+app.MapPut("/public/device/remove/{clientId}/{userId}/", UserDevicePublic.removeDevice)
+.Produces(StatusCodes.Status200OK);
 
 app.UseCloudEvents();
 app.UseRouting();

@@ -62,4 +62,14 @@ public static class UserDevicePublic
 
         return Results.Ok();
     }
+
+    public static async Task<IResult> removeDevice(
+         [FromServices] UserDBContext context,
+      [FromQuery(Name = "clientCode")] string ClientCode,
+      [FromQuery(Name = "userId")] Guid UserId
+     )
+    {
+        await context.UserDevices.Where(d => d.ClientId.Equals(ClientCode) && d.UserId.Equals(UserId) && d.Status == 1).ExecuteUpdateAsync(s => s.SetProperty(d=>d.Status,d=>0));
+        return Results.Ok();
+    }
 }
