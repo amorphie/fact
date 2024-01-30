@@ -135,6 +135,13 @@ public class UserModule : BaseRoute
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
+       routeGroupBuilder.MapGet("reference/{reference}", GetWithReference)
+       .WithOpenApi()
+       .WithSummary("Gets registered user by reference.")
+       .WithDescription("Gets registered user by reference.")
+       .Produces<GetUserResponse>(StatusCodes.Status200OK)
+       .Produces(StatusCodes.Status404NotFound);
+
 
         routeGroupBuilder.MapGet("/", GetAll)
        .WithOpenApi()
@@ -909,6 +916,23 @@ public class UserModule : BaseRoute
            .Include(d => d.UserTags)
            .Include(x => x.UserPasswords)
            .FirstOrDefault(t => t.Id == id);
+
+        if (user is User)
+        {
+            return TypedResults.Ok(ObjectMapper.Mapper.Map<GetUserResponse>(user));
+        }
+
+        return TypedResults.NotFound();
+    }
+
+    async ValueTask<IResult> GetWithReference(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "reference")] string reference)
+    {
+        var user = context!.Users!
+           .Include(d => d.UserTags)
+           .Include(x => x.UserPasswords)
+           .FirstOrDefault(t => t.Reference.Equals(reference));
 
         if (user is User)
         {
