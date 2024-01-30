@@ -936,7 +936,13 @@ public class UserModule : BaseRoute
 
         if (user is User)
         {
-            return TypedResults.Ok(ObjectMapper.Mapper.Map<GetUserResponse>(user));
+            return TypedResults.Ok(new{FirstName = user.FirstName,
+                            LastName = user.LastName,
+                            Reference = user.Reference,
+                            EMail = user.EMail,
+                            State = user.State,
+                            Id = user.Id,
+                            MobilePhone = user.Phone});
         }
 
         return TypedResults.NotFound();
