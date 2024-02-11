@@ -68,11 +68,12 @@ namespace amorphie.fact.data.Migrations
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Question" },
                 values: new object[] { new Guid("65dffa42-60b1-47d0-99f3-dd8c82861ed0"), new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9470), new Guid("3fe00b6d-8daa-47ba-8c59-b18337b89396"), new Guid("4426fe32-b8e4-4ff9-a68c-70dd2b1e30f3"), new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9480), new Guid("7e826031-89ad-4e22-ae9d-f3edc9344a80"), new Guid("1c644ed4-1871-470c-8fd0-5e8ed6e0c5a0"), "ilk öğretmenin adı" });
 
-            migrationBuilder.InsertData(
+            /*migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CountryCode", "Number", "Prefix", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "EMail", "FirstName", "LastName", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Reference", "Salt", "State" },
                 values: new object[] { new Guid("a885ffa9-c374-4a0d-aa81-790581e023a2"), 90, "1234564", 530, new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9210), new Guid("6d0f6859-0c81-4267-bd96-83dc6b787453"), new Guid("a90a4b17-8ed1-48f1-92e5-ada07b4a4c7a"), "test@gmail.com", "Damla", "Erhan", new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9220), new Guid("296916bc-8244-4275-af22-71c68ac15539"), new Guid("ee609d1b-ac14-45f2-ad18-cecb001af72c"), "12345678912", "fertrtretregfdgffd", "New" });
-
+            */
+            
             migrationBuilder.InsertData(
                 table: "UserPasswords",
                 columns: new[] { "Id", "AccessFailedCount", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "HashedPassword", "IsArgonHash", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "MustResetPassword", "UserId" },
