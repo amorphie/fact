@@ -22,6 +22,7 @@ public class UserDeviceModule
 
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
+        routeGroupBuilder.MapPost("/check-device/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
         routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
         routeGroupBuilder.MapPost("/save-mobile-device-client", saveMobileDeviceClient);
         routeGroupBuilder.MapGet("/check-device/{clientId}/{userId}/{deviceId}/{installationId}", checkDevice);
@@ -151,6 +152,26 @@ public class UserDeviceModule
 
         if (device != null)
             return Results.Ok();
+        else
+            return Results.NotFound();
+    }
+
+    async ValueTask<IResult> checkDeviceWithoutUser(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "clientId")] string clientId,
+     [FromRoute(Name = "deviceId")] string deviceId,
+     [FromRoute(Name = "installationId")] Guid installationId
+    )
+    {
+        var device = await context!.UserDevices
+            .Where(d => d.ClientId == clientId && d.DeviceId == deviceId && d.InstallationId == installationId && d.Status == 1)
+            .FirstOrDefaultAsync();
+
+        if (device != null)
+        {
+            var user = await context!.Users.FirstOrDefaultAsync(u => u.Id.Equals(device.Id));
+            return Results.Ok(new{Reference=user.Reference});
+        }
         else
             return Results.NotFound();
     }
