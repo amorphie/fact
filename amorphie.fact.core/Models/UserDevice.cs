@@ -19,6 +19,8 @@ public class UserDevice : EntityBase
     public string? DeviceToken { get; set; }
     public string? DeviceModel { get; set; }
     public string? DevicePlatform { get; set; }
+    public DateTime? LastLogonDate{get;set;}
+    public DateTime? ActivationRemovalDate{get;set;}
     public Guid? TokenId { get; set; }
     public string? ClientId { get; set; }
     [ForeignKey("User")]

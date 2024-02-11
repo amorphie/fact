@@ -61,19 +61,28 @@ public class UserDeviceModule
         {
             if (device.UserId != deviceInfo.UserId)
             {
-                device.Status = 0;
-
-                await context!.UserDevices.AddAsync(new UserDevice()
+                if(device.UserId == null)
                 {
-                    DeviceId = deviceInfo.DeviceId,
-                    InstallationId = deviceInfo.InstallationId,
-                    DeviceToken = deviceInfo.DeviceToken,
-                    DevicePlatform = deviceInfo.DevicePlatform,
-                    DeviceModel = deviceInfo.DeviceModel,
-                    UserId = deviceInfo.UserId,
-                    ClientId = deviceInfo.ClientId,
-                    Status = 1
-                });
+                    device.Status = 0;
+
+                    await context!.UserDevices.AddAsync(new UserDevice()
+                    {
+                        DeviceId = deviceInfo.DeviceId,
+                        InstallationId = deviceInfo.InstallationId,
+                        DeviceToken = deviceInfo.DeviceToken,
+                        DevicePlatform = deviceInfo.DevicePlatform,
+                        DeviceModel = deviceInfo.DeviceModel,
+                        UserId = deviceInfo.UserId,
+                        ClientId = deviceInfo.ClientId,
+                        LastLogonDate = DateTime.UtcNow,
+                        Status = 1
+                    });
+                }
+                else
+                {
+                    device.UserId = deviceInfo.UserId;
+                    device.LastLogonDate = DateTime.UtcNow;
+                }
                 await context!.SaveChangesAsync();
                 return Results.Ok();
             }
@@ -99,6 +108,7 @@ public class UserDeviceModule
                         DeviceModel = deviceInfo.DeviceModel,
                         UserId = deviceInfo.UserId,
                         ClientId = deviceInfo.ClientId,
+                        LastLogonDate = DateTime.UtcNow,
                         Status = 1
                     });
                     await context!.SaveChangesAsync();
@@ -117,6 +127,7 @@ public class UserDeviceModule
                     DeviceModel = deviceInfo.DeviceModel,
                     UserId = deviceInfo.UserId,
                     ClientId = deviceInfo.ClientId,
+                    LastLogonDate = DateTime.UtcNow,
                     Status = 1
                 });
                 await context!.SaveChangesAsync();

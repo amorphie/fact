@@ -54,6 +54,8 @@ db.Database.Migrate();
 
 app.MapPost("/public/device/save", UserDevicePublic.saveDevice)
             .Produces(StatusCodes.Status200OK);
+app.MapGet("/public/device/{clientCode}/{reference}", UserDevicePublic.GetActiveDevice)
+            .Produces(StatusCodes.Status200OK);
 app.MapPut("/public/device/remove/{clientCode}/{reference}/", UserDevicePublic.removeDevice)
 .Produces(StatusCodes.Status200OK);
 
