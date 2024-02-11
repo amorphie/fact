@@ -58,6 +58,7 @@ namespace amorphie.fact.data.Migrations
                 type: "timestamp with time zone",
                 nullable: true);
 
+            /*
             migrationBuilder.InsertData(
                 table: "SecurityImages",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "Image", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf" },
@@ -68,12 +69,12 @@ namespace amorphie.fact.data.Migrations
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Question" },
                 values: new object[] { new Guid("65dffa42-60b1-47d0-99f3-dd8c82861ed0"), new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9470), new Guid("3fe00b6d-8daa-47ba-8c59-b18337b89396"), new Guid("4426fe32-b8e4-4ff9-a68c-70dd2b1e30f3"), new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9480), new Guid("7e826031-89ad-4e22-ae9d-f3edc9344a80"), new Guid("1c644ed4-1871-470c-8fd0-5e8ed6e0c5a0"), "ilk öğretmenin adı" });
 
-            /*migrationBuilder.InsertData(
+            migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CountryCode", "Number", "Prefix", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "EMail", "FirstName", "LastName", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Reference", "Salt", "State" },
                 values: new object[] { new Guid("a885ffa9-c374-4a0d-aa81-790581e023a2"), 90, "1234564", 530, new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9210), new Guid("6d0f6859-0c81-4267-bd96-83dc6b787453"), new Guid("a90a4b17-8ed1-48f1-92e5-ada07b4a4c7a"), "test@gmail.com", "Damla", "Erhan", new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9220), new Guid("296916bc-8244-4275-af22-71c68ac15539"), new Guid("ee609d1b-ac14-45f2-ad18-cecb001af72c"), "12345678912", "fertrtretregfdgffd", "New" });
-            */
             
+
             migrationBuilder.InsertData(
                 table: "UserPasswords",
                 columns: new[] { "Id", "AccessFailedCount", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "HashedPassword", "IsArgonHash", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "MustResetPassword", "UserId" },
@@ -93,6 +94,7 @@ namespace amorphie.fact.data.Migrations
                 table: "UserTags",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Tag", "UserId" },
                 values: new object[] { new Guid("e2015adf-ad4c-4a6c-a22e-259e37655d7f"), new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9360), new Guid("849a8423-c779-471c-9779-9f6d052aca72"), new Guid("5868618b-7ef6-494d-aa72-187db52e5d94"), new DateTime(2024, 2, 11, 22, 39, 18, 776, DateTimeKind.Utc).AddTicks(9360), new Guid("22478b02-9418-47d9-9510-5d690e02d51c"), new Guid("fe2c5f03-3ef6-4f9e-8acc-2709bd8f2a62"), "user-list-get", new Guid("a885ffa9-c374-4a0d-aa81-790581e023a2") });
+            */
         }
 
         /// <inheritdoc />
