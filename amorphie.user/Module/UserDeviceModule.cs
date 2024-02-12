@@ -169,7 +169,7 @@ public class UserDeviceModule
 
         if (device != null)
         {
-            var user = await context!.Users.FirstOrDefaultAsync(u => u.Id.Equals(device.Id));
+            var user = await context!.Users.FirstOrDefaultAsync(u => u.Id.Equals(device.UserId));
             return Results.Ok(new{Reference=user.Reference});
         }
         else
