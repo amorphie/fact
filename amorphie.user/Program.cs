@@ -67,7 +67,7 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 db.Database.Migrate();
 
-app.MapPost("/public/device/save", UserDevicePublic.saveDevice)
+app.MapPost("/public/device/save/{clientCode}", UserDevicePublic.saveDevice)
             .Produces(StatusCodes.Status200OK);
 app.MapGet("/public/device/{clientCode}/{reference}", UserDevicePublic.GetActiveDevice)
             .Produces(StatusCodes.Status200OK);
