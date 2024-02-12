@@ -22,7 +22,7 @@ public class UserDeviceModule
 
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
-        routeGroupBuilder.MapPost("/check-device/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
+        routeGroupBuilder.MapPost("/check-device-without-user/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
         routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
         routeGroupBuilder.MapPost("/save-mobile-device-client", saveMobileDeviceClient);
         routeGroupBuilder.MapGet("/check-device/{clientId}/{userId}/{deviceId}/{installationId}", checkDevice);
