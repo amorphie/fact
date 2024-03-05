@@ -1,4 +1,6 @@
 using amorphie.core.Module.minimal_api;
+using amorphie.fact.core.Dtos.Device;
+using amorphie.fact.core.Models;
 using amorphie.fact.data;
 using amorphie.fact.data.Migrations;
 using amorphie.user;
@@ -20,6 +22,7 @@ public class UserDeviceModule
     {
         base.AddRoutes(routeGroupBuilder);
 
+        routeGroupBuilder.MapGet("/list", getDeviceList);
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
         routeGroupBuilder.MapGet("/check-device-without-user/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
@@ -154,6 +157,43 @@ public class UserDeviceModule
             return Results.Ok();
         else
             return Results.NotFound();
+    }
+
+    async ValueTask<IResult> getDeviceList(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "reference")] string reference
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if(user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var deviceList = await context!.UserDevices!.Where(u=> u.UserId.Equals(user.Id) && u.Status == 1).ToListAsync();
+        var response = new DeviceListDto();
+        foreach (var device in deviceList)
+        {
+            if(device.IsRegistered)
+            {
+                response.Add(new DeviceInfo(){
+                    DeviceId = device.DeviceId,
+                    ActivationRemovalDate = device.ActivationRemovalDate,
+                    CreatedByUserName = device.CreatedBy.ToString(),
+                    Description = device.Description,
+                    Id = device.Id,
+                    LastLogonDate = device.LastLogonDate,
+                    Manufacturer = device.Manufacturer,
+                    Model = device.DeviceModel,
+                    Platform = device.DevicePlatform,
+                    RegistrationDate = device.RegistrationDate,
+                    Status = DeviceStatusConstants.DeviceStatusMap[device.Status],
+                    Version = device.Version
+                });
+            }
+        }
+
+        return Results.Ok(deviceList);
     }
 
     async ValueTask<IResult> checkDeviceWithoutUser(
