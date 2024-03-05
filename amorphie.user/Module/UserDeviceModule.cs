@@ -23,6 +23,7 @@ public class UserDeviceModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapGet("/list/{reference}", getDeviceList);
+        routeGroupBuilder.MapGet("/remove-activation/{reference}", getDeviceList);
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
         routeGroupBuilder.MapGet("/check-device-without-user/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
@@ -194,6 +195,32 @@ public class UserDeviceModule
         }
 
         return Results.Ok(response);
+    }
+
+    async ValueTask<IResult> removeDeviceActivation(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "reference")] string reference,
+     [FromBody] RemoveDeviceActivationRequestDto removeDeviceActivationRequestDto
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if(user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var device = await context!.UserDevices.FirstOrDefaultAsync(u=> u.UserId.Equals(user.Id) && u.Id.Equals(removeDeviceActivationRequestDto.Id) && u.Status == 1);
+        if(device is UserDevice && device.IsRegistered)
+        {
+            device.Status = 0;
+            device.RemovalReason = removeDeviceActivationRequestDto.Description;
+            device.ActivationRemovalDate = DateTime.UtcNow;
+            device.ModifiedBy = user.Id;
+            await context!.SaveChangesAsync();
+            
+        }
+
+        return Results.Ok();
     }
 
     async ValueTask<IResult> checkDeviceWithoutUser(
