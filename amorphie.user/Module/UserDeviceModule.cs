@@ -23,7 +23,7 @@ public class UserDeviceModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapGet("/list/{reference}", getDeviceList);
-        routeGroupBuilder.MapPost("/remove-activation/{reference}", getDeviceList);
+        routeGroupBuilder.MapPut("/remove-activation/{reference}", getDeviceList);
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
         routeGroupBuilder.MapGet("/check-device-without-user/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
