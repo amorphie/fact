@@ -193,7 +193,7 @@ public class UserDeviceModule
             }
         }
 
-        return Results.Ok(deviceList);
+        return Results.Ok(response);
     }
 
     async ValueTask<IResult> checkDeviceWithoutUser(
