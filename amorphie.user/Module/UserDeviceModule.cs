@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.core.Dtos.Device;
 using amorphie.fact.core.Models;
@@ -66,7 +67,7 @@ public class UserDeviceModule
         {
             if (device.UserId != deviceInfo.UserId)
             {
-                if(device.UserId == null)
+                if(device.UserId != null)
                 {
                     device.Status = 0;
 
@@ -194,7 +195,9 @@ public class UserDeviceModule
             }
         }
 
-        return Results.Ok(response);
+        return Results.Json(response,new System.Text.Json.JsonSerializerOptions(){
+              PropertyNameCaseInsensitive = true
+        });
     }
 
     async ValueTask<IResult> removeDeviceActivation(
@@ -217,7 +220,6 @@ public class UserDeviceModule
             device.ActivationRemovalDate = DateTime.UtcNow;
             device.ModifiedBy = user.Id;
             await context!.SaveChangesAsync();
-            
         }
 
         return Results.Ok();
