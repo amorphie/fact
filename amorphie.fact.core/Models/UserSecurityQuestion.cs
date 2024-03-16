@@ -9,6 +9,10 @@ public class UserSecurityQuestion:EntityBase
 
     [ForeignKey("SecurityQuestion")]
     public Guid SecurityQuestionId { get; set; }
+    public int? AccessFailedCount{get;set;}
+    public DateTime? LastAccessDate{get;set;}
+    public DateTime? LastVerificationDate{get;set;}
+    public QuestionStatusType? Status{get;set;}
      [ForeignKey("User")]
     public Guid UserId { get; set; }
     public User? Users { get; set; }
