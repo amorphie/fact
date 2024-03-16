@@ -45,14 +45,14 @@ public static class UserDevicePublic
      )
     {
         var user = await context.Users.OrderByDescending(u => u.CreatedAt).FirstOrDefaultAsync(u => u.Reference.Equals(reference));
-        if(user == null)
+        if (user == null)
             return Results.NotFound("User Not Found");
-        
+
         var userDevice = await context.UserDevices.OrderByDescending(d => d.CreatedAt).FirstOrDefaultAsync(d => d.ClientId.Equals(ClientCode) && d.UserId.Equals(user.Id));
-        if(userDevice == null)
+        if (userDevice == null)
             return Results.NotFound("User Has No Active Device");
-        
-        if(userDevice.Status == 1)
+
+        if (userDevice.Status == 1)
         {
             userDevice.ActivationRemovalDate = DateTime.UtcNow;
             userDevice.Status = 0;
@@ -69,21 +69,22 @@ public static class UserDevicePublic
       [FromRoute(Name = "clientCode")] string ClientCode,
       [FromRoute(Name = "reference")] string reference
      )
-    {   
+    {
         var user = await context.Users.OrderByDescending(u => u.CreatedAt).FirstOrDefaultAsync(u => u.Reference.Equals(reference));
-        if(user == null)
+        if (user == null)
             return Results.NotFound("User Not Found");
-        
+
         var userDevice = await context.UserDevices.OrderByDescending(d => d.CreatedAt).FirstOrDefaultAsync(d => d.ClientId.Equals(ClientCode) && d.UserId.Equals(user.Id));
-        if(userDevice == null)
+        if (userDevice == null)
             return Results.NotFound("User Has No Active Device");
-        
-        return Results.Ok(new ActiveDeviceDto{
+
+        return Results.Ok(new ActiveDeviceDto
+        {
             Id = userDevice.Id,
             ActivationRemovalDate = userDevice.ActivationRemovalDate,
             LastLogonDate = userDevice.LastLogonDate,
             RegistrationDate = userDevice.CreatedAt,
-            DeviceId = userDevice.DeviceId, 
+            DeviceId = userDevice.DeviceId,
             Model = userDevice.DeviceModel,
             Platform = userDevice.DevicePlatform,
             CreatedByUserName = userDevice.CreatedBy.ToString(),
@@ -96,16 +97,16 @@ public static class UserDevicePublic
       [FromRoute(Name = "clientCode")] string ClientCode,
       [FromRoute(Name = "reference")] string reference
      )
-    {   
+    {
         var user = await context.Users.OrderByDescending(u => u.CreatedAt).FirstOrDefaultAsync(u => u.Reference.Equals(reference));
-        if(user == null)
+        if (user == null)
             return Results.NotFound("User Not Found");
-        
+
         var userDevice = await context.UserDevices.OrderByDescending(d => d.CreatedAt).FirstOrDefaultAsync(d => d.ClientId.Equals(ClientCode) && d.UserId.Equals(user.Id));
-        if(userDevice == null)
+        if (userDevice == null)
             return Results.NotFound("User Has No Active Device");
-        
-        if(userDevice.Status == 1)
+
+        if (userDevice.Status == 1)
         {
             userDevice.Status = 0;
             await context.SaveChangesAsync();

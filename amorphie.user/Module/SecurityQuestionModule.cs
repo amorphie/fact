@@ -21,8 +21,8 @@ public class SecurityQuestionModule
     {
         base.AddRoutes(routeGroupBuilder);
 
-        routeGroupBuilder.MapGet("get/{reference}",getAllSecurityQuestions);
-        routeGroupBuilder.MapPost("update/{reference}",updateSecurityQuestion);
+        routeGroupBuilder.MapGet("get/{reference}", getAllSecurityQuestions);
+        routeGroupBuilder.MapPost("update/{reference}", updateSecurityQuestion);
         routeGroupBuilder.MapGet("search", getAllSecurityQuestionFullTextSearch);
     }
 
@@ -33,31 +33,32 @@ public class SecurityQuestionModule
     )
     {
         var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
-        if(user == null)
+        if (user == null)
         {
             return Results.NotFound("User Not Found");
         }
 
         var securityQuestion = await context!.UserSecurityQuestions.OrderByDescending(q => q.CreatedAt).FirstOrDefaultAsync();
-        if(securityQuestion.Status == QuestionStatusType.Blocked)
+        if (securityQuestion.Status == QuestionStatusType.Blocked)
         {
             return Results.StatusCode(457);
         }
         var culture = CultureInfo.GetCultureInfo("tr-TR");
 
         var passwordHasher = new PasswordHasher();
-        var oldAnswer = passwordHasher.DecryptString(securityQuestion.SecurityAnswer,securityQuestion.Id.ToString());
+        var oldAnswer = passwordHasher.DecryptString(securityQuestion.SecurityAnswer, securityQuestion.Id.ToString());
         var isVerified = oldAnswer.ToUpper(culture).Equals(updateSecurityQuestionRequestDto.OldAnswer.Trim().ToUpper(culture));
 
-        if(isVerified)
+        if (isVerified)
         {
-            var newSecurityQuestion = new UserSecurityQuestion(){
+            var newSecurityQuestion = new UserSecurityQuestion()
+            {
                 LastVerificationDate = DateTime.UtcNow,
                 SecurityQuestionId = updateSecurityQuestionRequestDto.NewQuestionDefinitionId,
                 Status = QuestionStatusType.Active,
                 UserId = user.Id
             };
-            newSecurityQuestion.SecurityAnswer = passwordHasher.EncryptString(updateSecurityQuestionRequestDto.NewAnswer,newSecurityQuestion.Id.ToString());
+            newSecurityQuestion.SecurityAnswer = passwordHasher.EncryptString(updateSecurityQuestionRequestDto.NewAnswer, newSecurityQuestion.Id.ToString());
             await context!.UserSecurityQuestions.AddAsync(newSecurityQuestion);
             await context!.SaveChangesAsync();
             return Results.Ok();
@@ -73,8 +74,8 @@ public class SecurityQuestionModule
             await context!.SaveChangesAsync();
             return Results.StatusCode(456);
         }
-        
-        
+
+
     }
 
     async ValueTask<IResult> getAllSecurityQuestions(
@@ -92,7 +93,7 @@ public class SecurityQuestionModule
                                                 ValueTypeClr = m.ValueTypeClr,
                                                 Priority = m.Priority
                                             }).ToListAsync();
-        
+
         return Results.Ok(securityQuestionDefinitions);
     }
 
@@ -116,9 +117,9 @@ public class SecurityQuestionModule
         if (securityQuestions.Count() > 0)
         {
             var response = securityQuestions.Select(x => ObjectMapper.Mapper.Map<SecurityQuestionDto>(x)).ToList();
-            return Results.Ok(response);            
+            return Results.Ok(response);
         }
 
-         return Results.NoContent();        
+        return Results.NoContent();
     }
 }

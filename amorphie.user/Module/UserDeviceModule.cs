@@ -67,7 +67,7 @@ public class UserDeviceModule
         {
             if (device.UserId != deviceInfo.UserId)
             {
-                if(device.UserId != null)
+                if (device.UserId != null)
                 {
                     device.Status = 0;
 
@@ -167,18 +167,19 @@ public class UserDeviceModule
     )
     {
         var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
-        if(user == null)
+        if (user == null)
         {
             return Results.NotFound("User Not Found");
         }
 
-        var deviceList = await context!.UserDevices!.Where(u=> u.UserId.Equals(user.Id) && u.Status == 1).ToListAsync();
+        var deviceList = await context!.UserDevices!.Where(u => u.UserId.Equals(user.Id) && u.Status == 1).ToListAsync();
         var response = new DeviceListDto();
         foreach (var device in deviceList)
         {
-            if(device.IsRegistered)
+            if (device.IsRegistered)
             {
-                response.Add(new DeviceInfo(){
+                response.Add(new DeviceInfo()
+                {
                     DeviceId = device.DeviceId,
                     ActivationRemovalDate = device.ActivationRemovalDate,
                     CreatedByUserName = device.CreatedBy.ToString(),
@@ -195,8 +196,9 @@ public class UserDeviceModule
             }
         }
 
-        return Results.Json(response,new System.Text.Json.JsonSerializerOptions(){
-              PropertyNameCaseInsensitive = true
+        return Results.Json(response, new System.Text.Json.JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
         });
     }
 
@@ -207,13 +209,13 @@ public class UserDeviceModule
     )
     {
         var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
-        if(user == null)
+        if (user == null)
         {
             return Results.NotFound("User Not Found");
         }
 
-        var device = await context!.UserDevices.FirstOrDefaultAsync(u=> u.UserId.Equals(user.Id) && u.Id.Equals(removeDeviceActivationRequestDto.Id) && u.Status == 1);
-        if(device is UserDevice && device.IsRegistered)
+        var device = await context!.UserDevices.FirstOrDefaultAsync(u => u.UserId.Equals(user.Id) && u.Id.Equals(removeDeviceActivationRequestDto.Id) && u.Status == 1);
+        if (device is UserDevice && device.IsRegistered)
         {
             device.Status = 0;
             device.RemovalReason = removeDeviceActivationRequestDto.Description;
@@ -239,7 +241,7 @@ public class UserDeviceModule
         if (device != null)
         {
             var user = await context!.Users.FirstOrDefaultAsync(u => u.Id.Equals(device.UserId));
-            return Results.Ok(new{Reference=user.Reference});
+            return Results.Ok(new { Reference = user.Reference });
         }
         else
             return Results.NotFound();

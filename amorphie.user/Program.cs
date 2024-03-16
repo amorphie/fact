@@ -19,7 +19,7 @@ using (var tokenSource = new CancellationTokenSource(20000))
         Console.WriteLine("Dapr Sidecar Doesn't Respond");
         return;
     }
-    
+
 }
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];

@@ -135,12 +135,12 @@ public class UserModule : BaseRoute
        .Produces<GetUserResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
-       routeGroupBuilder.MapGet("reference/{reference}", GetWithReference)
-       .WithOpenApi()
-       .WithSummary("Gets registered user by reference.")
-       .WithDescription("Gets registered user by reference.")
-       .Produces<GetUserResponse>(StatusCodes.Status200OK)
-       .Produces(StatusCodes.Status404NotFound);
+        routeGroupBuilder.MapGet("reference/{reference}", GetWithReference)
+        .WithOpenApi()
+        .WithSummary("Gets registered user by reference.")
+        .WithDescription("Gets registered user by reference.")
+        .Produces<GetUserResponse>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
 
 
         routeGroupBuilder.MapGet("/", GetAll)
@@ -936,13 +936,16 @@ public class UserModule : BaseRoute
 
         if (user is User)
         {
-            return TypedResults.Ok(new{FirstName = user.FirstName,
-                            LastName = user.LastName,
-                            Reference = user.Reference,
-                            EMail = user.EMail,
-                            State = user.State,
-                            Id = user.Id,
-                            MobilePhone = user.Phone});
+            return TypedResults.Ok(new
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Reference = user.Reference,
+                EMail = user.EMail,
+                State = user.State,
+                Id = user.Id,
+                MobilePhone = user.Phone
+            });
         }
 
         return TypedResults.NotFound();

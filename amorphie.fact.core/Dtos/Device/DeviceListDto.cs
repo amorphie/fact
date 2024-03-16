@@ -8,6 +8,6 @@ namespace amorphie.fact.core.Dtos.Device
 {
     public class DeviceListDto : List<DeviceInfo>
     {
-        
+
     }
 }

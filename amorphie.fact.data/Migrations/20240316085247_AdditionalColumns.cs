@@ -11,7 +11,7 @@ namespace amorphie.fact.data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            
+
             migrationBuilder.AddColumn<int>(
                 name: "AccessFailedCount",
                 table: "UserSecurityQuestions",
@@ -65,7 +65,7 @@ namespace amorphie.fact.data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            
+
             migrationBuilder.DropColumn(
                 name: "AccessFailedCount",
                 table: "UserSecurityQuestions");
