@@ -1,4 +1,6 @@
+using System.Globalization;
 using amorphie.core.Module.minimal_api;
+using amorphie.fact.core.Dtos.SecurityQuestion;
 using amorphie.fact.data;
 using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +21,80 @@ public class SecurityQuestionModule
     {
         base.AddRoutes(routeGroupBuilder);
 
+        routeGroupBuilder.MapGet("get/{reference}", getAllSecurityQuestions);
+        routeGroupBuilder.MapPost("update/{reference}", updateSecurityQuestion);
         routeGroupBuilder.MapGet("search", getAllSecurityQuestionFullTextSearch);
+    }
+
+    async ValueTask<IResult> updateSecurityQuestion(
+        [FromServices] UserDBContext context,
+       [FromRoute] string reference,
+       [FromBody] UpdateSecurityQuestionRequestDto updateSecurityQuestionRequestDto
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if (user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var securityQuestion = await context!.UserSecurityQuestions.OrderByDescending(q => q.CreatedAt).FirstOrDefaultAsync();
+        if (securityQuestion.Status == QuestionStatusType.Blocked)
+        {
+            return Results.StatusCode(457);
+        }
+        var culture = CultureInfo.GetCultureInfo("tr-TR");
+
+        var passwordHasher = new PasswordHasher();
+        var oldAnswer = passwordHasher.DecryptString(securityQuestion.SecurityAnswer, securityQuestion.Id.ToString());
+        var isVerified = oldAnswer.ToUpper(culture).Equals(updateSecurityQuestionRequestDto.OldAnswer.Trim().ToUpper(culture));
+
+        if (isVerified)
+        {
+            var newSecurityQuestion = new UserSecurityQuestion()
+            {
+                LastVerificationDate = DateTime.UtcNow,
+                SecurityQuestionId = updateSecurityQuestionRequestDto.NewQuestionDefinitionId,
+                Status = QuestionStatusType.Active,
+                UserId = user.Id
+            };
+            newSecurityQuestion.SecurityAnswer = passwordHasher.EncryptString(updateSecurityQuestionRequestDto.NewAnswer, newSecurityQuestion.Id.ToString());
+            await context!.UserSecurityQuestions.AddAsync(newSecurityQuestion);
+            await context!.SaveChangesAsync();
+            return Results.Ok();
+        }
+        else
+        {
+            securityQuestion.AccessFailedCount = (securityQuestion.AccessFailedCount ?? 0) + 1;
+            securityQuestion.LastAccessDate = DateTime.UtcNow;
+            if (securityQuestion.AccessFailedCount >= 5)
+            {
+                securityQuestion.Status = QuestionStatusType.Blocked;
+            }
+            await context!.SaveChangesAsync();
+            return Results.StatusCode(456);
+        }
+
+
+    }
+
+    async ValueTask<IResult> getAllSecurityQuestions(
+        [FromServices] UserDBContext context,
+       [FromRoute] string reference
+    )
+    {
+        var response = new List<SecurityQuestionDto>();
+        var securityQuestionDefinitions = await context.SecurityQuestions.Where(m => m.IsActive).Select(m =>
+                                            new amorphie.fact.core.Dtos.SecurityQuestion.SecurityQuestionDto
+                                            {
+                                                Id = m.Id,
+                                                Description = m.Question,
+                                                Key = m.Key,
+                                                ValueTypeClr = m.ValueTypeClr,
+                                                Priority = m.Priority
+                                            }).ToListAsync();
+
+        return Results.Ok(securityQuestionDefinitions);
     }
 
     async ValueTask<IResult> getAllSecurityQuestionFullTextSearch(
@@ -42,9 +117,9 @@ public class SecurityQuestionModule
         if (securityQuestions.Count() > 0)
         {
             var response = securityQuestions.Select(x => ObjectMapper.Mapper.Map<SecurityQuestionDto>(x)).ToList();
-            return Results.Ok(response);            
+            return Results.Ok(response);
         }
 
-         return Results.NoContent();        
+        return Results.NoContent();
     }
 }

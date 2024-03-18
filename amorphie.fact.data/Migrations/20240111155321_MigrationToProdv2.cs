@@ -619,12 +619,12 @@ namespace amorphie.fact.data.Migrations
                 table: "UserDevices",
                 columns: new[] { "DeviceId", "InstallationId" });
 
-            migrationBuilder.CreateIndex(
+            /*migrationBuilder.CreateIndex(
                 name: "IX_UserDevices_Id_DeviceId_UserId_ClientId",
                 table: "UserDevices",
                 columns: new[] { "Id", "DeviceId", "UserId", "ClientId" })
                 .Annotation("Npgsql:IndexMethod", "GIN")
-                .Annotation("Npgsql:TsVectorConfig", "english");
+                .Annotation("Npgsql:TsVectorConfig", "english");*/
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserDevices_UserId",
