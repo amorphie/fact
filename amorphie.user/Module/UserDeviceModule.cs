@@ -1,4 +1,7 @@
+using System.Text.Json.Serialization;
 using amorphie.core.Module.minimal_api;
+using amorphie.fact.core.Dtos.Device;
+using amorphie.fact.core.Models;
 using amorphie.fact.data;
 using amorphie.fact.data.Migrations;
 using amorphie.user;
@@ -20,8 +23,11 @@ public class UserDeviceModule
     {
         base.AddRoutes(routeGroupBuilder);
 
+        routeGroupBuilder.MapGet("/list/{reference}", getDeviceList);
+        routeGroupBuilder.MapPut("/remove-activation/{reference}", removeDeviceActivation);
         routeGroupBuilder.MapGet("search", getAllUserDeviceFullTextSearch);
         //routeGroupBuilder.MapPost("/public/save-device", saveDevice);
+        routeGroupBuilder.MapGet("/check-device-without-user/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
         routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
         routeGroupBuilder.MapPost("/save-mobile-device-client", saveMobileDeviceClient);
         routeGroupBuilder.MapGet("/check-device/{clientId}/{userId}/{deviceId}/{installationId}", checkDevice);
@@ -61,19 +67,28 @@ public class UserDeviceModule
         {
             if (device.UserId != deviceInfo.UserId)
             {
-                device.Status = 0;
-
-                await context!.UserDevices.AddAsync(new UserDevice()
+                if (device.UserId != null)
                 {
-                    DeviceId = deviceInfo.DeviceId,
-                    InstallationId = deviceInfo.InstallationId,
-                    DeviceToken = deviceInfo.DeviceToken,
-                    DevicePlatform = deviceInfo.DevicePlatform,
-                    DeviceModel = deviceInfo.DeviceModel,
-                    UserId = deviceInfo.UserId,
-                    ClientId = deviceInfo.ClientId,
-                    Status = 1
-                });
+                    device.Status = 0;
+
+                    await context!.UserDevices.AddAsync(new UserDevice()
+                    {
+                        DeviceId = deviceInfo.DeviceId,
+                        InstallationId = deviceInfo.InstallationId,
+                        DeviceToken = deviceInfo.DeviceToken,
+                        DevicePlatform = deviceInfo.DevicePlatform,
+                        DeviceModel = deviceInfo.DeviceModel,
+                        UserId = deviceInfo.UserId,
+                        ClientId = deviceInfo.ClientId,
+                        LastLogonDate = DateTime.UtcNow,
+                        Status = 1
+                    });
+                }
+                else
+                {
+                    device.UserId = deviceInfo.UserId;
+                    device.LastLogonDate = DateTime.UtcNow;
+                }
                 await context!.SaveChangesAsync();
                 return Results.Ok();
             }
@@ -99,6 +114,7 @@ public class UserDeviceModule
                         DeviceModel = deviceInfo.DeviceModel,
                         UserId = deviceInfo.UserId,
                         ClientId = deviceInfo.ClientId,
+                        LastLogonDate = DateTime.UtcNow,
                         Status = 1
                     });
                     await context!.SaveChangesAsync();
@@ -117,6 +133,7 @@ public class UserDeviceModule
                     DeviceModel = deviceInfo.DeviceModel,
                     UserId = deviceInfo.UserId,
                     ClientId = deviceInfo.ClientId,
+                    LastLogonDate = DateTime.UtcNow,
                     Status = 1
                 });
                 await context!.SaveChangesAsync();
@@ -140,6 +157,92 @@ public class UserDeviceModule
 
         if (device != null)
             return Results.Ok();
+        else
+            return Results.NotFound();
+    }
+
+    async ValueTask<IResult> getDeviceList(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "reference")] string reference
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if (user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var deviceList = await context!.UserDevices!.Where(u => u.UserId.Equals(user.Id) && u.Status == 1).ToListAsync();
+        var response = new DeviceListDto();
+        foreach (var device in deviceList)
+        {
+            if (device.IsRegistered)
+            {
+                response.Add(new DeviceInfo()
+                {
+                    DeviceId = device.DeviceId,
+                    ActivationRemovalDate = device.ActivationRemovalDate,
+                    CreatedByUserName = device.CreatedBy.ToString(),
+                    Description = device.Description,
+                    Id = device.Id,
+                    LastLogonDate = device.LastLogonDate,
+                    Manufacturer = device.Manufacturer,
+                    Model = device.DeviceModel,
+                    Platform = device.DevicePlatform,
+                    RegistrationDate = device.RegistrationDate,
+                    Status = DeviceStatusConstants.DeviceStatusMap[device.Status],
+                    Version = device.Version
+                });
+            }
+        }
+
+        return Results.Json(response, new System.Text.Json.JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        });
+    }
+
+    async ValueTask<IResult> removeDeviceActivation(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "reference")] string reference,
+     [FromBody] RemoveDeviceActivationRequestDto removeDeviceActivationRequestDto
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if (user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var device = await context!.UserDevices.FirstOrDefaultAsync(u => u.UserId.Equals(user.Id) && u.Id.Equals(removeDeviceActivationRequestDto.Id) && u.Status == 1);
+        if (device is UserDevice && device.IsRegistered)
+        {
+            device.Status = 0;
+            device.RemovalReason = removeDeviceActivationRequestDto.Description;
+            device.ActivationRemovalDate = DateTime.UtcNow;
+            device.ModifiedBy = user.Id;
+            await context!.SaveChangesAsync();
+        }
+
+        return Results.Ok();
+    }
+
+    async ValueTask<IResult> checkDeviceWithoutUser(
+     [FromServices] UserDBContext context,
+     [FromRoute(Name = "clientId")] string clientId,
+     [FromRoute(Name = "deviceId")] string deviceId,
+     [FromRoute(Name = "installationId")] Guid installationId
+    )
+    {
+        var device = await context!.UserDevices
+            .Where(d => d.ClientId == clientId && d.DeviceId == deviceId && d.InstallationId == installationId && d.Status == 1)
+            .FirstOrDefaultAsync();
+
+        if (device != null)
+        {
+            var user = await context!.Users.FirstOrDefaultAsync(u => u.Id.Equals(device.UserId));
+            return Results.Ok(new { Reference = user.Reference });
+        }
         else
             return Results.NotFound();
     }
