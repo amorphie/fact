@@ -1,9 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.2 AS base
 WORKDIR /app
 RUN adduser -u 5561 --disabled-password --gecos "" amorphie-fact-clientuser && chown -R amorphie-fact-clientuser:amorphie-fact-clientuser /app
 USER amorphie-fact-clientuser
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 COPY ["./amorphie.client/amorphie.client.csproj", "."]
 RUN dotnet restore "./amorphie.client.csproj"
 COPY . .

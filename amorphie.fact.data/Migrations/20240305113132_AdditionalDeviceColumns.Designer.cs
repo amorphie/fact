@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -12,9 +13,11 @@ using amorphie.fact.data;
 namespace amorphie.fact.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    partial class UserDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240305113132_AdditionalDeviceColumns")]
+    partial class AdditionalDeviceColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -474,14 +477,14 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a29da4f0-f5b4-43a0-a808-23537dce190b"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1250),
-                            CreatedBy = new Guid("ec16fafb-2489-4761-953a-8f6285c14882"),
-                            CreatedByBehalfOf = new Guid("b3d8ce69-2d58-4678-8116-832d4502b259"),
+                            Id = new Guid("708a54b2-04ba-47d6-9326-a41d290bf3ce"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3570),
+                            CreatedBy = new Guid("322d16d3-464e-494a-bc2a-01be58a7e0ec"),
+                            CreatedByBehalfOf = new Guid("3982ad95-4c1c-4a65-93d9-c41fb323a564"),
                             Image = "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",
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1260),
-                            ModifiedBy = new Guid("5c1de49c-5f7c-46ff-879a-c0dd9c17474a"),
-                            ModifiedByBehalfOf = new Guid("8d4df201-f617-4817-b369-30f1e513955d")
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3570),
+                            ModifiedBy = new Guid("b5012098-606c-4440-88be-5e4683c9d2d6"),
+                            ModifiedByBehalfOf = new Guid("b6317b7c-f960-46c5-a261-ce6109834b8e")
                         });
                 });
 
@@ -500,12 +503,6 @@ namespace amorphie.fact.data.Migrations
                     b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Key")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -515,14 +512,8 @@ namespace amorphie.fact.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("Priority")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Question")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ValueTypeClr")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -537,13 +528,13 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("46b91422-078a-4f0e-ab68-98168f6250a4"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1330),
-                            CreatedBy = new Guid("04848d8a-fd66-4b03-9ccc-de43161bb12a"),
-                            CreatedByBehalfOf = new Guid("1d139546-5a3a-4657-a9a3-f642b1355a73"),
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1330),
-                            ModifiedBy = new Guid("81de6956-7e1e-4561-9aa9-ae6e49492f4c"),
-                            ModifiedByBehalfOf = new Guid("d51cf85e-26db-4141-9e5d-9a0b13efdf51"),
+                            Id = new Guid("3398e2f6-fa59-40be-951a-48e4a7cb01ed"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3640),
+                            CreatedBy = new Guid("f71a0be0-654f-4dd8-9e5b-d64eb570f499"),
+                            CreatedByBehalfOf = new Guid("a5205f19-4038-43e0-83fc-713cf4072ed4"),
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3640),
+                            ModifiedBy = new Guid("b6c69799-6b6a-4a09-be1a-457fc4807804"),
+                            ModifiedByBehalfOf = new Guid("4bde1816-509d-4808-81eb-2599f2513a33"),
                             Question = "ilk öğretmenin adı"
                         });
                 });
@@ -616,16 +607,16 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e036ec43-1165-4216-b07d-b0c338af399f"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1060),
-                            CreatedBy = new Guid("7b4c8735-b75f-43d2-af5d-36aed639a681"),
-                            CreatedByBehalfOf = new Guid("413a9b50-3388-47a6-819f-bc169d2e4ac4"),
+                            Id = new Guid("f0e3911c-0ecf-4ebc-8881-5e68cb843ac1"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3390),
+                            CreatedBy = new Guid("01555327-5b09-46db-83d3-ae2e4e0dd090"),
+                            CreatedByBehalfOf = new Guid("0a572b07-f937-48e9-b2a7-0dff060324fe"),
                             EMail = "test@gmail.com",
                             FirstName = "Damla",
                             LastName = "Erhan",
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1070),
-                            ModifiedBy = new Guid("1f28ece4-e455-48e5-8708-e457fefe77e0"),
-                            ModifiedByBehalfOf = new Guid("c20611ff-c2c4-4394-9dfd-b0b95a39869e"),
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3400),
+                            ModifiedBy = new Guid("7c23d693-7900-4e2c-a312-fa286bfefabe"),
+                            ModifiedByBehalfOf = new Guid("bb212e52-9099-4ebb-a744-746dc3907d66"),
                             Reference = "12345678912",
                             Salt = "fertrtretregfdgffd",
                             State = "New"
@@ -789,16 +780,16 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("fce17476-35fc-4ca9-8f58-959ddb91f81c"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1400),
-                            CreatedBy = new Guid("860cb57f-c109-4d2e-9e8c-07cfb823dd96"),
-                            CreatedByBehalfOf = new Guid("79381d9c-8253-4428-becb-6500eee4b85f"),
+                            Id = new Guid("0e6ec630-e63b-4bb7-bad1-cd10d30b8bda"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3710),
+                            CreatedBy = new Guid("299df658-9ded-4170-8461-821e3f04b8b4"),
+                            CreatedByBehalfOf = new Guid("83cb34a0-c2a7-496e-b2d2-d29a4bd97326"),
                             HashedPassword = "",
                             IsArgonHash = true,
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1410),
-                            ModifiedBy = new Guid("df2f1f17-4f2b-47c1-9da8-d254f22fc98a"),
-                            ModifiedByBehalfOf = new Guid("b6f7ebef-3470-4911-8120-1ac5e30be096"),
-                            UserId = new Guid("e036ec43-1165-4216-b07d-b0c338af399f")
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3720),
+                            ModifiedBy = new Guid("e22da62a-0652-40c5-b55d-5895611d4758"),
+                            ModifiedByBehalfOf = new Guid("2467bfc8-c50b-4302-9442-13659344eb78"),
+                            UserId = new Guid("f0e3911c-0ecf-4ebc-8881-5e68cb843ac1")
                         });
                 });
 
@@ -842,15 +833,15 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ae3f128f-068f-4e4c-b140-b6176b81a576"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1290),
-                            CreatedBy = new Guid("09b87ab3-a868-4edb-9297-c4a505182fac"),
-                            CreatedByBehalfOf = new Guid("8fa8c4ae-4984-468c-bc54-cc553f5b3f48"),
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1300),
-                            ModifiedBy = new Guid("29c8038b-8e71-4592-9f9f-c199738dfc65"),
-                            ModifiedByBehalfOf = new Guid("8c3bd2bb-e38b-48ce-911d-83da63b3e92c"),
+                            Id = new Guid("b2a4a91d-24c3-464d-b611-e4ac404db0b0"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3600),
+                            CreatedBy = new Guid("3d3399d0-41db-48c6-9441-007ba873e442"),
+                            CreatedByBehalfOf = new Guid("181feafb-97bf-4ff2-bf79-b22b19bb7afb"),
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3610),
+                            ModifiedBy = new Guid("08919299-f44d-41ae-878f-04b4071cb549"),
+                            ModifiedByBehalfOf = new Guid("9dbcd0e1-d2f9-4edb-bf35-32b1aeff698d"),
                             SecurityImage = "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",
-                            UserId = new Guid("e036ec43-1165-4216-b07d-b0c338af399f")
+                            UserId = new Guid("f0e3911c-0ecf-4ebc-8881-5e68cb843ac1")
                         });
                 });
 
@@ -860,9 +851,6 @@ namespace amorphie.fact.data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("AccessFailedCount")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -871,12 +859,6 @@ namespace amorphie.fact.data.Migrations
 
                     b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("LastAccessDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("LastVerificationDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -893,9 +875,6 @@ namespace amorphie.fact.data.Migrations
 
                     b.Property<Guid>("SecurityQuestionId")
                         .HasColumnType("uuid");
-
-                    b.Property<int?>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -918,16 +897,16 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("371df7e8-5cb5-4e8c-a6ab-12b8708a9d44"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1370),
-                            CreatedBy = new Guid("ec9f5ae8-c060-44db-8eef-6a6358f0ef28"),
-                            CreatedByBehalfOf = new Guid("602a1623-88c1-4f79-a52b-b3dff45f7510"),
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1370),
-                            ModifiedBy = new Guid("3b54dd76-a0e8-4d11-9a5a-444f9d4d9f0c"),
-                            ModifiedByBehalfOf = new Guid("519f4ac7-2531-4f37-a6ff-d8f2b153d6cb"),
+                            Id = new Guid("4d049653-015b-4ea0-bd1a-66598e688366"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3680),
+                            CreatedBy = new Guid("d4a717f3-8f25-4219-ae6c-12128db31d09"),
+                            CreatedByBehalfOf = new Guid("0a4e5245-e10f-4b44-9cc3-87df7b675a1a"),
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3680),
+                            ModifiedBy = new Guid("a332a6ee-7851-4e32-a3be-b1d236c7bf8e"),
+                            ModifiedByBehalfOf = new Guid("a5309a4f-02d2-4d26-9418-9a3eec9ae70c"),
                             SecurityAnswer = "test",
-                            SecurityQuestionId = new Guid("46b91422-078a-4f0e-ab68-98168f6250a4"),
-                            UserId = new Guid("e036ec43-1165-4216-b07d-b0c338af399f")
+                            SecurityQuestionId = new Guid("3398e2f6-fa59-40be-951a-48e4a7cb01ed"),
+                            UserId = new Guid("f0e3911c-0ecf-4ebc-8881-5e68cb843ac1")
                         });
                 });
 
@@ -1019,15 +998,15 @@ namespace amorphie.fact.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ff4f1f66-5d36-4057-9e7e-0184139a2d2f"),
-                            CreatedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1220),
-                            CreatedBy = new Guid("e07cd17b-5bbe-4d7b-a96d-689a9002342b"),
-                            CreatedByBehalfOf = new Guid("9a5810de-5926-4a48-83e2-9b23c9521ba5"),
-                            ModifiedAt = new DateTime(2024, 3, 16, 8, 52, 46, 881, DateTimeKind.Utc).AddTicks(1220),
-                            ModifiedBy = new Guid("a639eae7-01e2-406b-8900-8f785e32e7c3"),
-                            ModifiedByBehalfOf = new Guid("2b9b6555-0769-45f3-aa8e-b3961a66f293"),
+                            Id = new Guid("5575e9d3-a36b-4450-ab1c-40a2b5182e21"),
+                            CreatedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3530),
+                            CreatedBy = new Guid("9a5788ef-1099-4087-9cf6-a78963f9a212"),
+                            CreatedByBehalfOf = new Guid("9b5604da-71ee-4cf1-8529-4b18f3af5886"),
+                            ModifiedAt = new DateTime(2024, 3, 5, 11, 31, 31, 909, DateTimeKind.Utc).AddTicks(3540),
+                            ModifiedBy = new Guid("d71ba515-3dc5-43c8-9b18-a85ddbc8b73c"),
+                            ModifiedByBehalfOf = new Guid("27c7df89-9fb5-4a68-8aad-6ddec30fc088"),
                             Tag = "user-list-get",
-                            UserId = new Guid("e036ec43-1165-4216-b07d-b0c338af399f")
+                            UserId = new Guid("f0e3911c-0ecf-4ebc-8881-5e68cb843ac1")
                         });
                 });
 
@@ -1160,7 +1139,7 @@ namespace amorphie.fact.data.Migrations
                             b1.HasData(
                                 new
                                 {
-                                    UserId = new Guid("e036ec43-1165-4216-b07d-b0c338af399f"),
+                                    UserId = new Guid("f0e3911c-0ecf-4ebc-8881-5e68cb843ac1"),
                                     CountryCode = 90,
                                     Number = "1234564",
                                     Prefix = 530
