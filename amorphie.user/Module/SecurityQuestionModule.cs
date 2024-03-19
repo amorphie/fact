@@ -23,8 +23,47 @@ public class SecurityQuestionModule
 
         routeGroupBuilder.MapGet("get/{reference}", getAllSecurityQuestions);
         routeGroupBuilder.MapPost("update/{reference}", updateSecurityQuestion);
+        routeGroupBuilder.MapPost("migrate", migrateSecurityQuestion);
         routeGroupBuilder.MapGet("search", getAllSecurityQuestionFullTextSearch);
     }
+
+    async ValueTask<IResult> migrateSecurityQuestion(
+        [FromServices] UserDBContext context,
+       [FromBody] MigrateSecurityQuestionRequestDto migrateSecurityQuestionRequestDto
+    )
+    {
+        var securityQuestion = await context!.UserSecurityQuestions.FirstOrDefaultAsync(q => q.Id.Equals(migrateSecurityQuestionRequestDto.Id));
+        if(securityQuestion is {})
+        {
+            securityQuestion.Status = migrateSecurityQuestionRequestDto.QuestionStatusType;
+            securityQuestion.SecurityAnswer = migrateSecurityQuestionRequestDto.Answer;
+            securityQuestion.ModifiedAt = migrateSecurityQuestionRequestDto.ModifiedAt;
+            securityQuestion.ModifiedBy = migrateSecurityQuestionRequestDto.ModifiedBy;
+            securityQuestion.ModifiedByBehalfOf = migrateSecurityQuestionRequestDto.ModifiedByBehalfOf;
+            
+        }
+        else
+        {
+            securityQuestion = new UserSecurityQuestion()
+            {
+                Id = migrateSecurityQuestionRequestDto.Id,
+                UserId = migrateSecurityQuestionRequestDto.UserId,
+                SecurityAnswer = migrateSecurityQuestionRequestDto.Answer,
+                SecurityQuestionId = migrateSecurityQuestionRequestDto.SecurityQuestionId,
+                Status = migrateSecurityQuestionRequestDto.QuestionStatusType,
+                CreatedAt = migrateSecurityQuestionRequestDto.CreatedAt,
+                CreatedBy = migrateSecurityQuestionRequestDto.CreatedBy,
+                CreatedByBehalfOf = migrateSecurityQuestionRequestDto.CreatedByBehalfOf,
+                ModifiedAt = migrateSecurityQuestionRequestDto.ModifiedAt,
+                ModifiedBy = migrateSecurityQuestionRequestDto.ModifiedBy,
+                ModifiedByBehalfOf = migrateSecurityQuestionRequestDto.ModifiedByBehalfOf
+            };
+
+            await context!.UserSecurityQuestions.AddAsync(securityQuestion);
+        }
+        await context!.SaveChangesAsync();
+        return Results.Ok();
+    } 
 
     async ValueTask<IResult> updateSecurityQuestion(
         [FromServices] UserDBContext context,
