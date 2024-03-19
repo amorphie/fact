@@ -1,5 +1,6 @@
 using amorphie.core.Identity;
 using amorphie.core.Module.minimal_api;
+using amorphie.fact.core.Dtos.SecurityImage;
 using amorphie.fact.data;
 using amorphie.user;
 using AutoMapper;
@@ -23,8 +24,44 @@ public class UserSecurityImageModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapGet("/user/{userId}/image/{imageId}/userCheckImage", userCheckImage);
+        routeGroupBuilder.MapPost("migrate", migrateSecurityImage);
     }
 
+    async ValueTask<IResult> migrateSecurityImage(
+        [FromServices] UserDBContext context,
+       [FromBody] MigrateSecurityImageRequestDto migrateSecurityImageRequestDto
+    )
+    {
+        var securityImage = await context!.UserSecurityImages.FirstOrDefaultAsync(q => q.Id.Equals(migrateSecurityImageRequestDto.Id));
+        if(securityImage is {})
+        {
+            securityImage.RequireChange = migrateSecurityImageRequestDto.RequireChange;
+            securityImage.ModifiedAt = migrateSecurityImageRequestDto.ModifiedAt;
+            securityImage.ModifiedBy = migrateSecurityImageRequestDto.ModifiedBy;
+            securityImage.ModifiedByBehalfOf = migrateSecurityImageRequestDto.ModifiedByBehalfOf;
+        }
+        else
+        {
+            securityImage = new UserSecurityImage()
+            {
+                Id = migrateSecurityImageRequestDto.Id,
+                UserId = migrateSecurityImageRequestDto.UserId,
+                SecurityImageId = migrateSecurityImageRequestDto.SecurityImageId,
+                RequireChange = migrateSecurityImageRequestDto.RequireChange,
+                CreatedAt = migrateSecurityImageRequestDto.CreatedAt,
+                CreatedBy = migrateSecurityImageRequestDto.CreatedBy,
+                CreatedByBehalfOf = migrateSecurityImageRequestDto.CreatedByBehalfOf,
+                ModifiedAt = migrateSecurityImageRequestDto.ModifiedAt,
+                ModifiedBy = migrateSecurityImageRequestDto.ModifiedBy,
+                ModifiedByBehalfOf = migrateSecurityImageRequestDto.ModifiedByBehalfOf
+            };
+
+            await context!.UserSecurityImages.AddAsync(securityImage);
+        }
+        await context!.SaveChangesAsync();
+        return Results.Ok();
+    } 
+    
     protected override async ValueTask<IResult> UpsertMethod(
     [FromServices] IMapper mapper,
     [FromServices] IValidator<UserSecurityImage> validator,
@@ -51,7 +88,7 @@ public class UserSecurityImageModule
                 var result = Convert.ToBase64String(password);
                 var newRecord = ObjectMapper.Mapper.Map<UserSecurityImage>(data);
                 newRecord.CreatedAt = DateTime.UtcNow;
-                newRecord.SecurityImage = result;
+                newRecord.SecurityImageId = data.SecurityImageId;
 
                 context!.UserSecurityImages!.Add(newRecord);
                 context!.SaveChanges();
@@ -69,17 +106,9 @@ public class UserSecurityImageModule
             {
                 if (user.Salt != null)
                 {
-
-                    var bytePassword = Convert.FromBase64String(userSecurityImage.SecurityImage);
-                    var salt = Convert.FromBase64String(user.Salt);
-                    var checkPassword = ArgonPasswordHelper.VerifyHash(securityImage.Image, salt, bytePassword);
-
-                    if (!checkPassword)
-                    {
-                        var password = ArgonPasswordHelper.HashPassword(securityImage.Image, salt);
-                        userSecurityImage.SecurityImage = Convert.ToBase64String(password);
-                        hasChanges = true;
-                    }
+                    userSecurityImage.SecurityImageId = data.SecurityImageId;
+                    hasChanges = true;
+                    
 
                     userSecurityImage.ModifiedAt = DateTime.UtcNow;
                     userSecurityImage.ModifiedBy = bbtIdentity.UserId.Value;
@@ -112,21 +141,14 @@ public class UserSecurityImageModule
 
         if (user != null)
         {
-            var securityImage = context!.SecurityImages!.FirstOrDefault(x => x.Id == imageId);
 
             if (user.UserSecurityImages != null && user.UserSecurityImages.Count > 0)
             {
-                var userSecurityImage = user.UserSecurityImages.FirstOrDefault();
-                var byteImage = Convert.FromBase64String(userSecurityImage.SecurityImage);
-                var salt = Convert.FromBase64String(user.Salt);
-                var checkPassword = ArgonPasswordHelper.VerifyHash(securityImage.Image, salt, byteImage);
-
-                if (checkPassword)
-                {
-                    return Results.Ok("Image match");
-                }
-
-                return Results.Problem("Image do not match");
+                var userSecurityImage = user.UserSecurityImages.OrderByDescending(i => i.CreatedAt).FirstOrDefault();
+                if(userSecurityImage.Id.Equals(imageId))
+                    return Results.Ok();
+                else
+                    return Results.Conflict();
             }
 
             return Results.Problem("SecurityImage definition is not found. Please check userId is exists in definitions");

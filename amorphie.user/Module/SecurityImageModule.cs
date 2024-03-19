@@ -18,42 +18,9 @@ public class SecurityImageModule
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
-         base.AddRoutes(routeGroupBuilder);
-         routeGroupBuilder.MapPost("migrate", migrateSecurityImage);
+        base.AddRoutes(routeGroupBuilder);
+         
     }    
 
-    async ValueTask<IResult> migrateSecurityImage(
-        [FromServices] UserDBContext context,
-       [FromBody] MigrateSecurityImageRequestDto migrateSecurityImageRequestDto
-    )
-    {
-        var securityImage = await context!.UserSecurityImages.FirstOrDefaultAsync(q => q.Id.Equals(migrateSecurityImageRequestDto.Id));
-        if(securityImage is {})
-        {
-            securityImage.RequireChange = migrateSecurityImageRequestDto.RequireChange;
-            securityImage.ModifiedAt = migrateSecurityImageRequestDto.ModifiedAt;
-            securityImage.ModifiedBy = migrateSecurityImageRequestDto.ModifiedBy;
-            securityImage.ModifiedByBehalfOf = migrateSecurityImageRequestDto.ModifiedByBehalfOf;
-        }
-        else
-        {
-            securityImage = new UserSecurityImage()
-            {
-                Id = migrateSecurityImageRequestDto.Id,
-                UserId = migrateSecurityImageRequestDto.UserId,
-                SecurityImageId = migrateSecurityImageRequestDto.SecurityImageId,
-                RequireChange = migrateSecurityImageRequestDto.RequireChange,
-                CreatedAt = migrateSecurityImageRequestDto.CreatedAt,
-                CreatedBy = migrateSecurityImageRequestDto.CreatedBy,
-                CreatedByBehalfOf = migrateSecurityImageRequestDto.CreatedByBehalfOf,
-                ModifiedAt = migrateSecurityImageRequestDto.ModifiedAt,
-                ModifiedBy = migrateSecurityImageRequestDto.ModifiedBy,
-                ModifiedByBehalfOf = migrateSecurityImageRequestDto.ModifiedByBehalfOf
-            };
-
-            await context!.UserSecurityImages.AddAsync(securityImage);
-        }
-        await context!.SaveChangesAsync();
-        return Results.Ok();
-    } 
+    
 }
