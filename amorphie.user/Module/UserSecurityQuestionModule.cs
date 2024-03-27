@@ -46,6 +46,7 @@ public class UserSecurityQuestionModule : BaseRoute
         .Produces(StatusCodes.Status404NotFound);
 
         routeGroupBuilder.MapPost("migrate", migrateSecurityQuestion);
+        routeGroupBuilder.MapPost("migrateQuestions", migrateSecurityQuestions);
     }
 
     async ValueTask<IResult> deleteUserSecurityQuestion(
@@ -63,6 +64,39 @@ public class UserSecurityQuestionModule : BaseRoute
         context.SaveChanges();
 
         return Results.Ok("Delete successful");
+    }
+
+    async ValueTask<IResult> migrateSecurityQuestions(
+        [FromServices] UserDBContext context,
+       [FromBody] List<SecurityQuestionRequestDto> securityQuestionRequestDtos
+    )
+    {
+        foreach (var question in securityQuestionRequestDtos)
+        {
+            var newQuestion = await context.SecurityQuestions.FirstOrDefaultAsync(s => s.Id.Equals(question.Id));
+            if(newQuestion is not {})
+            {
+                await context.SecurityQuestions.AddAsync(new SecurityQuestion(){
+                    CreatedAt = question.CreatedAt,
+                    CreatedBy = question.CreatedBy,
+                    CreatedByBehalfOf = question.CreatedByBehalfOf,
+                    ModifiedAt = question.ModifiedAt,
+                    ModifiedBy = question.ModifiedBy,
+                    ModifiedByBehalfOf = question.ModifiedByBehalfOf,
+                    DescriptionEn = question.DescriptionEn,
+                    DescriptionTr = question.DescriptionTr,
+                    Id = question.Id,
+                    Question = "",
+                    IsActive = question.IsActive,
+                    Key = question.Key,
+                    Priority = question.Priority,
+                    ValueTypeClr = question.ValueTypeClr 
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
+        return Results.Ok();
     }
 
     async ValueTask<IResult> migrateSecurityQuestion(

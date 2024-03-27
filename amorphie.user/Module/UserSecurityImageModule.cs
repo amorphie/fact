@@ -5,6 +5,7 @@ using amorphie.fact.data;
 using amorphie.user;
 using AutoMapper;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,36 @@ public class UserSecurityImageModule
 
         routeGroupBuilder.MapGet("/user/{userId}/image/{imageId}/userCheckImage", userCheckImage);
         routeGroupBuilder.MapPost("migrate", migrateSecurityImage);
+        routeGroupBuilder.MapPost("migrateImages", migrateSecurityImages);
+    }
+
+    async ValueTask<IResult> migrateSecurityImages(
+        [FromServices] UserDBContext context,
+       [FromBody] List<SecurityImageRequestDto> securityImageRequestDtos
+    )
+    {
+        foreach (var image in securityImageRequestDtos)
+        {
+            var img = await context.SecurityImages.FirstOrDefaultAsync(s => s.Id.Equals(image.Id));
+            if(img is not {})
+            {
+                await context.SecurityImages.AddAsync(new SecurityImage(){
+                    CreatedAt = image.CreatedAt,
+                    CreatedBy = image.CreatedBy,
+                    CreatedByBehalfOf = image.CreatedByBehalfOf,
+                    ModifiedAt = image.ModifiedAt,
+                    ModifiedBy = image.ModifiedBy,
+                    ModifiedByBehalfOf = image.ModifiedByBehalfOf,
+                    EnTitle = image.EnTitle,
+                    TrTitle = image.TrTitle,
+                    Id = image.Id,
+                    Image = image.Image
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
+        return Results.Ok();
     }
 
     async ValueTask<IResult> migrateSecurityImage(
