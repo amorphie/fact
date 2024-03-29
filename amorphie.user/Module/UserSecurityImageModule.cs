@@ -1,10 +1,12 @@
 using amorphie.core.Identity;
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.core.Dtos.SecurityImage;
+using amorphie.fact.core.Helper;
 using amorphie.fact.data;
 using amorphie.user;
 using AutoMapper;
 using FluentValidation;
+using Google.Api;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +27,68 @@ public class UserSecurityImageModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapGet("/user/{userId}/image/{imageId}/userCheckImage", userCheckImage);
+        routeGroupBuilder.MapPut("/user/{reference}",updateSecurityImage);
+        routeGroupBuilder.MapGet("/user/{reference}",getSecurityImages);
         routeGroupBuilder.MapPost("migrate", migrateSecurityImage);
         routeGroupBuilder.MapPost("migrateImages", migrateSecurityImages);
+    }
+
+    async ValueTask<IResult> updateSecurityImage(
+        [FromServices] UserDBContext context,
+       [FromRoute] string reference,
+       [FromBody] UpdateSecurityImageDto updateSecurityImageDto
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if (user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var securityImage = new UserSecurityImage{
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = user.Id,
+            CreatedByBehalfOf = null,
+            RequireChange = null,
+            UserId = user.Id
+        };
+
+        await context!.AddAsync(securityImage);
+        await context!.SaveChangesAsync();
+
+        return Results.Ok();
+    }
+    async ValueTask<IResult> getSecurityImages(
+        HttpContext httpContext,
+        [FromServices] UserDBContext context,
+       [FromRoute] string reference
+    )
+    {
+        var user = await context!.Users.FirstOrDefaultAsync(u => u.Reference.Equals(reference));
+        if (user == null)
+        {
+            return Results.NotFound("User Not Found");
+        }
+
+        var securityImages = await context!.SecurityImages.ToListAsync();
+        var userSecurityImage = await context!.UserSecurityImages.OrderByDescending(i => i.CreatedAt).FirstOrDefaultAsync(i => i.UserId == user.Id);
+
+        var response = new List<amorphie.fact.core.Dtos.SecurityImage.SecurityImageDto>();
+
+        foreach (var item in securityImages)
+        {
+            response.Add(new amorphie.fact.core.Dtos.SecurityImage.SecurityImageDto{
+                Id = item.Id,
+                ImagePath = item.Image,
+                IsSelected = item.Id.Equals(userSecurityImage?.SecurityImageId),
+                Title = LangHelper.GetLang(httpContext).Equals("tr") ? item.TrTitle : item.EnTitle
+            });
+        }
+
+        return Results.Json(response, new System.Text.Json.JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        });
     }
 
     async ValueTask<IResult> migrateSecurityImages(
