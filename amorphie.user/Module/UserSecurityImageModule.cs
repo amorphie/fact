@@ -50,7 +50,8 @@ public class UserSecurityImageModule
             CreatedBy = user.Id,
             CreatedByBehalfOf = null,
             RequireChange = null,
-            UserId = user.Id
+            UserId = user.Id,
+            SecurityImageId = updateSecurityImageDto.ImageId
         };
 
         await context!.AddAsync(securityImage);
