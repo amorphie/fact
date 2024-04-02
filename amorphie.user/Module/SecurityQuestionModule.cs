@@ -23,11 +23,11 @@ public class SecurityQuestionModule
 
         routeGroupBuilder.MapGet("get/{reference}", getAllSecurityQuestions);
         routeGroupBuilder.MapPost("update/{reference}", updateSecurityQuestion);
-        
+
         routeGroupBuilder.MapGet("search", getAllSecurityQuestionFullTextSearch);
     }
 
-    
+
 
     async ValueTask<IResult> updateSecurityQuestion(
         [FromServices] UserDBContext context,

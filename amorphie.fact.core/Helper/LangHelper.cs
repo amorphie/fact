@@ -28,7 +28,8 @@ namespace amorphie.fact.core.Helper
         public static string GetLang(HttpContext context)
         {
             var lang = GetLangCode(context);
-            return lang switch{
+            return lang switch
+            {
                 "tr-TR" => "tr",
                 "en-US" => "en",
                 "en-EN" => "en",

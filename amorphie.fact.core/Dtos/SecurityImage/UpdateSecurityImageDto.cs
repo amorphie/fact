@@ -7,6 +7,6 @@ namespace amorphie.fact.core.Dtos.SecurityImage
 {
     public class UpdateSecurityImageDto
     {
-        public Guid ImageId{get;set;}
+        public Guid ImageId { get; set; }
     }
 }

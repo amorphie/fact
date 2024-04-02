@@ -19,7 +19,7 @@ public class UserSecurityQuestionModule : BaseRoute
         routeGroupBuilder.MapGet("/usersecurityquestion", getAllUserSecurityQuestionFullTextSearch)
         .WithOpenApi()
        .WithSummary("Returns saved usersecurityquestion records.")
-       .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")       
+       .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")
        .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
@@ -74,9 +74,10 @@ public class UserSecurityQuestionModule : BaseRoute
         foreach (var question in securityQuestionRequestDtos)
         {
             var newQuestion = await context.SecurityQuestions.FirstOrDefaultAsync(s => s.Id.Equals(question.Id));
-            if(newQuestion is not {})
+            if (newQuestion is not { })
             {
-                await context.SecurityQuestions.AddAsync(new SecurityQuestion(){
+                await context.SecurityQuestions.AddAsync(new SecurityQuestion()
+                {
                     CreatedAt = question.CreatedAt,
                     CreatedBy = question.CreatedBy,
                     CreatedByBehalfOf = question.CreatedByBehalfOf,
@@ -90,7 +91,7 @@ public class UserSecurityQuestionModule : BaseRoute
                     IsActive = question.IsActive,
                     Key = question.Key,
                     Priority = question.Priority,
-                    ValueTypeClr = question.ValueTypeClr 
+                    ValueTypeClr = question.ValueTypeClr
                 });
             }
         }
@@ -105,14 +106,14 @@ public class UserSecurityQuestionModule : BaseRoute
     )
     {
         var securityQuestion = await context!.UserSecurityQuestions.FirstOrDefaultAsync(q => q.Id.Equals(migrateSecurityQuestionRequestDto.Id));
-        if(securityQuestion is {})
+        if (securityQuestion is { })
         {
             securityQuestion.Status = migrateSecurityQuestionRequestDto.QuestionStatusType;
             securityQuestion.SecurityAnswer = migrateSecurityQuestionRequestDto.Answer;
             securityQuestion.ModifiedAt = migrateSecurityQuestionRequestDto.ModifiedAt;
             securityQuestion.ModifiedBy = migrateSecurityQuestionRequestDto.ModifiedBy;
             securityQuestion.ModifiedByBehalfOf = migrateSecurityQuestionRequestDto.ModifiedByBehalfOf;
-            
+
         }
         else
         {
@@ -135,7 +136,7 @@ public class UserSecurityQuestionModule : BaseRoute
         }
         await context!.SaveChangesAsync();
         return Results.Ok();
-    } 
+    }
 
     async ValueTask<IResult> userCheckSecurityAnswer(
    [FromRoute(Name = "userId")] Guid userId,

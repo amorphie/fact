@@ -60,8 +60,8 @@ public class UserDeviceModule
     )
     {
         //removeAnotherDevicesBelongsToUser
-        await context!.UserDevices.Where(d=> !d.DeviceId.Equals(deviceInfo.DeviceId) && d.UserId.Equals(deviceInfo.UserId)).ExecuteUpdateAsync(s => s.SetProperty(d => d.Status,0));
-        
+        await context!.UserDevices.Where(d => !d.DeviceId.Equals(deviceInfo.DeviceId) && d.UserId.Equals(deviceInfo.UserId)).ExecuteUpdateAsync(s => s.SetProperty(d => d.Status, 0));
+
         var device = await context!.UserDevices
         .Where(d => d.ClientId.Equals(deviceInfo.ClientId) && d.DeviceId.Equals(deviceInfo.DeviceId) && d.InstallationId.Equals(deviceInfo.InstallationId) && d.Status == 1)
         .FirstOrDefaultAsync();

@@ -5,7 +5,7 @@ using amorphie.user;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-public class SecurityImageModule 
+public class SecurityImageModule
 : BaseBBTRoute<SecurityImageDto, SecurityImage, UserDBContext>
 {
     public SecurityImageModule(WebApplication app) : base(app)
@@ -19,8 +19,8 @@ public class SecurityImageModule
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
-         
-    }    
 
-    
+    }
+
+
 }
