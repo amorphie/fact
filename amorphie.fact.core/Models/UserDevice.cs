@@ -39,7 +39,7 @@ public class UserDevice : EntityBase
     {
         get
         {
-            return Status == 1 && !string.IsNullOrWhiteSpace(DeviceToken);
+            return Status == 1;
         }
     }
 }

@@ -1,4 +1,5 @@
 using amorphie.core.Module.minimal_api;
+using amorphie.fact.core.Dtos.SecurityQuestion;
 using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ public class UserSecurityQuestionModule : BaseRoute
         routeGroupBuilder.MapGet("/usersecurityquestion", getAllUserSecurityQuestionFullTextSearch)
         .WithOpenApi()
        .WithSummary("Returns saved usersecurityquestion records.")
-       .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")       
+       .WithDescription("Returns existing usersecurityquestion with metadata.Query parameter SecurityQuestion is can contain request or order SecurityQuestion of usersecurityquestions.")
        .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
        .Produces(StatusCodes.Status404NotFound);
 
@@ -43,6 +44,9 @@ public class UserSecurityQuestionModule : BaseRoute
         .WithDescription("Check security answer")
         .Produces<GetUserSecurityQuestionResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
+
+        routeGroupBuilder.MapPost("migrate", migrateSecurityQuestion);
+        routeGroupBuilder.MapPost("migrateQuestions", migrateSecurityQuestions);
     }
 
     async ValueTask<IResult> deleteUserSecurityQuestion(
@@ -60,6 +64,78 @@ public class UserSecurityQuestionModule : BaseRoute
         context.SaveChanges();
 
         return Results.Ok("Delete successful");
+    }
+
+    async ValueTask<IResult> migrateSecurityQuestions(
+        [FromServices] UserDBContext context,
+       [FromBody] List<SecurityQuestionRequestDto> securityQuestionRequestDtos
+    )
+    {
+        foreach (var question in securityQuestionRequestDtos)
+        {
+            var newQuestion = await context.SecurityQuestions.FirstOrDefaultAsync(s => s.Id.Equals(question.Id));
+            if (newQuestion is not { })
+            {
+                await context.SecurityQuestions.AddAsync(new SecurityQuestion()
+                {
+                    CreatedAt = question.CreatedAt,
+                    CreatedBy = question.CreatedBy,
+                    CreatedByBehalfOf = question.CreatedByBehalfOf,
+                    ModifiedAt = question.ModifiedAt,
+                    ModifiedBy = question.ModifiedBy,
+                    ModifiedByBehalfOf = question.ModifiedByBehalfOf,
+                    DescriptionEn = question.DescriptionEn,
+                    DescriptionTr = question.DescriptionTr,
+                    Id = question.Id,
+                    Question = "",
+                    IsActive = question.IsActive,
+                    Key = question.Key,
+                    Priority = question.Priority,
+                    ValueTypeClr = question.ValueTypeClr
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
+        return Results.Ok();
+    }
+
+    async ValueTask<IResult> migrateSecurityQuestion(
+        [FromServices] UserDBContext context,
+       [FromBody] MigrateSecurityQuestionRequestDto migrateSecurityQuestionRequestDto
+    )
+    {
+        var securityQuestion = await context!.UserSecurityQuestions.FirstOrDefaultAsync(q => q.Id.Equals(migrateSecurityQuestionRequestDto.Id));
+        if (securityQuestion is { })
+        {
+            securityQuestion.Status = migrateSecurityQuestionRequestDto.QuestionStatusType;
+            securityQuestion.SecurityAnswer = migrateSecurityQuestionRequestDto.Answer;
+            securityQuestion.ModifiedAt = migrateSecurityQuestionRequestDto.ModifiedAt;
+            securityQuestion.ModifiedBy = migrateSecurityQuestionRequestDto.ModifiedBy;
+            securityQuestion.ModifiedByBehalfOf = migrateSecurityQuestionRequestDto.ModifiedByBehalfOf;
+
+        }
+        else
+        {
+            securityQuestion = new UserSecurityQuestion()
+            {
+                Id = migrateSecurityQuestionRequestDto.Id,
+                UserId = migrateSecurityQuestionRequestDto.UserId,
+                SecurityAnswer = migrateSecurityQuestionRequestDto.Answer,
+                SecurityQuestionId = migrateSecurityQuestionRequestDto.SecurityQuestionId,
+                Status = migrateSecurityQuestionRequestDto.QuestionStatusType,
+                CreatedAt = migrateSecurityQuestionRequestDto.CreatedAt,
+                CreatedBy = migrateSecurityQuestionRequestDto.CreatedBy,
+                CreatedByBehalfOf = migrateSecurityQuestionRequestDto.CreatedByBehalfOf,
+                ModifiedAt = migrateSecurityQuestionRequestDto.ModifiedAt,
+                ModifiedBy = migrateSecurityQuestionRequestDto.ModifiedBy,
+                ModifiedByBehalfOf = migrateSecurityQuestionRequestDto.ModifiedByBehalfOf
+            };
+
+            await context!.UserSecurityQuestions.AddAsync(securityQuestion);
+        }
+        await context!.SaveChangesAsync();
+        return Results.Ok();
     }
 
     async ValueTask<IResult> userCheckSecurityAnswer(
