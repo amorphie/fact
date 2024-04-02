@@ -23,8 +23,11 @@ public class SecurityQuestionModule
 
         routeGroupBuilder.MapGet("get/{reference}", getAllSecurityQuestions);
         routeGroupBuilder.MapPost("update/{reference}", updateSecurityQuestion);
+
         routeGroupBuilder.MapGet("search", getAllSecurityQuestionFullTextSearch);
     }
+
+
 
     async ValueTask<IResult> updateSecurityQuestion(
         [FromServices] UserDBContext context,
@@ -84,14 +87,14 @@ public class SecurityQuestionModule
     )
     {
         var response = new List<SecurityQuestionDto>();
-        var securityQuestionDefinitions = await context.SecurityQuestions.Where(m => m.IsActive).Select(m =>
+        var securityQuestionDefinitions = await context.SecurityQuestions.Where(m => m.IsActive.Value).Select(m =>
                                             new amorphie.fact.core.Dtos.SecurityQuestion.SecurityQuestionDto
                                             {
                                                 Id = m.Id,
                                                 Description = m.Question,
                                                 Key = m.Key,
                                                 ValueTypeClr = m.ValueTypeClr,
-                                                Priority = m.Priority
+                                                Priority = m.Priority.Value
                                             }).ToListAsync();
 
         return Results.Ok(securityQuestionDefinitions);
