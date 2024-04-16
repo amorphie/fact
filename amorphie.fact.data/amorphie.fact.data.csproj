@@ -16,7 +16,7 @@
     <PackageReference Include="Dapr.Client" Version="1.12.0" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.12.0" />
 
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
   </ItemGroup>
    <ItemGroup>
     <ProjectReference Include="..\amorphie.fact.core\amorphie.fact.core.csproj" />
