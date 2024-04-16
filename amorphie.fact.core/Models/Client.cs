@@ -22,8 +22,8 @@ public class Client : EntityBase
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
     public ICollection<ClientAudience> Audiences { get; set; } = default!;
-    // public bool CanCreateLoginUrl{get;set;}
-    // public string[]? CreateLoginUrlClients{get;set;} = default!;
+    public bool CanCreateLoginUrl{get;set;}
+    public string[]? CreateLoginUrlClients{get;set;} = default!;
     [NotMapped]
     public virtual NpgsqlTsVector SearchVector { get; set; }
 

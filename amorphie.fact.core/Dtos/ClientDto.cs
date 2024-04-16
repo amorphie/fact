@@ -26,8 +26,8 @@ public class ClientDto : DtoBase
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
     public ICollection<ClientAudience> Audiences { get; set; } = default!;
-    // public bool CanCreateLoginUrl{get;set;} = default!;
-    // public string[]? CreateLoginUrlClients { get; set; } = default!;
+    public bool CanCreateLoginUrl{get;set;} = default!;
+    public string[]? CreateLoginUrlClients { get; set; } = default!;
     public string? JwtSecretSalt { get; set; }
 }
 
@@ -138,6 +138,8 @@ public class ClientGetDto
 
     [JsonPropertyName("jwtSecretSalt")]
     public string? JwtSecretSalt { get; set; }
+    public bool CanCreateLoginUrl{get;set;}
+    public string[]? CreateLoginUrlClients{get;set;} = default!;
 }
 
 public class ValidateClientRequest
