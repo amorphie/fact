@@ -7,4 +7,5 @@ public class UserSaveDeviceDto
     public string? DeviceToken { get; set; }
     public string? DeviceModel { get; set; }
     public string? DevicePlatform { get; set; }
+    public string? DeviceVersion{get;set;}
 }
