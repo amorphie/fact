@@ -26,6 +26,8 @@ public class ClientDto : DtoBase
     public ICollection<ClientGrantType> AllowedGrantTypes { get; set; } = default!;
     public ICollection<ClientFlow> Flows { get; set; } = default!;
     public ICollection<ClientAudience> Audiences { get; set; } = default!;
+    public bool CanCreateLoginUrl{get;set;} = default!;
+    public string[]? CreteLoginUrlClients { get; set; } = default!;
     public string? JwtSecretSalt { get; set; }
 }
 
