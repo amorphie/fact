@@ -73,7 +73,7 @@
             "httpPort": 45010,
             "grpcPort": 45011,
             "label": "dapr-debug-amorphie-user",
-            "type": "daprd",
+            "type": "dapr",
             "dependsOn": "build-amorphie-user",
             "componentsPath": "dapr/components",
             "config": "dapr/config.yaml",
