@@ -105,16 +105,8 @@ public class ClientModule
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
-    protected override async ValueTask<IResult> GetAllMethod(
-                [FromServices] UserDBContext context,
-                [FromServices] IMapper mapper,
-                [FromQuery][Range(0, 100)] int page,
-                [FromQuery][Range(5, 100)] int pageSize,
-                HttpContext httpContext,
-                CancellationToken token,
-                [FromQuery] string? sortColumn,
-                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
-                )
+
+    protected async override ValueTask<IResult> GetAllMethod([FromServices] UserDBContext context, [FromServices] IMapper mapper, [FromQuery, Range(0, 100)] int page, [FromQuery, Range(5, 100)] int pageSize, HttpContext httpContext, CancellationToken token, [FromQuery] string? sortColumn, [FromQuery] SortDirectionEnum? sortDirection)
     {
         IQueryable<Client> query = context
             .Set<Client>()
@@ -143,6 +135,8 @@ public class ClientModule
                 ? Results.Ok(mapper.Map<IList<ClientDto>>(resultList))
                 : Results.NoContent();
     }
+
+    
 
     async ValueTask<IResult> validateClient(
         [FromBody] ValidateClientRequest data,

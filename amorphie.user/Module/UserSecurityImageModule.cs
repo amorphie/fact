@@ -27,10 +27,11 @@ public class UserSecurityImageModule
         base.AddRoutes(routeGroupBuilder);
 
         routeGroupBuilder.MapGet("/user/{userId}/image/{imageId}/userCheckImage", userCheckImage);
-        routeGroupBuilder.MapPut("/user/{reference}",updateSecurityImage);
-        routeGroupBuilder.MapGet("/user/{reference}",getSecurityImages);
+        routeGroupBuilder.MapPut("/user/{reference}", updateSecurityImage);
+        routeGroupBuilder.MapGet("/user/{reference}", getSecurityImages);
         routeGroupBuilder.MapPost("migrate", migrateSecurityImage);
         routeGroupBuilder.MapPost("migrateImages", migrateSecurityImages);
+        routeGroupBuilder.MapGet("/getLastSecurityImage/{userId}",getLastSecurityImage);
     }
 
     async ValueTask<IResult> updateSecurityImage(
@@ -45,7 +46,8 @@ public class UserSecurityImageModule
             return Results.NotFound("User Not Found");
         }
 
-        var securityImage = new UserSecurityImage{
+        var securityImage = new UserSecurityImage
+        {
             CreatedAt = DateTime.UtcNow,
             CreatedBy = user.Id,
             CreatedByBehalfOf = null,
@@ -59,6 +61,21 @@ public class UserSecurityImageModule
 
         return Results.Ok();
     }
+    async ValueTask<IResult> getLastSecurityImage(
+        HttpContext httpContext,
+        [FromServices] UserDBContext context,
+       [FromRoute] Guid userId
+    )
+    {
+        var securityImage = await context!.UserSecurityImages!.Where(i => i.UserId.Equals(userId))
+                .OrderByDescending(i => i.CreatedAt).FirstOrDefaultAsync();
+
+        if(securityImage is {})
+            return Results.Ok(securityImage);
+        else
+            return Results.NotFound();
+    }
+
     async ValueTask<IResult> getSecurityImages(
         HttpContext httpContext,
         [FromServices] UserDBContext context,
@@ -78,7 +95,8 @@ public class UserSecurityImageModule
 
         foreach (var item in securityImages)
         {
-            response.Add(new amorphie.fact.core.Dtos.SecurityImage.SecurityImageDto{
+            response.Add(new amorphie.fact.core.Dtos.SecurityImage.SecurityImageDto
+            {
                 Id = item.Id,
                 ImagePath = item.Image,
                 IsSelected = item.Id.Equals(userSecurityImage?.SecurityImageId),
@@ -100,9 +118,10 @@ public class UserSecurityImageModule
         foreach (var image in securityImageRequestDtos)
         {
             var img = await context.SecurityImages.FirstOrDefaultAsync(s => s.Id.Equals(image.Id));
-            if(img is not {})
+            if (img is not { })
             {
-                await context.SecurityImages.AddAsync(new SecurityImage(){
+                await context.SecurityImages.AddAsync(new SecurityImage()
+                {
                     CreatedAt = image.CreatedAt,
                     CreatedBy = image.CreatedBy,
                     CreatedByBehalfOf = image.CreatedByBehalfOf,
@@ -127,7 +146,7 @@ public class UserSecurityImageModule
     )
     {
         var securityImage = await context!.UserSecurityImages.FirstOrDefaultAsync(q => q.Id.Equals(migrateSecurityImageRequestDto.Id));
-        if(securityImage is {})
+        if (securityImage is { })
         {
             securityImage.RequireChange = migrateSecurityImageRequestDto.RequireChange;
             securityImage.ModifiedAt = migrateSecurityImageRequestDto.ModifiedAt;
@@ -154,8 +173,8 @@ public class UserSecurityImageModule
         }
         await context!.SaveChangesAsync();
         return Results.Ok();
-    } 
-    
+    }
+
     protected override async ValueTask<IResult> UpsertMethod(
     [FromServices] IMapper mapper,
     [FromServices] IValidator<UserSecurityImage> validator,
@@ -202,7 +221,7 @@ public class UserSecurityImageModule
                 {
                     userSecurityImage.SecurityImageId = data.SecurityImageId;
                     hasChanges = true;
-                    
+
 
                     userSecurityImage.ModifiedAt = DateTime.UtcNow;
                     userSecurityImage.ModifiedBy = bbtIdentity.UserId.Value;
@@ -239,7 +258,7 @@ public class UserSecurityImageModule
             if (user.UserSecurityImages != null && user.UserSecurityImages.Count > 0)
             {
                 var userSecurityImage = user.UserSecurityImages.OrderByDescending(i => i.CreatedAt).FirstOrDefault();
-                if(userSecurityImage.Id.Equals(imageId))
+                if (userSecurityImage.Id.Equals(imageId))
                     return Results.Ok();
                 else
                     return Results.Conflict();

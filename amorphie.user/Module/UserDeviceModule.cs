@@ -30,7 +30,65 @@ public class UserDeviceModule
         routeGroupBuilder.MapGet("/check-device-without-user/{clientId}/{deviceId}/{installationId}", checkDeviceWithoutUser);
         routeGroupBuilder.MapPost("/save-device", saveDeviceClient);
         routeGroupBuilder.MapPost("/save-mobile-device-client", saveMobileDeviceClient);
+        routeGroupBuilder.MapPost("/save-mobile-device-client-init", saveMobileDeviceClientInit);
         routeGroupBuilder.MapGet("/check-device/{clientId}/{userId}/{deviceId}/{installationId}", checkDevice);
+    }
+
+    public static async Task<IResult> saveMobileDeviceClientInit(
+         [FromServices] UserDBContext context,
+         [FromHeader(Name = "clientIdReal")] string clientCode,
+      [FromBody] UserSaveDeviceDto deviceInfo
+     )
+    {
+        var device = await context!.UserDevices.FirstOrDefaultAsync(d => d.ClientId.Equals(clientCode) && d.DeviceId.Equals(deviceInfo.DeviceId));
+        if(device is {})
+        {
+            if(device.InstallationId.Equals(deviceInfo.InstallationId))
+            {
+                if(!device.DeviceToken.Equals(deviceInfo.DeviceToken))
+                {
+                    device.DeviceToken = deviceInfo.DeviceToken;
+                    await context!.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                device.Status = 0;
+                var newDevice = new UserDevice
+                {
+                    ClientId = clientCode,
+                    CreatedAt = DateTime.UtcNow,
+                    DeviceId = deviceInfo.DeviceId,
+                    DeviceModel = deviceInfo.DeviceModel,
+                    InstallationId = deviceInfo.InstallationId,
+                    DeviceToken = deviceInfo.DeviceToken,
+                    DevicePlatform = deviceInfo.DevicePlatform,
+                    Version = deviceInfo.DeviceVersion,
+                    Status = 1
+                };
+                await context!.UserDevices.AddAsync(newDevice);
+                await context!.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            device = new UserDevice
+            {
+                ClientId = clientCode,
+                CreatedAt = DateTime.UtcNow,
+                DeviceId = deviceInfo.DeviceId,
+                DeviceModel = deviceInfo.DeviceModel,
+                InstallationId = deviceInfo.InstallationId,
+                DeviceToken = deviceInfo.DeviceToken,
+                DevicePlatform = deviceInfo.DevicePlatform,
+                Version = deviceInfo.DeviceVersion,
+                Status = 1
+            };
+            await context!.UserDevices.AddAsync(device);
+            await context!.SaveChangesAsync();
+        }
+
+        return Results.Ok();
     }
 
     async ValueTask<IResult> saveDeviceClient(
@@ -60,8 +118,8 @@ public class UserDeviceModule
     )
     {
         //removeAnotherDevicesBelongsToUser
-        await context!.UserDevices.Where(d=> !d.DeviceId.Equals(deviceInfo.DeviceId) && d.UserId.Equals(deviceInfo.UserId)).ExecuteUpdateAsync(s => s.SetProperty(d => d.Status,0));
-        
+        await context!.UserDevices.Where(d => !d.DeviceId.Equals(deviceInfo.DeviceId) && d.UserId.Equals(deviceInfo.UserId)).ExecuteUpdateAsync(s => s.SetProperty(d => d.Status, 0));
+
         var device = await context!.UserDevices
         .Where(d => d.ClientId.Equals(deviceInfo.ClientId) && d.DeviceId.Equals(deviceInfo.DeviceId) && d.InstallationId.Equals(deviceInfo.InstallationId) && d.Status == 1)
         .FirstOrDefaultAsync();
@@ -81,6 +139,7 @@ public class UserDeviceModule
                         DeviceToken = deviceInfo.DeviceToken,
                         DevicePlatform = deviceInfo.DevicePlatform,
                         DeviceModel = deviceInfo.DeviceModel,
+                        Version = deviceInfo.DeviceVersion,
                         UserId = deviceInfo.UserId,
                         ClientId = deviceInfo.ClientId,
                         LastLogonDate = DateTime.UtcNow,
@@ -92,6 +151,7 @@ public class UserDeviceModule
                     device.UserId = deviceInfo.UserId;
                     device.LastLogonDate = DateTime.UtcNow;
                 }
+                device.Version = deviceInfo.DeviceVersion;
                 await context!.SaveChangesAsync();
                 return Results.Ok();
             }
@@ -115,6 +175,7 @@ public class UserDeviceModule
                         DeviceToken = deviceInfo.DeviceToken,
                         DevicePlatform = deviceInfo.DevicePlatform,
                         DeviceModel = deviceInfo.DeviceModel,
+                        Version = deviceInfo.DeviceVersion,
                         UserId = deviceInfo.UserId,
                         ClientId = deviceInfo.ClientId,
                         LastLogonDate = DateTime.UtcNow,
@@ -134,6 +195,7 @@ public class UserDeviceModule
                     DeviceToken = deviceInfo.DeviceToken,
                     DevicePlatform = deviceInfo.DevicePlatform,
                     DeviceModel = deviceInfo.DeviceModel,
+                    Version = deviceInfo.DeviceVersion,
                     UserId = deviceInfo.UserId,
                     ClientId = deviceInfo.ClientId,
                     LastLogonDate = DateTime.UtcNow,

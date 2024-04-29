@@ -11,7 +11,7 @@ namespace amorphie.fact.data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            
+
             migrationBuilder.AddColumn<DateTime>(
                 name: "ActivationRemovalDate",
                 table: "UserDevices",
@@ -66,7 +66,7 @@ namespace amorphie.fact.data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            
+
             migrationBuilder.DropColumn(
                 name: "ActivationRemovalDate",
                 table: "UserDevices");

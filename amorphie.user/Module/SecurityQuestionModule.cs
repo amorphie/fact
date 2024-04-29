@@ -2,7 +2,7 @@ using System.Globalization;
 using amorphie.core.Module.minimal_api;
 using amorphie.fact.core.Dtos.SecurityQuestion;
 using amorphie.fact.data;
-using amorphie.user;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,12 +23,30 @@ public class SecurityQuestionModule
 
         routeGroupBuilder.MapGet("get/{reference}", getAllSecurityQuestions);
         routeGroupBuilder.MapPost("update/{reference}", updateSecurityQuestion);
-        
+
         routeGroupBuilder.MapGet("search", getAllSecurityQuestionFullTextSearch);
+        routeGroupBuilder.MapGet("getAll", getAllSecurityQuestion);
     }
 
-    
+    async ValueTask<IResult> getAllSecurityQuestion(
+        [FromServices] UserDBContext context
+    )
+    {
+        var questions = await context.SecurityQuestions.Where(q => q.IsActive.HasValue && q.IsActive.Value).Select(
+                    q => new
+                    {
+                        q.Id,
+                        q.DescriptionTr,
+                        q.DescriptionEn,
+                        q.Key,
+                        q.ValueTypeClr,
+                        q.Priority
+                    }
+                ).ToListAsync();
 
+        return Results.Ok(questions);
+    }
+    
     async ValueTask<IResult> updateSecurityQuestion(
         [FromServices] UserDBContext context,
        [FromRoute] string reference,
