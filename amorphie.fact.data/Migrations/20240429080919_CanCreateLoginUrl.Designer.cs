@@ -13,7 +13,7 @@ using amorphie.fact.data;
 namespace amorphie.fact.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    [Migration("20240416104314_CanCreateLoginUrl")]
+    [Migration("20240429080919_CanCreateLoginUrl")]
     partial class CanCreateLoginUrl
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace amorphie.fact.data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.13")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
