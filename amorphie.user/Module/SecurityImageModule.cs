@@ -19,7 +19,24 @@ public class SecurityImageModule
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
+        routeGroupBuilder.MapGet("getAll", getAllSecurityImages);
+    }
 
+    async ValueTask<IResult> getAllSecurityImages(
+        [FromServices] UserDBContext context
+    )
+    {
+        var securityImages = await context.SecurityImages.Select(
+                    i => new
+                    {
+                        Id = i.Id,
+                        ImagePath = i.Image,
+                        IsSelected = false,
+                        EnTitle = i.TrTitle,
+                        TrTitle = i.EnTitle
+                    }
+                ).ToListAsync();
+        return Results.Ok(securityImages);
     }
 
 
