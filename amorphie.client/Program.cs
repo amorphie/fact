@@ -6,6 +6,7 @@ using FluentValidation;
 using System.Reflection;
 using amorphie.core.Swagger;
 using Elastic.Apm.NetCoreAll;
+using amorphie.fact.core.Dtos.SecurityImage;
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
@@ -57,6 +58,8 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
+var migrates = await db.Database.GetPendingMigrationsAsync();
+migrates.ToList().ForEach(m => Console.WriteLine(m));
 db.Database.Migrate();
 
 app.UseCloudEvents();
