@@ -31,8 +31,8 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS": "http://localhost:4901",
-                "DAPR_HTTP_PORT": "49010",
-                "DAPR_GRPC_PORT": "49011"
+                "DAPR_HTTP_PORT": "49015",
+                "DAPR_GRPC_PORT": "49016"
             },
             "postDebugTask": "daprd-down-amorphie-client"
         }

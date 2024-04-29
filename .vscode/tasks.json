@@ -83,8 +83,8 @@
         {
             "appId": "amorphie-client",
             "appPort": 4901,
-            "httpPort": 49010,
-            "grpcPort": 49011,
+            "httpPort": 49015,
+            "grpcPort": 49016,
             "label": "dapr-debug-amorphie-client",
             "type": "dapr",
             "dependsOn": "build-amorphie-client",
