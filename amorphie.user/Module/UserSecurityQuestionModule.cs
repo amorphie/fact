@@ -47,6 +47,22 @@ public class UserSecurityQuestionModule : BaseRoute
 
         routeGroupBuilder.MapPost("migrate", migrateSecurityQuestion);
         routeGroupBuilder.MapPost("migrateQuestions", migrateSecurityQuestions);
+        routeGroupBuilder.MapGet("/getLastSecurityQuestion/{userId}",getLastSecurityQuestion);
+    }
+
+    async ValueTask<IResult> getLastSecurityQuestion(
+        HttpContext httpContext,
+        [FromServices] UserDBContext context,
+       [FromRoute] Guid userId
+    )
+    {
+        var securityQuestion = await context!.UserSecurityQuestions!.Where(i => i.UserId.Equals(userId))
+                .OrderByDescending(i => i.CreatedAt).FirstOrDefaultAsync();
+
+        if(securityQuestion is {})
+            return Results.Ok(securityQuestion);
+        else
+            return Results.NotFound();
     }
 
     async ValueTask<IResult> deleteUserSecurityQuestion(
