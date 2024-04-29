@@ -58,8 +58,14 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
-var migrates = await db.Database.GetPendingMigrationsAsync();
+
+Console.WriteLine("locals");
+var migrates =  db.Database.GetMigrations();
 migrates.ToList().ForEach(m => Console.WriteLine(m));
+Console.WriteLine("applieds");
+var migrates2 =  db.Database.GetAppliedMigrations();
+migrates2.ToList().ForEach(m => Console.WriteLine(m));
+
 db.Database.Migrate();
 
 app.UseCloudEvents();
