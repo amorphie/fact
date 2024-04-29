@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<UserDBContext>
-    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
+    (options => options.EnableSensitiveDataLogging().UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
 
 var app = builder.Build();
 
