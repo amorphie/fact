@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<UserDBContext>
-    (options => options.EnableSensitiveDataLogging().UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
+    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
 
 var app = builder.Build();
 
@@ -58,13 +58,6 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
-
-Console.WriteLine("locals");
-var migrates =  db.Database.GetMigrations();
-migrates.ToList().ForEach(m => Console.WriteLine(m));
-Console.WriteLine("applieds");
-var migrates2 =  db.Database.GetAppliedMigrations();
-migrates2.ToList().ForEach(m => Console.WriteLine(m));
 
 db.Database.Migrate();
 
