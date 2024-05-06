@@ -31,6 +31,7 @@ public class UserSecurityImageModule
         routeGroupBuilder.MapGet("/user/{reference}", getSecurityImages);
         routeGroupBuilder.MapPost("migrate", migrateSecurityImage);
         routeGroupBuilder.MapPost("migrateImages", migrateSecurityImages);
+        routeGroupBuilder.MapGet("/getLastSecurityImage/{userId}",getLastSecurityImage);
     }
 
     async ValueTask<IResult> updateSecurityImage(
@@ -60,6 +61,21 @@ public class UserSecurityImageModule
 
         return Results.Ok();
     }
+    async ValueTask<IResult> getLastSecurityImage(
+        HttpContext httpContext,
+        [FromServices] UserDBContext context,
+       [FromRoute] Guid userId
+    )
+    {
+        var securityImage = await context!.UserSecurityImages!.Where(i => i.UserId.Equals(userId))
+                .OrderByDescending(i => i.CreatedAt).FirstOrDefaultAsync();
+
+        if(securityImage is {})
+            return Results.Ok(securityImage);
+        else
+            return Results.NotFound();
+    }
+
     async ValueTask<IResult> getSecurityImages(
         HttpContext httpContext,
         [FromServices] UserDBContext context,

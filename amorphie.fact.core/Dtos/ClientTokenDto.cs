@@ -20,4 +20,6 @@ public class ClientTokenGetDto
     
     [JsonPropertyName("claims")]
     public string[]? PublicClaims { get; set; }
+    [JsonPropertyName("privateClaims")]
+    public string[]? PrivateClaims { get; set; }
 }
