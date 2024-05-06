@@ -49,13 +49,13 @@ namespace amorphie.fact.data.Migrations
                 table: "UserSecurityImages",
                 column: "SecurityImageId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_UserSecurityImages_SecurityImages_SecurityImageId",
-                table: "UserSecurityImages",
-                column: "SecurityImageId",
-                principalTable: "SecurityImages",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            // migrationBuilder.AddForeignKey(
+            //     name: "FK_UserSecurityImages_SecurityImages_SecurityImageId",
+            //     table: "UserSecurityImages",
+            //     column: "SecurityImageId",
+            //     principalTable: "SecurityImages",
+            //     principalColumn: "Id",
+            //     onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
