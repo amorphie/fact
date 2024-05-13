@@ -153,10 +153,12 @@ public class UserDeviceModule
                     device.UserId = deviceInfo.UserId;
                     device.LastLogonDate = DateTime.UtcNow;
                 }
-                
-                await context!.SaveChangesAsync();
-                return Results.Ok();
             }
+            else
+            {
+                device.Version = deviceInfo.DeviceVersion;
+            }
+            await context!.SaveChangesAsync();
             return Results.Ok();
         }
         else
