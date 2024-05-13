@@ -45,6 +45,7 @@ public class UserDeviceModule
         {
             if(device.InstallationId.Equals(deviceInfo.InstallationId))
             {
+                device.DeviceModel = deviceInfo.DeviceModel;
                 device.Version = deviceInfo.DeviceVersion;
                 if(!device.DeviceToken.Equals(deviceInfo.DeviceToken))
                 {
@@ -150,6 +151,7 @@ public class UserDeviceModule
                 else
                 {
                     device.Version = deviceInfo.DeviceVersion;
+                    device.DeviceModel = deviceInfo.DeviceModel;
                     device.UserId = deviceInfo.UserId;
                     device.LastLogonDate = DateTime.UtcNow;
                 }
@@ -157,6 +159,7 @@ public class UserDeviceModule
             else
             {
                 device.Version = deviceInfo.DeviceVersion;
+                device.DeviceModel = deviceInfo.DeviceModel;
             }
             await context!.SaveChangesAsync();
             return Results.Ok();
