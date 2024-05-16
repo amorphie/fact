@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using amorphie.core.Module.minimal_api;
+using amorphie.face.core.Constants;
 using amorphie.fact.core.Dtos.Device;
 using amorphie.fact.core.Models;
 using amorphie.fact.data;
@@ -45,6 +46,8 @@ public class UserDeviceModule
         {
             if(device.InstallationId.Equals(deviceInfo.InstallationId))
             {
+                device.DeviceModel = deviceInfo.DeviceModel;
+                device.Version = deviceInfo.DeviceVersion;
                 if(!device.DeviceToken.Equals(deviceInfo.DeviceToken))
                 {
                     device.DeviceToken = deviceInfo.DeviceToken;
@@ -148,13 +151,18 @@ public class UserDeviceModule
                 }
                 else
                 {
+                    device.Version = deviceInfo.DeviceVersion;
+                    device.DeviceModel = deviceInfo.DeviceModel;
                     device.UserId = deviceInfo.UserId;
                     device.LastLogonDate = DateTime.UtcNow;
                 }
-                device.Version = deviceInfo.DeviceVersion;
-                await context!.SaveChangesAsync();
-                return Results.Ok();
             }
+            else
+            {
+                device.Version = deviceInfo.DeviceVersion;
+                device.DeviceModel = deviceInfo.DeviceModel;
+            }
+            await context!.SaveChangesAsync();
             return Results.Ok();
         }
         else
@@ -252,7 +260,7 @@ public class UserDeviceModule
                     Id = device.Id,
                     LastLogonDate = device.LastLogonDate,
                     Manufacturer = device.Manufacturer,
-                    Model = device.DeviceModel,
+                    Model = IphoneModelMapping.Models.ContainsKey(device.DeviceModel.Trim()) ? IphoneModelMapping.Models[device.DeviceModel.Trim()] : device.DeviceModel,
                     Platform = device.DevicePlatform,
                     RegistrationDate = device.RegistrationDate,
                     Status = DeviceStatusConstants.DeviceStatusMap[device.Status],
