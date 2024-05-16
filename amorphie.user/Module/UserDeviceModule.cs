@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using amorphie.core.Module.minimal_api;
+using amorphie.face.core.Constants;
 using amorphie.fact.core.Dtos.Device;
 using amorphie.fact.core.Models;
 using amorphie.fact.data;
@@ -259,7 +260,7 @@ public class UserDeviceModule
                     Id = device.Id,
                     LastLogonDate = device.LastLogonDate,
                     Manufacturer = device.Manufacturer,
-                    Model = device.DeviceModel,
+                    Model = IphoneModelMapping.Models.ContainsKey(device.DeviceModel.Trim()) ? IphoneModelMapping.Models[device.DeviceModel.Trim()] : device.DeviceModel,
                     Platform = device.DevicePlatform,
                     RegistrationDate = device.RegistrationDate,
                     Status = DeviceStatusConstants.DeviceStatusMap[device.Status],
