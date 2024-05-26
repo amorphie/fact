@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 using amorphie.core.Module.minimal_api;
-using amorphie.face.core.Constants;
+using amorphie.fact.core.Constants;
 using amorphie.fact.core.Dtos.Device;
 using amorphie.fact.core.Models;
 using amorphie.fact.data;
