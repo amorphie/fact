@@ -1,0 +1,14 @@
+using amorphie.core.Base;
+
+public class UserClaimDto : DtoBase
+{
+    public string ClaimName { get; set; } = string.Empty;
+    public string ClaimValue { get; set; } = string.Empty; 
+    public Guid UserId { get; set; }
+    public User? User { get; set; }
+}
+
+public class UserClaimSearch : DtoSearchBase
+{
+
+}
