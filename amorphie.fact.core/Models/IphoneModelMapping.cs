@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace amorphie.face.core.Constants
+namespace amorphie.fact.core.Constants
 {
     public class IphoneModelMapping
     {

@@ -32,6 +32,7 @@ public class UserDBContext : DbContext
     public DbSet<ClientFlow>? ClientFlows { get; set; }
     public DbSet<ClientAudience>? ClientAudiences { get; set; }
     public DbSet<UserSmsKey>? UserSmsKeys { get; set; }
+    public DbSet<UserClaim>? UserClaims { get; set; }
 
     public UserDBContext(DbContextOptions options) : base(options) { }
 
