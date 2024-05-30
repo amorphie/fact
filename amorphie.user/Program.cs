@@ -62,6 +62,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
 ;
+
+builder.Services.AddHealthChecks();
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -76,6 +78,8 @@ app.MapGet("/public/device/{clientCode}/{reference}", UserDevicePublic.GetActive
             .Produces(StatusCodes.Status200OK);
 app.MapPut("/public/device/remove/{clientCode}/{reference}/", UserDevicePublic.removeDevice)
 .Produces(StatusCodes.Status200OK);
+
+app.MapHealthChecks("/health");
 
 app.UseCloudEvents();
 app.UseRouting();
