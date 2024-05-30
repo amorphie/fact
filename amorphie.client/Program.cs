@@ -49,7 +49,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<UserDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
-
+builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 app.UseAllElasticApm(app.Configuration);
@@ -60,7 +60,7 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 
 db.Database.Migrate();
-
+app.MapHealthChecks("/health");
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
