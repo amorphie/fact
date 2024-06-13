@@ -24,6 +24,7 @@ public class Client : EntityBase
     public ICollection<ClientAudience> Audiences { get; set; } = default!;
     public bool CanCreateLoginUrl{get;set;}
     public string[]? CreateLoginUrlClients{get;set;} = default!;
+    public string? LoginWorkflowName{ get; set; } = default!;
     [NotMapped]
     public virtual NpgsqlTsVector SearchVector { get; set; }
 
