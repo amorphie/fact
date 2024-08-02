@@ -5,6 +5,8 @@ using System.Reflection;
 using FluentValidation;
 using amorphie.core.Extension;
 using Dapr.Client;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var client = new DaprClientBuilder().Build();
