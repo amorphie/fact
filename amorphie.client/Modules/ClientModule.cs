@@ -164,7 +164,7 @@ public class ClientModule
 
         if (client == null)
         {
-            if (data.ClientId == Guid.Parse(configuration["TempClient:ClientId"]))
+            if (data.ClientId == Guid.Parse(configuration["TempClient:ClientId"]) && data.Secret == configuration["TempClient:Secret"])
             {
                 encryptedString = EncryptString(ApplicationSettings.ClientSecretKey, configuration["TempClient:Secret"]);
 
@@ -216,7 +216,7 @@ public class ClientModule
             .FirstOrDefaultAsync(t => t.Code == data.Code
                                       && t.Secret == encryptedString, token);
 
-        if (client == null && data.Code == configuration["TempClient:ClientCode"])
+        if (client == null && data.Code == configuration["TempClient:ClientCode"] && data.Secret == configuration["TempClient:Secret"])
         {
             encryptedString = EncryptString(ApplicationSettings.ClientSecretKey, configuration["TempClient:Secret"]);
             client = await context!.Clients!.AsNoTracking()
