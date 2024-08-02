@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.2 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.7 AS base
 WORKDIR /app
 RUN adduser -u 5561 --disabled-password --gecos "" amorphie-fact-clientuser && chown -R amorphie-fact-clientuser:amorphie-fact-clientuser /app
 USER amorphie-fact-clientuser
