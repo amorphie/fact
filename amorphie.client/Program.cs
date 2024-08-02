@@ -7,8 +7,23 @@ using System.Reflection;
 using amorphie.core.Swagger;
 using Elastic.Apm.NetCoreAll;
 using amorphie.fact.core.Dtos.SecurityImage;
+using Dapr.Client;
 
 var builder = WebApplication.CreateBuilder(args);
+var client = new DaprClientBuilder().Build();
+using (var tokenSource = new CancellationTokenSource(20000))
+{
+    try
+    {
+        await client.WaitForSidecarAsync(tokenSource.Token);
+    }
+    catch (System.Exception ex)
+    {
+        Console.WriteLine("Dapr Sidecar Doesn't Respond");
+        return;
+    }
+}
+
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
 await builder.SetSecrets();
@@ -21,17 +36,14 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.OperationFilter<AddSwaggerParameterFilter>();
-});
+builder.Services.AddSwaggerGen(options => { options.OperationFilter<AddSwaggerParameterFilter>(); });
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
 
 var assemblies = new Assembly[]
-                {
-                     typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly
-                };
+{
+    typeof(ClientValidator).Assembly, typeof(ClientMapper).Assembly
+};
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
@@ -51,8 +63,10 @@ builder.Services.AddDbContext<UserDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.fact.data")));
 builder.Services.AddHealthChecks();
 var app = builder.Build();
-
-app.UseAllElasticApm(app.Configuration);
+if (!app.Environment.IsDevelopment())
+{
+    app.UseAllElasticApm(app.Configuration);
+}
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 

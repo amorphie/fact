@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -12,9 +13,11 @@ using amorphie.fact.data;
 namespace amorphie.fact.data.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    partial class UserDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240526075903_UserClaim")]
+    partial class UserClaim
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,9 +63,6 @@ namespace amorphie.fact.data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("LoginUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LoginWorkflowName")
                         .HasColumnType("text");
 
                     b.Property<string>("LogoutUrl")

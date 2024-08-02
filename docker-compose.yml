@@ -1,36 +1,31 @@
 version: "3.9"
 services:
-  amorphie.user:
-    image: ${DOCKER_REGISTRY-}amorphie.user
-    build:
-      context: .
-      dockerfile: Dockerfile-User
-    ports:
-      - '5000:5000'
-    depends_on:
-      - redis
-      - placement
-    networks:
-      - bbt-development
-  amorphie.client:
-    image: ${DOCKER_REGISTRY-}amorphie.client
-    build:
-      context: .
-      dockerfile: Dockerfile-Client
-    ports:
-      - '5001:5001'
-    depends_on:
-      - redis
-      - placement
-    networks:
-      - bbt-development
-  placement:
-    image: "daprio/dapr"
-    command: ["./placement", "-port", "50006"]
-    ports:
-      - "50006:50006"
-    networks:
-      - bbt-development
+  # amorphie.user:
+  #   image: ${DOCKER_REGISTRY-}amorphie.user
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-User
+  #   ports:
+  #     - '5000:5000'
+  #   depends_on:
+  #     - redis
+  #     - placement
+  #   networks:
+  #     - bbt-development
+  # amorphie.client:
+  #   image: ${DOCKER_REGISTRY-}amorphie.client
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-Client
+  #   ports:
+  #     - '5001:5001'
+  #   depends_on:
+  #     - redis
+  #     - placement
+  #   networks:
+  #     - bbt-development
+# 
+
   redis:
     container_name: bbt-redis
     image: redis:latest
@@ -84,51 +79,53 @@ services:
     networks:
       - bbt-development
       
-  zipkin:
-    container_name: bbt-zipkin
-    image: "openzipkin/zipkin"
-    ports:
-      - "9411:9411"
-    networks:
-      - bbt-development
-  prometheus:
-    container_name: bbt-prometheus
-    image: "prom/prometheus"
-    command:
-      - "--config.file=/etc/prometheus.yml"
-    volumes:
-      - ./prometheus/:/etc
-    ports:
-      - "9090:9090"
-    networks:
-      - bbt-development
+  # zipkin:
+  #   container_name: bbt-zipkin
+  #   image: "openzipkin/zipkin"
+  #   ports:
+  #     - "9411:9411"
+  #   networks:
+  #     - bbt-development
+  # prometheus:
+  #   container_name: bbt-prometheus
+  #   image: "prom/prometheus"
+  #   command:
+  #     - "--config.file=/etc/prometheus.yml"
+  #   volumes:
+  #     - ./prometheus/:/etc
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - bbt-development
+
   vault:
-      image: vault:latest
-      container_name: vault
-      restart: on-failure:10
-      ports:
-        - "8200:8200"
-      environment:
-         VAULT_ADDR: 'https://0.0.0.0:8200'
-         VAULT_API_ADDR: 'https://0.0.0.0:8200'
-         VAULT_DEV_ROOT_TOKEN_ID: 'admin'
-         VAULT_TOKEN: 'admin' 
-      cap_add: 
-        - IPC_LOCK
-      healthcheck:
-        retries: 5
-      command: server -dev -dev-root-token-id="admin"
-      networks: 
-        - bbt-development
+    image: vault:1.13.3
+    container_name: vault
+    restart: on-failure:10
+    ports:
+      - "8200:8200"
+    environment:
+        VAULT_ADDR: 'https://0.0.0.0:8200'
+        VAULT_API_ADDR: 'https://0.0.0.0:8200'
+        VAULT_DEV_ROOT_TOKEN_ID: 'admin'
+        VAULT_TOKEN: 'admin' 
+    cap_add: 
+      - IPC_LOCK
+    healthcheck:
+      retries: 5
+    command: server -dev -dev-root-token-id="admin"
+    networks: 
+      - bbt-development
+        
   vault-prepopulate: 
     image: alpine/curl 
     depends_on: 
-    - vault 
+      - vault 
     volumes: 
-    - ./vault.sh:/usr/local/bin/prepopulate_vault.sh 
-    command: ["sh", "-c", "/usr/local/bin/prepopulate_vault.sh"] 
+      - ./vault.sh:/etc/vault/prepopulate_vault.sh 
+    command: ["sh", "-c", "chmod +x /etc/vault/prepopulate_vault.sh && /etc/vault/prepopulate_vault.sh"] 
     networks: 
-    - bbt-development
+      - bbt-development
   # user-scretstore:
   #   container_name: bbt-scretstore
   #   image: "vault:latest"

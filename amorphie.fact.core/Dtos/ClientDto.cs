@@ -28,6 +28,7 @@ public class ClientDto : DtoBase
     public ICollection<ClientAudience> Audiences { get; set; } = default!;
     public bool CanCreateLoginUrl{get;set;} = default!;
     public string[]? CreateLoginUrlClients { get; set; } = default!;
+    public string LoginWorkflowName { get; set; } = default!;
     public string? JwtSecretSalt { get; set; }
 }
 
@@ -140,6 +141,7 @@ public class ClientGetDto
     public string? JwtSecretSalt { get; set; }
     public bool CanCreateLoginUrl{get;set;}
     public string[]? CreateLoginUrlClients{get;set;} = default!;
+    public string LoginWorkflowName { get; set; } = default!;
 }
 
 public class ValidateClientRequest
