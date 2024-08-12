@@ -16,7 +16,20 @@ if [ "$SECRET_CHECK" -ne 200 ]; then
               "PostgreSql": "Host=localhost:5432;Database=users;Username=postgres;Password=postgres",
               "TempClient:ClientId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
               "TempClient:ClientCode": "TestApp",
-              "TempClient:Secret": "testsecret"
+              "TempClient:Secret": "testsecret",
+              "ElasticApm:Environment": "Dev",
+              "ElasticApm:SecretToken": "",
+              "ElasticApm:ServerUrl": "",
+              "Logging:LogResponse": "true",
+              "Logging:SanitizeFieldNames": "access_token,refresh_token,client_secret,authorization",
+              "Logging:SanitizeHeaderNames": "authorization,authentication,client_secret,x-userinfo",
+              "Serilog:MinimumLevel:Default": "Information",
+              "Serilog:MinimumLevel:Override:amorphie.client": "Information",
+              "Serilog:MinimumLevel:Override:amorphie.user": "Information",
+              "Serilog:WriteTo:0:Args:formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact",
+              "Serilog:WriteTo:0:Args:path": "logs/log-amorphie-fact.json",
+              "Serilog:WriteTo:0:Args:rollingInterval": "Day",
+              "Serilog:WriteTo:0:Name": "File"
             }
   }'
 else
