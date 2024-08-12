@@ -14,7 +14,9 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5092",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DAPR_HTTP_PORT": "44010",
+        "DAPR_GRPC_PORT": "44011"
       }
     },
     "https": {
@@ -23,14 +25,18 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7196;http://localhost:5092",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DAPR_HTTP_PORT": "44010",
+        "DAPR_GRPC_PORT": "44011"
       }
     },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DAPR_HTTP_PORT": "44010",
+        "DAPR_GRPC_PORT": "44011"
       }
     }
   }
