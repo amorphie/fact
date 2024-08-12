@@ -7,7 +7,8 @@ using amorphie.core.Extension;
 using Dapr.Client;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-
+ThreadPool.SetMinThreads(20, 20);
+    
 var builder = WebApplication.CreateBuilder(args);
 var client = new DaprClientBuilder().Build();
 using (var tokenSource = new CancellationTokenSource(20000))
