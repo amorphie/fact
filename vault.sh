@@ -24,9 +24,10 @@ if [ "$SECRET_CHECK" -ne 200 ]; then
               "Logging:SanitizeFieldNames": "access_token,refresh_token,client_secret,authorization",
               "Logging:SanitizeHeaderNames": "authorization,authentication,client_secret,x-userinfo",
               "Serilog:MinimumLevel:Default": "Information",
-              "Serilog:MinimumLevel:Override:amorphie.fact": "Information",
+              "Serilog:MinimumLevel:Override:amorphie.client": "Information",
+              "Serilog:MinimumLevel:Override:amorphie.user": "Information",
               "Serilog:WriteTo:0:Args:formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact",
-              "Serilog:WriteTo:0:Args:path": "/logs/log-amorphie-fact.json",
+              "Serilog:WriteTo:0:Args:path": "logs/log-amorphie-fact.json",
               "Serilog:WriteTo:0:Args:rollingInterval": "Day",
               "Serilog:WriteTo:0:Name": "File"
             }
