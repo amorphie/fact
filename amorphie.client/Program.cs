@@ -6,8 +6,9 @@ using FluentValidation;
 using System.Reflection;
 using amorphie.core.Swagger;
 using Elastic.Apm.NetCoreAll;
-using amorphie.fact.core.Dtos.SecurityImage;
 using Dapr.Client;
+
+ThreadPool.SetMinThreads(50, 50);
 
 var builder = WebApplication.CreateBuilder(args);
 var client = new DaprClientBuilder().Build();
