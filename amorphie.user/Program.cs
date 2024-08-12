@@ -4,7 +4,9 @@ using amorphie.core.Identity;
 using System.Reflection;
 using FluentValidation;
 using amorphie.core.Extension;
+using amorphie.core.Middleware.Logging;
 using Dapr.Client;
+using Elastic.Apm.NetCoreAll;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 
@@ -26,10 +28,9 @@ using (var tokenSource = new CancellationTokenSource(20000))
 await builder.Configuration.AddVaultSecrets("user-secretstore", new string[] { "user-secretstore" });
 var postgreSql = builder.Configuration["postgresql"];
 // var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
-builder.Logging.ClearProviders();
-builder.Logging.AddJsonConsole();
 
 builder.Services.AddDaprClient();
+builder.AddSeriLog<AmorphieLogEnricher>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -65,6 +66,11 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddHealthChecks();
 var app = builder.Build();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseAllElasticApm(app.Configuration);
+}
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
@@ -87,7 +93,7 @@ app.MapSubscribeHandler();
 app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseLoggingHandlerMiddlewares();
 try
 {
     app.Logger.LogInformation("Starting application...");

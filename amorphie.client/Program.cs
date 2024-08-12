@@ -4,9 +4,9 @@ using amorphie.core.Identity;
 using amorphie.core.Extension;
 using FluentValidation;
 using System.Reflection;
+using amorphie.core.Middleware.Logging;
 using amorphie.core.Swagger;
 using Elastic.Apm.NetCoreAll;
-using amorphie.fact.core.Dtos.SecurityImage;
 using Dapr.Client;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,13 +29,10 @@ var postgreSql = builder.Configuration["postgresql"];
 await builder.SetSecrets();
 
 // var postgreSql = "Host=localhost:5432;Database=users;Username=postgres;Password=postgres";
-builder.Logging.ClearProviders();
-builder.Logging.AddJsonConsole();
-
-
 builder.Services.AddDaprClient();
-builder.Services.AddEndpointsApiExplorer();
+builder.AddSeriLog<AmorphieLogEnricher>();
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => { options.OperationFilter<AddSwaggerParameterFilter>(); });
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
@@ -74,6 +71,7 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<UserDBContext>();
 
 db.Database.Migrate();
+
 app.MapHealthChecks("/health");
 app.UseCloudEvents();
 app.UseRouting();
@@ -81,6 +79,7 @@ app.MapSubscribeHandler();
 app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseLoggingHandlerMiddlewares();
 
 try
 {
