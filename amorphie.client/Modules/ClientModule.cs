@@ -166,8 +166,6 @@ public class ClientModule
         {
             if (data.ClientId == Guid.Parse(configuration["TempClient:ClientId"]) && data.Secret == configuration["TempClient:Secret"])
             {
-                encryptedString = EncryptString(ApplicationSettings.ClientSecretKey, configuration["TempClient:Secret"]);
-
                 client = await context!.Clients!.AsNoTracking()
                     .Include(t => t.HeaderConfig)
                     .Include(t => t.Jws)
@@ -218,7 +216,6 @@ public class ClientModule
 
         if (client == null && data.Code == configuration["TempClient:ClientCode"] && data.Secret == configuration["TempClient:Secret"])
         {
-            encryptedString = EncryptString(ApplicationSettings.ClientSecretKey, configuration["TempClient:Secret"]);
             client = await context!.Clients!.AsNoTracking()
                 .Include(t => t.HeaderConfig)
                 .Include(t => t.Jws)
