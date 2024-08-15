@@ -9,6 +9,7 @@ using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Dapr.Client;
+using System.Security.Claims;
 
 public class UserModule : BaseRoute
 {
@@ -867,7 +868,8 @@ public class UserModule : BaseRoute
                             EMail = user.EMail,
                             State = user.State,
                             Id = user.Id,
-                            MobilePhone = user.Phone
+                            MobilePhone = user.Phone,
+                            Claims = user.Claims
                         }
                         );
 
@@ -893,7 +895,8 @@ public class UserModule : BaseRoute
                             EMail = user.EMail,
                             State = user.State,
                             Id = user.Id,
-                            MobilePhone = user.Phone
+                            MobilePhone = user.Phone,
+                            Claims = user.Claims
                         });
 
                 }
@@ -915,6 +918,7 @@ public class UserModule : BaseRoute
         var user = context!.Users!
            .Include(d => d.UserTags)
            .Include(x => x.UserPasswords)
+           .Include(x => x.Claims)
            .FirstOrDefault(t => t.Id == id);
 
         if (user is User)
@@ -944,7 +948,8 @@ public class UserModule : BaseRoute
                 EMail = user.EMail,
                 State = user.State,
                 Id = user.Id,
-                MobilePhone = user.Phone
+                MobilePhone = user.Phone,
+                Claims = user.Claims
             });
         }
 
