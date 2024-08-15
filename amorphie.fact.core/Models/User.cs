@@ -25,6 +25,7 @@ public class User : EntityBase
 
     public ICollection<UserPassword>? UserPasswords { get; set; } = new List<UserPassword>();
     public ICollection<UserSmsKey>? UserSmsKeys { get; set; } = new List<UserSmsKey>();
+    public ICollection<UserClaim>? Claims { get; set; } = new List<UserClaim>();
 }
 
 public record Phone
