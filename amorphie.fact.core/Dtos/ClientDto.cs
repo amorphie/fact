@@ -30,8 +30,6 @@ public class ClientDto : DtoBase
     public string[]? CreateLoginUrlClients { get; set; } = default!;
     public string LoginWorkflowName { get; set; } = default!;
     public string? JwtSecretSalt { get; set; }
-    public string? PrivateKey{get;set;}
-    public string? PublicKey{get;set;}
 }
 
 public class ClientGetDto
