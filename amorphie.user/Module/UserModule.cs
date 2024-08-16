@@ -9,6 +9,7 @@ using amorphie.fact.data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Dapr.Client;
+using System.Security.Claims;
 
 public class UserModule : BaseRoute
 {
@@ -158,6 +159,7 @@ public class UserModule : BaseRoute
         var query = context!.Users!
             .Include(d => d.UserTags)
             .Include(x => x.UserPasswords)
+            .Include(x => x.Claims)
             .Skip(userSearch.Page * userSearch.PageSize)
             .Take(userSearch.PageSize);
 
@@ -194,6 +196,7 @@ public class UserModule : BaseRoute
     {
         var query = context!.Users!
             .Include(d => d.UserTags)
+            .Include(x => x.Claims)
             .Skip(page * pageSize)
             .Take(pageSize);
 
@@ -217,6 +220,7 @@ public class UserModule : BaseRoute
     {
         var query = context!.Users!
             .Include(d => d.UserTags)
+            .Include(x => x.Claims)
             .Skip(page * pageSize)
             .Take(pageSize);
 
@@ -844,6 +848,7 @@ public class UserModule : BaseRoute
     {
         var user = await context!.Users!
         .Include(x => x.UserPasswords)
+        .Include(x => x.Claims)
         .FirstOrDefaultAsync(x => x.Reference == loginRequest.Reference);
 
         if (user != null)
@@ -867,7 +872,8 @@ public class UserModule : BaseRoute
                             EMail = user.EMail,
                             State = user.State,
                             Id = user.Id,
-                            MobilePhone = user.Phone
+                            MobilePhone = user.Phone,
+                            Claims = user.Claims
                         }
                         );
 
@@ -893,7 +899,8 @@ public class UserModule : BaseRoute
                             EMail = user.EMail,
                             State = user.State,
                             Id = user.Id,
-                            MobilePhone = user.Phone
+                            MobilePhone = user.Phone,
+                            Claims = user.Claims
                         });
 
                 }
@@ -915,6 +922,7 @@ public class UserModule : BaseRoute
         var user = context!.Users!
            .Include(d => d.UserTags)
            .Include(x => x.UserPasswords)
+           .Include(x => x.Claims)
            .FirstOrDefault(t => t.Id == id);
 
         if (user is User)
@@ -932,6 +940,7 @@ public class UserModule : BaseRoute
         var user = context!.Users!
            .Include(d => d.UserTags)
            .Include(x => x.UserPasswords)
+           .Include(x => x.Claims)
            .FirstOrDefault(t => t.Reference.Equals(reference));
 
         if (user is User)
@@ -944,7 +953,8 @@ public class UserModule : BaseRoute
                 EMail = user.EMail,
                 State = user.State,
                 Id = user.Id,
-                MobilePhone = user.Phone
+                MobilePhone = user.Phone,
+                Claims = user.Claims
             });
         }
 
@@ -958,6 +968,7 @@ public class UserModule : BaseRoute
         var resultList = await context!.Users!
            .Include(d => d.UserTags)
            .Include(x => x.UserPasswords)
+           .Include(x => x.Claims)
             .Skip(page * pageSize)
             .Take(pageSize)
             .ToListAsync();

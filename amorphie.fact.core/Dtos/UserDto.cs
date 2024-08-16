@@ -15,7 +15,8 @@ DateTime CreatedAt,
 Guid ModifiedBy,
 DateTime ModifiedAt,
 Guid? CreatedByBehalfOf,
-Guid? ModifiedByBehalof);
+Guid? ModifiedByBehalof,
+ICollection<UserClaim> Claims);
 
 
 public record PostUserRequest(string FirstName,
