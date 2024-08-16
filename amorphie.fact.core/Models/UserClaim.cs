@@ -7,5 +7,4 @@ public class UserClaim : EntityBase
     public string ClaimValue{get;set;} = string.Empty;
     [ForeignKey("User")]
     public Guid UserId { get; set; }
-    public User? User { get; set; }
 }

@@ -12,6 +12,7 @@ using FluentValidation;
 using amorphie.core.Swagger;
 using Microsoft.OpenApi.Models;
 using amorphie.core.Extension;
+using System.Reflection;
 
 namespace amorphie.client;
 
@@ -30,12 +31,37 @@ public class ClientModule
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
-
         routeGroupBuilder.MapPost("validate", validateClient);
         routeGroupBuilder.MapPost("validateClientByCode", validateClientByCode);
         routeGroupBuilder.MapGet("search", getAllClientFullTextSearch);
         routeGroupBuilder.MapPost("workflowClient", workflowClient);
         routeGroupBuilder.MapGet("code/{code}", GetByCode);
+        routeGroupBuilder.MapGet("generateKeys", GenerateKeys);
+    }
+
+    protected async ValueTask<IResult> GenerateKeys(
+        [FromServices] UserDBContext context,
+        [FromServices] IMapper mapper,
+        HttpContext httpContext,
+        CancellationToken token
+        )
+    {
+        var clients = await context.Clients.Where(c => string.IsNullOrWhiteSpace(c.PrivateKey) && string.IsNullOrWhiteSpace(c.PublicKey))
+            .ToListAsync();
+        
+        foreach (var client in clients)
+        {
+            RSA rsa = RSA.Create();
+            rsa.KeySize = 2048;
+            RsaService rsaService = new ();
+            var keys = rsaService.SaveKeys(rsa);
+
+            client.PrivateKey = keys.Item1;
+            client.PublicKey = keys.Item2;
+        }
+
+        await context.SaveChangesAsync();
+        return Results.Ok();
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -367,6 +393,14 @@ public class ClientModule
         }
         else
         {
+            RSA rsa = RSA.Create();
+            rsa.KeySize = 2048;
+            RsaService rsaService = new ();
+            var keys = rsaService.SaveKeys(rsa);
+            
+            dbModelData.PrivateKey = keys.Item1;
+            dbModelData.PublicKey  = keys.Item2;
+
             dbModelData.CreatedAt = DateTime.UtcNow;
             dbModelData.CreatedBy = bbtIdentity.UserId.Value;
             dbModelData.CreatedByBehalfOf = bbtIdentity.BehalfOfId.Value;

@@ -142,6 +142,8 @@ public class ClientGetDto
     public bool CanCreateLoginUrl{get;set;}
     public string[]? CreateLoginUrlClients{get;set;} = default!;
     public string LoginWorkflowName { get; set; } = default!;
+    public string? PrivateKey{get;set;}
+    public string? PublicKey{get;set;}
 }
 
 public class ValidateClientRequest

@@ -21,6 +21,7 @@ public class ObjectMapper
         cfg.AddProfile<JwsMapper>();
         cfg.AddProfile<IdempotencyMapper>();
         cfg.AddProfile<ClientTokenMapper>();
+        cfg.AddProfile<UserClaimMapper>();
     });
 
     return config.CreateMapper();
