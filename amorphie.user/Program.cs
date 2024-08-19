@@ -9,7 +9,8 @@ using Dapr.Client;
 using Elastic.Apm.NetCoreAll;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-
+ThreadPool.SetMinThreads(20, 20);
+    
 var builder = WebApplication.CreateBuilder(args);
 var client = new DaprClientBuilder().Build();
 using (var tokenSource = new CancellationTokenSource(20000))

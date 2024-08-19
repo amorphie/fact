@@ -9,6 +9,8 @@ using amorphie.core.Swagger;
 using Elastic.Apm.NetCoreAll;
 using Dapr.Client;
 
+ThreadPool.SetMinThreads(50, 50);
+
 var builder = WebApplication.CreateBuilder(args);
 var client = new DaprClientBuilder().Build();
 using (var tokenSource = new CancellationTokenSource(20000))
