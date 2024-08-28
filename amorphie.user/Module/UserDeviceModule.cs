@@ -151,6 +151,7 @@ public class UserDeviceModule
                 }
                 else
                 {
+                    device.DeviceToken = deviceInfo.DeviceToken;
                     device.Version = deviceInfo.DeviceVersion;
                     device.DeviceModel = deviceInfo.DeviceModel;
                     device.UserId = deviceInfo.UserId;
@@ -159,6 +160,7 @@ public class UserDeviceModule
             }
             else
             {
+                device.DeviceToken = deviceInfo.DeviceToken;
                 device.Version = deviceInfo.DeviceVersion;
                 device.DeviceModel = deviceInfo.DeviceModel;
             }
